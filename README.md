@@ -43,7 +43,8 @@ Chizma va 3D qo‘llanmasi: [docs/CHIZMA-UZ.md](docs/CHIZMA-UZ.md)
 - `RomFlow-…-armv7.apk` — eski telefonlar; `RomFlow-….apk` — hammasiga;
 - `…-windows-x64.zip`, `…-linux-x64.tar.gz`, `…-macos.zip`;
 - **iPhone / iPad (iOS 15 – 27)**: TestFlight havolasidan bir bosishda yoki
-  bepul SideStore orqali — aniq qo‘llanma: [docs/IPHONE-UZ.md](docs/IPHONE-UZ.md).
+  bepul SideStore orqali — aniq qo‘llanma: [docs/IPHONE-UZ.md](docs/IPHONE-UZ.md);
+  Ubuntu Linux kompyuter orqali: [IOS-Qollanma.md](IOS-Qollanma.md).
 
 Yangi APK eskisining ustiga o‘rnatiladi, ma’lumotlar saqlanadi (bir xil imzo
 bilan). Yangilashdan oldin Sozlamalar → Zaxira nusxa saqlash tavsiya etiladi.

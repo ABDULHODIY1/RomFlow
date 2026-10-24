@@ -9,6 +9,8 @@ ruxsat beradi. RomFlow’ni iPhone’ga qo‘yishning uchta yo‘li bor:
 | **2. SideStore + RomFlow manbasi** | **GET** (bir bosish, birinchi sozlashdan keyin) | bepul (Apple ID) | iOS 27 da kerak emas (SideInstaller) | 7 kun, SideStore yangilaydi |
 | **3. Sideloadly** | — | bepul (Apple ID) | har safar | 7 kun |
 
+Ubuntu Linux kompyuter bilan qadamma-qadam: [../IOS-Qollanma.md](../IOS-Qollanma.md).
+
 Ko‘p usta bo‘lsa — **1-yo‘l**: hamma bitta havoladan bir bosishda o‘rnatadi.
 Bitta telefon va pul to‘lamasdan — **2** yoki **3-yo‘l**.
 
