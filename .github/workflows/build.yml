@@ -1,0 +1,435 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.35.7'
+  FLUTTER_SUPPRESS_ANALYTICS: true
+  DART_SUPPRESS_ANALYTICS: true
+  # Builds from main are published as a release named after the pubspec
+  # version, e.g. v2.1.0.
+  PUBLISH: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+
+jobs:
+  apk:
+    name: Analyze, test and build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib test integration_test
+      - run: flutter analyze
+      - run: flutter test
+      # The manufacturers' catalog that installed apps download every day.
+      - name: Check the manufacturers' catalog
+        run: |
+          python3 -c "import json; d = json.load(open('assets/manufacturers_uz.json')); assert d['format'] == 'romflow-manufacturers' and d['version'] >= 1; print('catalog v%d: %d makers, %d systems' % (d['version'], len(d['manufacturers']), len(d['systems'])))"
+      # The app reads the dollar rate from these open services (the Central
+      # Bank, else the international rate). Not fatal: the bank's site is
+      # often slow from abroad.
+      - name: Check the dollar rate services
+        continue-on-error: true
+        run: |
+          curl -sS -m 30 https://cbu.uz/uz/arkhiv-kursov-valyut/json/USD/ -o cbu.json \
+            && python3 -c "import json; r = json.load(open('cbu.json'))[0]; assert r['Ccy'] == 'USD' and float(r['Rate']) > 0, r; print('CBU OK', r['Rate'], r['Date'])" \
+            || echo "CBU not reachable from here"
+          curl -sS -m 30 https://open.er-api.com/v6/latest/USD -o open.json
+          python3 -c "import json; d = json.load(open('open.json')); assert d['result'] == 'success' and d['rates']['UZS'] > 0, d; print('OPEN OK', d['rates']['UZS'])"
+      # The release key comes from repository secrets and never lands in
+      # git. Without them (forks, pull requests) the APK gets a debug key:
+      # fine for testing, but it cannot update an installed release.
+      - name: Release signing key
+        env:
+          KEYSTORE: ${{ secrets.ROMFLOW_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ROMFLOW_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ROMFLOW_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ROMFLOW_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE" ]; then
+            echo "::warning::No signing secrets: the APK is signed with a debug key (test only)."
+            echo "SIGNED=debug" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          echo "$KEYSTORE" | base64 -d > android/app/upload.keystore
+          printf 'storeFile=upload.keystore\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+            "$STORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > android/key.properties
+          echo "SIGNED=release" >> "$GITHUB_ENV"
+      - run: flutter build apk --release
+      # Smaller APKs for one processor type each, easier to send to a phone.
+      - run: flutter build apk --release --split-per-abi
+      - name: Name the APK after its version
+        run: |
+          version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr '+' '-')
+          out=build/app/outputs/flutter-apk
+          mkdir -p dist
+          cp $out/app-release.apk "dist/RomFlow-$version.apk"
+          cp $out/app-arm64-v8a-release.apk "dist/RomFlow-$version-arm64.apk"
+          cp $out/app-armeabi-v7a-release.apk "dist/RomFlow-$version-armv7.apk"
+          ls -la dist
+      # Every APK must carry the pubspec version code, or one could not be
+      # installed over another later.
+      - name: Check the version code of every APK
+        run: |
+          aapt2=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/aapt2
+          want=$(grep '^version:' pubspec.yaml | sed 's/.*+//')
+          for apk in dist/*.apk; do
+            code=$("$aapt2" dump badging "$apk" | sed -n "s/.*versionCode='\([0-9]*\)'.*/\1/p")
+            echo "$apk: $code"
+            test "$code" = "$want"
+          done
+      - name: Remove the signing key
+        if: always()
+        run: rm -f android/app/upload.keystore android/key.properties
+      - name: Publish the APKs right away
+        if: env.PUBLISH == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | sed 's/+.*//')
+          tag="v$version"
+          # The newest section of the changelog is the release note.
+          awk 'NR > 1 && /^# RomFlow /{exit} {print}' docs/YANGILIKLAR-UZ.md > notes.md
+          if [ "$SIGNED" = debug ]; then
+            printf '\n> Android: test imzosi — bu APK avvalgi versiya ustiga o‘rnatilmaydi.\n' >> notes.md
+          fi
+          printf '\niPhone: [docs/IPHONE-UZ.md](https://github.com/%s/blob/main/docs/IPHONE-UZ.md)\n' "$GITHUB_REPOSITORY" >> notes.md
+          if ! gh release view "$tag" > /dev/null 2>&1; then
+            gh release create "$tag" --target "$GITHUB_SHA" --title "RomFlow $version" \
+              --notes-file notes.md
+          fi
+          gh release upload "$tag" dist/*.apk --clobber
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RomFlow-APK
+          path: dist/*.apk
+          if-no-files-found: error
+
+  demo:
+    name: Record demo video on an Android emulator
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Free disk space for the emulator image
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost \
+            /usr/local/lib/node_modules /opt/hostedtoolcache/CodeQL /usr/local/share/powershell
+          df -h /
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install ffmpeg
+        run: sudo apt-get update -q && sudo apt-get install -yq ffmpeg
+      - run: flutter pub get
+      - name: Build the demo app before the emulator starts
+        run: flutter build apk --profile --dart-define=ROMFLOW_DEMO=true --target=integration_test/demo_test.dart
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          arch: x86_64
+          target: default
+          profile: pixel_6
+          cores: 4
+          ram-size: 3072M
+          disk-size: 3000M
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back virtualscene
+          script: bash tool/record_demo.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: RomFlow-demo-video
+          path: |
+            build/demo/RomFlow-demo.mp4
+            build/demo/drive.log
+          if-no-files-found: warn
+
+  smoke:
+    name: Install and open the APK on an emulator
+    needs: apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space for the emulator image
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost \
+            /usr/local/lib/node_modules /opt/hostedtoolcache/CodeQL /usr/local/share/powershell
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: actions/download-artifact@v4
+        with:
+          name: RomFlow-APK
+          path: new
+      # With the release key, the new APK must install over the previous
+      # release and keep its data; debug-signed builds cannot, so they only
+      # get a clean install.
+      - name: Previous release for the update check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HAS_KEY: ${{ secrets.ROMFLOW_KEYSTORE_BASE64 != '' }}
+        run: |
+          current="v$(grep '^version:' pubspec.yaml | awk '{print $2}' | sed 's/+.*//')"
+          echo "PREVIOUS=-" >> "$GITHUB_ENV"
+          [ "$HAS_KEY" = true ] || exit 0
+          for tag in $(gh release list --limit 20 --json tagName,isPrerelease \
+              --jq '.[] | select(.isPrerelease | not) | .tagName'); do
+            [ "$tag" = "$current" ] && continue
+            mkdir -p previous
+            if gh release download "$tag" --dir previous --pattern 'RomFlow-*.apk'; then
+              apk=$(ls previous/*.apk | grep -v -e arm64 -e armv7 | head -1)
+              [ -n "$apk" ] && echo "PREVIOUS=$apk" >> "$GITHUB_ENV" && echo "update check from $tag"
+              break
+            fi
+          done
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          arch: x86_64
+          target: default
+          profile: pixel_6
+          cores: 4
+          ram-size: 3072M
+          disk-size: 3000M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash tool/smoke_install.sh "$PREVIOUS" "$(ls new/*.apk | grep -v -e arm64 -e armv7 | head -1)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: RomFlow-smoke
+          path: build/smoke
+          if-no-files-found: warn
+
+  linux:
+    name: Linux desktop build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Install GTK build tools
+        run: sudo apt-get update -q && sudo apt-get install -yq ninja-build libgtk-3-dev clang cmake pkg-config
+      - run: flutter pub get
+      - run: flutter build linux --release
+      - name: Package
+        run: |
+          version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr '+' '-')
+          mkdir -p dist
+          tar czf "dist/RomFlow-$version-linux-x64.tar.gz" -C build/linux/x64/release bundle
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RomFlow-Linux
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  windows:
+    name: Windows desktop build
+    # Flutter 3.35 knows Visual Studio 2022, not the newer one on windows-latest.
+    runs-on: windows-2022
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter build windows --release
+      - name: Package
+        run: |
+          version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr '+' '-')
+          mkdir -p dist
+          cd build/windows/x64/runner/Release
+          7z a -tzip "../../../../../dist/RomFlow-$version-windows-x64.zip" . > /dev/null
+          cd -
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RomFlow-Windows
+          path: dist/*.zip
+          if-no-files-found: error
+
+  apple:
+    name: macOS app and iOS/iPadOS build
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: xcodebuild -version
+      - run: flutter pub get
+      - run: flutter build macos --release
+      - name: Build iOS without signing
+        run: flutter build ios --release --no-codesign
+      - name: Package
+        run: |
+          version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr '+' '-')
+          mkdir -p dist ipa/Payload
+          ditto -c -k --sequesterRsrc --keepParent build/macos/Build/Products/Release/RomFlow.app "dist/RomFlow-$version-macos.zip"
+          cp -R build/ios/iphoneos/Runner.app ipa/Payload/
+          (cd ipa && zip -qry "../dist/RomFlow-$version-ios-unsigned.ipa" Payload)
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RomFlow-Apple
+          path: |
+            dist/*.zip
+            dist/*.ipa
+          if-no-files-found: error
+
+  release:
+    name: Add the other platforms to the release
+    needs: [apk, demo, linux, windows, apple]
+    if: always() && needs.apk.result == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+      # The AltStore / SideStore source: added once on the iPhone, it installs
+      # and updates RomFlow with one tap. Stable address:
+      # https://github.com/<repo>/releases/latest/download/altstore-source.json
+      - name: iPhone source for SideStore and AltStore
+        if: needs.apple.result == 'success'
+        run: |
+          version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | sed 's/+.*//')
+          ipa=$(ls out/RomFlow-Apple/*.ipa | head -1)
+          python3 tool/ios_source.py "$ipa" \
+            "https://github.com/$GITHUB_REPOSITORY/releases/download/v$version/$(basename "$ipa")" \
+            "$GITHUB_REPOSITORY" out/altstore-source.json
+      - name: Upload builds and the demo video
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="v$(grep '^version:' pubspec.yaml | awk '{print $2}' | sed 's/+.*//')"
+          files=$(ls out/RomFlow-demo-video/*.mp4 out/RomFlow-Linux/* \
+            out/RomFlow-Windows/* out/RomFlow-Apple/* out/altstore-source.json 2>/dev/null || true)
+          [ -n "$files" ] && gh release upload "$tag" $files --clobber
+          gh release view "$tag"
+
+  testflight:
+    name: iPhone build to TestFlight
+    # Only with an Apple Developer account: the four secrets below (see
+    # docs/IPHONE-UZ.md). Testers then install with one tap from the
+    # TestFlight public link.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: macos-latest
+    timeout-minutes: 60
+    env:
+      HAS_APPLE: ${{ secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' && secrets.ASC_KEY_P8 != '' && secrets.APPLE_TEAM_ID != '' }}
+    steps:
+      - name: Apple secrets
+        run: |
+          if [ "$HAS_APPLE" != true ]; then
+            echo "::notice::No Apple Developer secrets: TestFlight upload skipped (docs/IPHONE-UZ.md)."
+          fi
+      - uses: actions/checkout@v4
+        if: env.HAS_APPLE == 'true'
+      - uses: subosito/flutter-action@v2
+        if: env.HAS_APPLE == 'true'
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      # App Store Connect takes builds made with the iOS 26 SDK or newer.
+      - name: Newest released Xcode
+        if: env.HAS_APPLE == 'true'
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | grep -vi -e beta -e rc | sort -V | tail -1)
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+      - name: Archive and upload to TestFlight
+        if: env.HAS_APPLE == 'true'
+        env:
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+          KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          key="$RUNNER_TEMP/AuthKey_$KEY_ID.p8"
+          if printf '%s' "$KEY_P8" | grep -q 'BEGIN PRIVATE KEY'; then
+            printf '%s\n' "$KEY_P8" > "$key"
+          else
+            printf '%s' "$KEY_P8" | base64 --decode > "$key"
+          fi
+          build=$(grep '^version:' pubspec.yaml | sed 's/.*+//')
+          flutter pub get
+          # Every upload needs a new build number: pubspec build, then the run.
+          flutter build ios --release --config-only --build-number="$build.$GITHUB_RUN_NUMBER"
+          auth=(-allowProvisioningUpdates -authenticationKeyPath "$key"
+            -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER")
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' \
+            -archivePath build/ios/RomFlow.xcarchive archive \
+            DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic "${auth[@]}"
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath build/ios/RomFlow.xcarchive \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath build/ios/export "${auth[@]}"
+          rm -f "$key"
+          echo "::notice::Uploaded RomFlow $build.$GITHUB_RUN_NUMBER to App Store Connect; it appears in TestFlight after processing."

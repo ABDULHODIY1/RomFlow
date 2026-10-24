@@ -1,0 +1,4029 @@
+{
+  "profile": {
+    "name": "AKFA — NAMUNA",
+    "brand": "AKFA",
+    "material": "aluminium",
+    "framePrice": 45000,
+    "sashPrice": 50000,
+    "mullionPrice": 42000,
+    "glassPrice": 130000,
+    "hardwarePrice": 95000,
+    "gasketPrice": 3500,
+    "laborPrice": 50000,
+    "wastePct": 7,
+    "markupPct": 25,
+    "frameFaceMm": 50,
+    "sashFaceMm": 50,
+    "demo": true
+  },
+  "cases": [
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 0,
+            "price": 53500,
+            "cost": 0
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 44940,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.4,
+            "price": 130000,
+            "cost": 442000
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 0,
+            "price": 95000,
+            "cost": 0
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1315970,
+        "unitPrice": 1644963,
+        "total": 3289926,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 0,
+            "price": 53500,
+            "cost": 0
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 44940,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.4,
+            "price": 130000,
+            "cost": 442000
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 0,
+            "price": 95000,
+            "cost": 0
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1032470,
+        "unitPrice": 1290588,
+        "total": 2581176,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 0,
+            "price": 64200,
+            "cost": 0
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 53928,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.4,
+            "price": 130000,
+            "cost": 442000
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 0,
+            "price": 95000,
+            "cost": 0
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1391084,
+        "unitPrice": 1738855,
+        "total": 3477710,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 0,
+            "price": 64200,
+            "cost": 0
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 53928,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.4,
+            "price": 130000,
+            "cost": 442000
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 0,
+            "price": 95000,
+            "cost": 0
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1107584,
+        "unitPrice": 1384480,
+        "total": 2768960,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 0,
+            "price": 69550,
+            "cost": 0
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 58422,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.4,
+            "price": 130000,
+            "cost": 442000
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 0,
+            "price": 95000,
+            "cost": 0
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1428641,
+        "unitPrice": 1785801,
+        "total": 3571602,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "fixed",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 0,
+            "price": 69550,
+            "cost": 0
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 58422,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.4,
+            "price": 130000,
+            "cost": 442000
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 0,
+            "price": 95000,
+            "cost": 0
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1145141,
+        "unitPrice": 1431426,
+        "total": 2862852,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 53500,
+            "cost": 395900
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 44940,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1760070,
+        "unitPrice": 2200088,
+        "total": 4400176,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 53500,
+            "cost": 395900
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 44940,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1476570,
+        "unitPrice": 1845713,
+        "total": 3691426,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 64200,
+            "cost": 475080
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 53928,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1914364,
+        "unitPrice": 2392955,
+        "total": 4785910,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 64200,
+            "cost": 475080
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 53928,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1630864,
+        "unitPrice": 2038580,
+        "total": 4077160,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 69550,
+            "cost": 514670
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 58422,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1991511,
+        "unitPrice": 2489389,
+        "total": 4978778,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "casement",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 69550,
+            "cost": 514670
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 58422,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1708011,
+        "unitPrice": 2135014,
+        "total": 4270028,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.65,
+            "price": 53500,
+            "cost": 302275
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 44940,
+            "cost": 89880
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0275,
+            "price": 130000,
+            "cost": 393575
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1768350,
+        "unitPrice": 2210438,
+        "total": 4420876,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.65,
+            "price": 53500,
+            "cost": 302275
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 44940,
+            "cost": 89880
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0275,
+            "price": 130000,
+            "cost": 393575
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1484850,
+        "unitPrice": 1856063,
+        "total": 3712126,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.65,
+            "price": 64200,
+            "cost": 362730
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 53928,
+            "cost": 107856
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0275,
+            "price": 130000,
+            "cost": 393575
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1921895,
+        "unitPrice": 2402369,
+        "total": 4804738,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.65,
+            "price": 64200,
+            "cost": 362730
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 53928,
+            "cost": 107856
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0275,
+            "price": 130000,
+            "cost": 393575
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1638395,
+        "unitPrice": 2047994,
+        "total": 4095988,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.65,
+            "price": 69550,
+            "cost": 392958
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 58422,
+            "cost": 116844
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0275,
+            "price": 130000,
+            "cost": 393575
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1998668,
+        "unitPrice": 2498335,
+        "total": 4996670,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.65,
+            "price": 69550,
+            "cost": 392958
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 58422,
+            "cost": 116844
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0275,
+            "price": 130000,
+            "cost": 393575
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1715168,
+        "unitPrice": 2143960,
+        "total": 4287920,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.0667,
+            "price": 53500,
+            "cost": 271067
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 4,
+            "price": 44940,
+            "cost": 179760
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.9567,
+            "price": 130000,
+            "cost": 384367
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 15.2,
+            "price": 3500,
+            "cost": 53200
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1831464,
+        "unitPrice": 2289330,
+        "total": 4578660,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.0667,
+            "price": 53500,
+            "cost": 271067
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 4,
+            "price": 44940,
+            "cost": 179760
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.9567,
+            "price": 130000,
+            "cost": 384367
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 15.2,
+            "price": 3500,
+            "cost": 53200
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1547964,
+        "unitPrice": 1934955,
+        "total": 3869910,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.0667,
+            "price": 64200,
+            "cost": 325280
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 4,
+            "price": 53928,
+            "cost": 215712
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.9567,
+            "price": 130000,
+            "cost": 384367
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 15.2,
+            "price": 3500,
+            "cost": 53200
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1996743,
+        "unitPrice": 2495929,
+        "total": 4991858,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.0667,
+            "price": 64200,
+            "cost": 325280
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 4,
+            "price": 53928,
+            "cost": 215712
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.9567,
+            "price": 130000,
+            "cost": 384367
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 15.2,
+            "price": 3500,
+            "cost": 53200
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1713243,
+        "unitPrice": 2141554,
+        "total": 4283108,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.0667,
+            "price": 69550,
+            "cost": 352387
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 4,
+            "price": 58422,
+            "cost": 233688
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.9567,
+            "price": 130000,
+            "cost": 384367
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 15.2,
+            "price": 3500,
+            "cost": 53200
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 2079383,
+        "unitPrice": 2599229,
+        "total": 5198458,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "triple",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 5.0667,
+            "price": 69550,
+            "cost": 352387
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 4,
+            "price": 58422,
+            "cost": 233688
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.9567,
+            "price": 130000,
+            "cost": 384367
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 15.2,
+            "price": 3500,
+            "cost": 53200
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1795883,
+        "unitPrice": 2244854,
+        "total": 4489708,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 3.6,
+            "price": 53500,
+            "cost": 192600
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 3.7,
+            "price": 44940,
+            "cost": 166278
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0475,
+            "price": 130000,
+            "cost": 396175
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 14.4,
+            "price": 3500,
+            "cost": 50400
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1748523,
+        "unitPrice": 2185654,
+        "total": 4371308,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 3.6,
+            "price": 53500,
+            "cost": 192600
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 3.7,
+            "price": 44940,
+            "cost": 166278
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0475,
+            "price": 130000,
+            "cost": 396175
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 14.4,
+            "price": 3500,
+            "cost": 50400
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1465023,
+        "unitPrice": 1831279,
+        "total": 3662558,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 3.6,
+            "price": 64200,
+            "cost": 231120
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 3.7,
+            "price": 53928,
+            "cost": 199534
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0475,
+            "price": 130000,
+            "cost": 396175
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 14.4,
+            "price": 3500,
+            "cost": 50400
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1895413,
+        "unitPrice": 2369266,
+        "total": 4738532,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 3.6,
+            "price": 64200,
+            "cost": 231120
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 3.7,
+            "price": 53928,
+            "cost": 199534
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0475,
+            "price": 130000,
+            "cost": 396175
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 14.4,
+            "price": 3500,
+            "cost": 50400
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1611913,
+        "unitPrice": 2014891,
+        "total": 4029782,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 3.6,
+            "price": 69550,
+            "cost": 250380
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 3.7,
+            "price": 58422,
+            "cost": 216161
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0475,
+            "price": 130000,
+            "cost": 396175
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 14.4,
+            "price": 3500,
+            "cost": 50400
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1968857,
+        "unitPrice": 2461071,
+        "total": 4922142,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "transom",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 3.6,
+            "price": 69550,
+            "cost": 250380
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 3.7,
+            "price": 58422,
+            "cost": 216161
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.0475,
+            "price": 130000,
+            "cost": 396175
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 14.4,
+            "price": 3500,
+            "cost": 50400
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1685357,
+        "unitPrice": 2106696,
+        "total": 4213392,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 53500,
+            "cost": 395900
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 44940,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1760070,
+        "unitPrice": 2200088,
+        "total": 4400176,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 53500,
+            "cost": 395900
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 44940,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1476570,
+        "unitPrice": 1845713,
+        "total": 3691426,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 64200,
+            "cost": 475080
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 53928,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1914364,
+        "unitPrice": 2392955,
+        "total": 4785910,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 64200,
+            "cost": 475080
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 53928,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1630864,
+        "unitPrice": 2038580,
+        "total": 4077160,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 69550,
+            "cost": 514670
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 58422,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 1991511,
+        "unitPrice": 2489389,
+        "total": 4978778,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 69550,
+            "cost": 514670
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 0,
+            "price": 58422,
+            "cost": 0
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 3.04,
+            "price": 130000,
+            "cost": 395200
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 1,
+            "price": 95000,
+            "cost": 95000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 7.4,
+            "price": 3500,
+            "cost": 25900
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1708011,
+        "unitPrice": 2135014,
+        "total": 4270028,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 53500,
+            "cost": 604550
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 44940,
+            "cost": 89880
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 2130200,
+        "unitPrice": 2662750,
+        "total": 5325500,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 53500,
+            "cost": 604550
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 44940,
+            "cost": 89880
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1846700,
+        "unitPrice": 2308375,
+        "total": 4616750,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 64200,
+            "cost": 725460
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 53928,
+            "cost": 107856
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 2344200,
+        "unitPrice": 2930250,
+        "total": 5860500,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 64200,
+            "cost": 725460
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 53928,
+            "cost": 107856
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 2060700,
+        "unitPrice": 2575875,
+        "total": 5151750,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 69550,
+            "cost": 785915
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 58422,
+            "cost": 116844
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 2451200,
+        "unitPrice": 3064000,
+        "total": 6128000,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "double_door",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 69550,
+            "cost": 785915
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 58422,
+            "cost": 116844
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 2167700,
+        "unitPrice": 2709625,
+        "total": 5419250,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 53500,
+            "cost": 604550
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 44940,
+            "cost": 89880
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 2130200,
+        "unitPrice": 2662750,
+        "total": 5325500,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "white",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 48150,
+            "cost": 375570
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 53500,
+            "cost": 604550
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 44940,
+            "cost": 89880
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 1846700,
+        "unitPrice": 2308375,
+        "total": 4616750,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 64200,
+            "cost": 725460
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 53928,
+            "cost": 107856
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 2344200,
+        "unitPrice": 2930250,
+        "total": 5860500,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "anthracite",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 57780,
+            "cost": 450684
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 64200,
+            "cost": 725460
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 53928,
+            "cost": 107856
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 2060700,
+        "unitPrice": 2575875,
+        "total": 5151750,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": true,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 69550,
+            "cost": 785915
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 58422,
+            "cost": 116844
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          },
+          {
+            "name": "Setka (namuna narx)",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 75000,
+            "cost": 283500
+          }
+        ],
+        "cost": 2451200,
+        "unitPrice": 3064000,
+        "total": 6128000,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    },
+    {
+      "input": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false
+      },
+      "result": {
+        "profileId": "sample-AKFA",
+        "template": "sliding",
+        "widthMm": 1800,
+        "heightMm": 2100,
+        "quantity": 2,
+        "color": "oak",
+        "mosquito": false,
+        "profileName": "AKFA — NAMUNA",
+        "brand": "AKFA",
+        "material": "aluminium",
+        "demo": true,
+        "parts": [
+          {
+            "name": "Tashqi rama",
+            "unit": "m",
+            "quantity": 7.8,
+            "price": 62595,
+            "cost": 488241
+          },
+          {
+            "name": "Tabaqa profili",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 69550,
+            "cost": 785915
+          },
+          {
+            "name": "Impost",
+            "unit": "m",
+            "quantity": 2,
+            "price": 58422,
+            "cost": 116844
+          },
+          {
+            "name": "Shisha / panel",
+            "unit": "m²",
+            "quantity": 2.755,
+            "price": 130000,
+            "cost": 358150
+          },
+          {
+            "name": "Furnitura to‘plami",
+            "unit": "dona",
+            "quantity": 2,
+            "price": 95000,
+            "cost": 190000
+          },
+          {
+            "name": "Zichlagich",
+            "unit": "m",
+            "quantity": 11.3,
+            "price": 3500,
+            "cost": 39550
+          },
+          {
+            "name": "Mehnat",
+            "unit": "m²",
+            "quantity": 3.78,
+            "price": 50000,
+            "cost": 189000
+          }
+        ],
+        "cost": 2167700,
+        "unitPrice": 2709625,
+        "total": 5419250,
+        "areaM2": 3.78,
+        "warning": "Taxminiy smeta. Kesish kartasi emas; texnik katalog va sex o‘lchovlari bilan tekshiring."
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+Copyright (c) 2026 RomFlow mualliflari. Barcha huquqlar himoyalangan.
+
+Ushbu repodagi manba kodi ko‘rib chiqish va hissa qo‘shish uchun ochiq.
+Mualliflarning yozma ruxsatisiz uni nusxalash, o‘zgartirib tarqatish yoki
+tijoriy maqsadda ishlatish taqiqlanadi. Pull Request yuborgan hissa
+qo‘shuvchilar o‘z o‘zgarishlarini ushbu shartlar asosida tarqatishga rozilik
+beradi.
+
+Uchinchi tomon fayllari o‘z litsenziyalari bilan:
+- assets/DejaVuSans.ttf — assets/FONT-LICENSE.txt
+- Tabler Icons asosidagi ikonka — assets/TABLER-ICONS-LICENSE.txt
+- Flutter va paketlar — ilovadagi “Litsenziyalar” sahifasi
+
+---
+
+Copyright (c) 2026 the RomFlow authors. All rights reserved.
+
+The source code in this repository is published for review and
+contributions. Copying, redistributing modified versions or commercial use
+requires written permission from the authors. Contributors who open a pull
+request agree to their changes being distributed under these terms.
+
+Third-party files keep their own licences, listed above.
