@@ -6,7 +6,7 @@ ruxsat beradi. RomFlow’ni iPhone’ga qo‘yishning uchta yo‘li bor:
 | Yo‘l | Telefonda | Narxi | Kompyuter | Imzo muddati |
 |---|---|---|---|---|
 | **1. TestFlight** | havola → **Install** (bir bosish) | Apple Developer, 99 $/yil (faqat ustaxona egasi) | kerak emas | har build 90 kun; yangisi o‘zi keladi |
-| **2. SideStore + RomFlow manbasi** | **GET** (bir bosish, birinchi sozlashdan keyin) | bepul (Apple ID) | birinchi marta | 7 kun, SideStore yangilaydi |
+| **2. SideStore + RomFlow manbasi** | **GET** (bir bosish, birinchi sozlashdan keyin) | bepul (Apple ID) | iOS 27 da kerak emas (SideInstaller) | 7 kun, SideStore yangilaydi |
 | **3. Sideloadly** | — | bepul (Apple ID) | har safar | 7 kun |
 
 Ko‘p usta bo‘lsa — **1-yo‘l**: hamma bitta havoladan bir bosishda o‘rnatadi.
@@ -60,25 +60,40 @@ Bitta telefon va pul to‘lamasdan — **2** yoki **3-yo‘l**.
 
 ## 2-yo‘l. SideStore — bepul, keyin bir bosishda
 
-### Bir marta sozlash
-1. **SideStore**’ni rasmiy qo‘llanma bo‘yicha o‘rnating: **docs.sidestore.io**
-   → *Installation*. Kompyuter (Windows, Mac yoki Linux) bir marta kerak,
-   10–15 daqiqa. Apple ID so‘raladi — iloji bo‘lsa alohida Apple ID oching.
-2. iPhone: **Sozlamalar → Maxfiylik va xavfsizlik → Dasturchi rejimi
-   (Developer Mode)** → yoqing → telefon qayta yonadi → **Yoqish**.
-3. **Sozlamalar → Umumiy → VPN va qurilmani boshqarish** → Apple ID’ingiz →
+### Bir marta sozlash — iOS 27 da kompyutersiz
+> ⚠️ Faqat rasmiy sayt: **https://sideinstaller.net**. “sideinstaller.com” —
+> soxta sayt, Apple ID’ni o‘g‘irlashi mumkin; u yerga hech narsa yozmang.
+
+1. Sozlamalar → Umumiy → Haqida: **iOS 27** bo‘lsin (iOS 26 va pastida
+   SideStore uchun bir marta kompyuter kerak: **docs.sidestore.io**).
+2. Alohida, yangi Apple ID oching (appleid.apple.com) — asosiysini ishlatmang.
+3. App Store’dan **LocalDevVPN** ni o‘rnating, oching → **Connect** (Wi-Fi).
+4. Safari → **sideinstaller.net** → sertifikatlardan birini tanlab
+   **SideInstaller** ni o‘rnating. “Ishonchsiz dasturchi” chiqsa: Sozlamalar →
+   Umumiy → VPN va qurilmani boshqarish → **Ishonish**.
+5. SideInstaller → 2-qadamdagi Apple ID bilan kiring → **Install SideStore**.
+6. **Sozlamalar → Maxfiylik va xavfsizlik → Dasturchi rejimi (Developer
+   Mode)** → yoqing → telefon qayta yonadi → **Yoqish**.
+7. **Sozlamalar → Umumiy → VPN va qurilmani boshqarish** → Apple ID’ingiz →
    **Ishonish (Trust)**.
 
-### RomFlow’ni o‘rnatish
-4. SideStore → **Sources** → **+** → manzil:
-   ```
-   https://github.com/z3wax/RomFlow/releases/latest/download/altstore-source.json
-   ```
-   → *Add*.
-5. *Browse* → **RomFlow** → **GET**. Keyingi versiyalar: **UPDATE**.
+SideInstaller’ni sayt bergan umumiy sertifikat imzolaydi: Apple uni bekor
+qilsa, saytdan boshqasini tanlang. SideStore va RomFlow esa sizning Apple
+ID’ingiz bilan imzolanadi.
 
-Bepul Apple ID imzosi 7 kun amal qiladi: SideStore’ni haftada bir ochib
-**Refresh All** bosing (yoki uning fon yangilashini yoqing). AltStore
+### RomFlow’ni o‘rnatish
+- **Bir bosishda** (SideInstaller o‘rnatilgan bo‘lsa), iPhone’da oching:
+  https://sideinstaller.net/open.html?url=https%3A%2F%2Fgithub.com%2Fz3wax%2FRomFlow%2Freleases%2Flatest%2Fdownload%2FRomFlow.ipa
+- Yoki SideStore → **Sources** → **+** → manzil:
+  ```
+  https://github.com/z3wax/RomFlow/releases/latest/download/altstore-source.json
+  ```
+  → *Add* → *Browse* → **RomFlow** → **GET**. Keyingi versiyalar: **UPDATE**.
+- Yoki IPA faylni (Releases → `RomFlow-…-ios-unsigned.ipa`) Fayllar’ga
+  saqlab: SideStore → **My Apps** → **+** → faylni tanlang.
+
+Bepul Apple ID imzosi 7 kun amal qiladi: haftada bir LocalDevVPN → Connect,
+keyin SideStore → **Refresh All** (ma’lumotlar o‘chmaydi). AltStore
 Classic’da ham xuddi shu manba ishlaydi.
 
 ---

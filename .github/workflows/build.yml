@@ -3,7 +3,10 @@ name: Build
 on:
   push:
     branches: [main]
+    # Guides and notes alone need no new build.
+    paths-ignore: ['docs/**', '**/*.md', 'LICENSE']
   pull_request:
+    paths-ignore: ['docs/**', '**/*.md', 'LICENSE']
   workflow_dispatch:
 
 permissions:
@@ -352,49 +355,56 @@ jobs:
           python3 tool/ios_source.py "$ipa" \
             "https://github.com/$GITHUB_REPOSITORY/releases/download/v$version/$(basename "$ipa")" \
             "$GITHUB_REPOSITORY" out/altstore-source.json
+          # A fixed name too, for the one-tap link that always opens the
+          # newest: .../releases/latest/download/RomFlow.ipa
+          cp "$ipa" out/RomFlow.ipa
       - name: Upload builds and the demo video
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="v$(grep '^version:' pubspec.yaml | awk '{print $2}' | sed 's/+.*//')"
           files=$(ls out/RomFlow-demo-video/*.mp4 out/RomFlow-Linux/* \
-            out/RomFlow-Windows/* out/RomFlow-Apple/* out/altstore-source.json 2>/dev/null || true)
+            out/RomFlow-Windows/* out/RomFlow-Apple/* out/altstore-source.json out/RomFlow.ipa 2>/dev/null || true)
           [ -n "$files" ] && gh release upload "$tag" $files --clobber
           gh release view "$tag"
 
+  apple-secrets:
+    name: Apple Developer secrets
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          READY: ${{ secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' && secrets.ASC_KEY_P8 != '' && secrets.APPLE_TEAM_ID != '' }}
+        run: |
+          echo "ready=$READY" >> "$GITHUB_OUTPUT"
+          [ "$READY" = true ] || echo "::notice::No Apple Developer secrets: TestFlight upload skipped (docs/IPHONE-UZ.md)."
+
   testflight:
     name: iPhone build to TestFlight
-    # Only with an Apple Developer account: the four secrets below (see
+    # Only with an Apple Developer account: the four secrets above (see
     # docs/IPHONE-UZ.md). Testers then install with one tap from the
     # TestFlight public link.
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: apple-secrets
+    if: needs.apple-secrets.outputs.ready == 'true'
     runs-on: macos-latest
     timeout-minutes: 60
-    env:
-      HAS_APPLE: ${{ secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' && secrets.ASC_KEY_P8 != '' && secrets.APPLE_TEAM_ID != '' }}
     steps:
-      - name: Apple secrets
-        run: |
-          if [ "$HAS_APPLE" != true ]; then
-            echo "::notice::No Apple Developer secrets: TestFlight upload skipped (docs/IPHONE-UZ.md)."
-          fi
       - uses: actions/checkout@v4
-        if: env.HAS_APPLE == 'true'
       - uses: subosito/flutter-action@v2
-        if: env.HAS_APPLE == 'true'
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
       # App Store Connect takes builds made with the iOS 26 SDK or newer.
       - name: Newest released Xcode
-        if: env.HAS_APPLE == 'true'
         run: |
           xcode=$(ls -d /Applications/Xcode_*.app | grep -vi -e beta -e rc | sort -V | tail -1)
           sudo xcode-select -s "$xcode"
           xcodebuild -version
       - name: Archive and upload to TestFlight
-        if: env.HAS_APPLE == 'true'
         env:
           TEAM: ${{ secrets.APPLE_TEAM_ID }}
           KEY_ID: ${{ secrets.ASC_KEY_ID }}
