@@ -783,8 +783,10 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
           labelText: tr(label),
           suffixText: 'mm',
           isDense: true,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          // Glass fields keep their own padding, the name inside them.
+          contentPadding: usesIOSGlass
+              ? const EdgeInsets.fromLTRB(14, 8, 14, 8)
+              : const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         );
     return Scaffold(
       backgroundColor: Theme.of(context).brightness == Brightness.dark

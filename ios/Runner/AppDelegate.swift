@@ -294,7 +294,8 @@ final class GlassButtons: NSObject, FlutterPlatformView {
       }
     }
     if let symbol = item["symbol"] as? String {
-      config.image = UIImage(systemName: symbol)
+      // An unknown name draws nothing: a plain square instead.
+      config.image = UIImage(systemName: symbol) ?? UIImage(systemName: "square")
       config.imagePadding = 6
       config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
         pointSize: CGFloat(item["iconSize"] as? Double ?? 16), weight: .semibold)

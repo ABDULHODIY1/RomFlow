@@ -535,7 +535,38 @@ class GlassAppBar extends AppBar {
     final out = <Widget>[], group = <Widget>[];
     void flush() {
       if (group.isEmpty) return;
-      out.add(_GlassCapsule(children: List.of(group)));
+      // On iPhone a bar's icon buttons are UIKit's own glass buttons, one
+      // view for the group; menus keep the painted capsule.
+      final icons = [
+        for (final b in group)
+          if (b is IconButton && b.icon is Icon) b,
+      ];
+      if (nativeGlass &&
+          icons.length == group.length &&
+          icons.every((b) => sfSymbol((b.icon as Icon).icon) != null)) {
+        out.add(Center(
+          child: NativeGlassButtons(
+            height: 44,
+            width: icons.length * 44.0 + (icons.length - 1) * 6,
+            spacing: 6,
+            items: [
+              for (var i = 0; i < icons.length; i++)
+                GlassButton(
+                  '$i',
+                  symbol: sfSymbol((icons[i].icon as Icon).icon),
+                  label: icons[i].tooltip,
+                  enabled: icons[i].onPressed != null,
+                  size: 44,
+                  iconSize: 17,
+                ),
+            ],
+            onTap: (id) => icons[int.parse(id)].onPressed?.call(),
+            fallback: _GlassCapsule(children: List.of(icons)),
+          ),
+        ));
+      } else {
+        out.add(_GlassCapsule(children: List.of(group)));
+      }
       group.clear();
     }
 
@@ -567,8 +598,10 @@ class _TopEdge extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [bg.withValues(alpha: .96), bg.withValues(alpha: 0)],
-            stops: const [.55, 1],
+            // Solid behind the title, fading only at the bar's lower edge:
+            // the page no longer reads through the title.
+            colors: [bg, bg, bg.withValues(alpha: 0)],
+            stops: const [0, .8, 1],
           ),
         ),
       ),
@@ -614,6 +647,25 @@ class _GlassBackButton extends StatelessWidget {
     final route = ModalRoute.of(context);
     if (route == null || !route.canPop) return const SizedBox.shrink();
     final close = route is PageRoute && route.fullscreenDialog;
+    if (nativeGlass) {
+      return Center(
+        child: NativeGlassButtons(
+          height: 44,
+          width: 44,
+          items: [
+            GlassButton(
+              'back',
+              symbol: close ? 'xmark' : 'chevron.left',
+              label: close ? 'Yopish' : 'Orqaga',
+              size: 44,
+              iconSize: 17,
+            ),
+          ],
+          onTap: (_) => Navigator.maybePop(context),
+          fallback: const SizedBox.shrink(),
+        ),
+      );
+    }
     return Center(
       child: GlassIconButton(
         icon: close ? Icons.close : Icons.arrow_back_ios_new,
@@ -684,6 +736,53 @@ Future<T?> showGlassSheet<T>({
     ),
   );
 }
+
+/// The SF Symbol drawn by UIKit for a Material icon, where one fits.
+final _sfSymbols = <IconData, String>{
+  Icons.arrow_back_ios_new: 'chevron.left',
+  Icons.close: 'xmark',
+  Icons.undo: 'arrow.uturn.backward',
+  Icons.redo: 'arrow.uturn.forward',
+  Icons.tune: 'slider.horizontal.3',
+  Icons.fullscreen: 'arrow.up.left.and.arrow.down.right',
+  Icons.fullscreen_exit: 'arrow.down.right.and.arrow.up.left',
+  Icons.list_alt: 'list.bullet.rectangle',
+  Icons.ios_share: 'square.and.arrow.up',
+  Icons.share: 'square.and.arrow.up',
+  Icons.inventory_2_outlined: 'shippingbox',
+  Icons.edit_outlined: 'pencil',
+  Icons.delete_outline: 'trash',
+  Icons.add: 'plus',
+  Icons.search: 'magnifyingglass',
+  Icons.more_vert: 'ellipsis',
+  Icons.grid_view_outlined: 'square.split.2x2',
+  Icons.window_outlined: 'window.vertical.closed',
+  Icons.door_front_door_outlined: 'door.left.hand.closed',
+  Icons.layers_outlined: 'square.3.layers.3d',
+  Icons.handyman_outlined: 'wrench.and.screwdriver',
+  Icons.dashboard_customize_outlined: 'square.grid.2x2',
+  Icons.touch_app_outlined: 'hand.point.up.left',
+  Icons.vertical_split_outlined: 'rectangle.split.2x1',
+  Icons.horizontal_split_outlined: 'rectangle.split.1x2',
+  Icons.view_column_outlined: 'rectangle.split.3x1',
+  Icons.open_in_full: 'arrow.up.left.and.arrow.down.right',
+  Icons.flip: 'arrow.left.and.right.righttriangle.left.righttriangle.right',
+  Icons.crop_square: 'square',
+  Icons.square_outlined: 'square.fill',
+  Icons.view_week_outlined: 'line.3.horizontal',
+  Icons.check_box_outline_blank: 'square.dashed',
+  Icons.grid_on: 'grid',
+  Icons.lock_outline: 'lock',
+  Icons.settings_input_component: 'arrow.uturn.right.circle',
+  Icons.horizontal_rule: 'minus',
+  Icons.grid_4x4: 'number',
+  Icons.apps: 'square.grid.3x3',
+  Icons.bookmark_add_outlined: 'bookmark',
+  Icons.folder_open: 'folder',
+};
+
+/// [icon] as an SF Symbol name, or null when there is no good match.
+String? sfSymbol(IconData? icon) => icon == null ? null : _sfSymbols[icon];
 
 /// One system glass button: an SF Symbol and/or a title.
 class GlassButton {

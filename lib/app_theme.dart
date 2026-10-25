@@ -37,10 +37,17 @@ ThemeData romFlowTheme(Brightness brightness) {
   final OutlinedBorder buttonShape = nativeGlass
       ? const StadiumBorder()
       : RoundedRectangleBorder(borderRadius: BorderRadius.circular(12));
-  final input = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
-    borderSide: BorderSide(color: border),
-  );
+  // Liquid Glass: iOS-style filled fields, the name inside the field (an
+  // outlined border put it on the field's edge, crossed by the line).
+  final InputBorder input = usesIOSGlass
+      ? UnderlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        )
+      : OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: border),
+        );
   final base = ThemeData(
     useMaterial3: true,
     brightness: brightness,
@@ -105,8 +112,12 @@ ThemeData romFlowTheme(Brightness brightness) {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: usesIOSGlass ? Colors.transparent : field,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      fillColor: usesIOSGlass
+          ? (dark ? const Color(0xff1d2632) : const Color(0xffeef2f7))
+          : field,
+      contentPadding: usesIOSGlass
+          ? null
+          : const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       labelStyle: TextStyle(color: muted, fontSize: 14),
       hintStyle: TextStyle(color: muted),
       helperStyle: TextStyle(color: muted, fontSize: 12),

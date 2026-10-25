@@ -2329,6 +2329,31 @@ class _DrawingEditorState extends State<DrawingEditor> {
   }
 
   Widget viewSwitch() {
+    if (nativeGlass) {
+      // 2D | 3D and the photo view as UIKit's glass buttons.
+      return NativeGlassButtons(
+        height: 40,
+        width: 46 + 46 + 40 + 8,
+        spacing: 4,
+        items: [
+          GlassButton('2d', title: '2D', selected: !show3d, height: 40),
+          GlassButton('3d', title: '3D', selected: show3d, height: 40),
+          const GlassButton(
+            'place',
+            symbol: 'camera',
+            label: 'Joyida ko‘rish',
+            size: 40,
+            iconSize: 16,
+          ),
+        ],
+        onTap: (id) => switch (id) {
+          '2d' => setState(() => show3d = false),
+          '3d' => setState(() => show3d = true),
+          _ => placeOnPhoto(),
+        },
+        fallback: const SizedBox.shrink(),
+      );
+    }
     final scheme = Theme.of(context).colorScheme;
     Widget side(String label, bool on, VoidCallback tap) => Material(
         type: MaterialType.transparency,
@@ -2479,7 +2504,10 @@ class _DrawingEditorState extends State<DrawingEditor> {
   /// The palette of tool groups: a glass capsule when Liquid Glass is on.
   Widget glassBar(ColorScheme scheme, Widget child) => Padding(
         padding: const EdgeInsets.fromLTRB(12, 2, 12, 0),
-        child: usesIOSGlass
+        child: child is NativeGlassButtons
+            // UIKit's buttons bring their own glass.
+            ? Center(child: child)
+            : usesIOSGlass
             // A floating toolbar over the paper: one capsule of Apple's
             // glass, as wide as its tools, the drawing showing through.
             ? Center(
@@ -3661,11 +3689,44 @@ class _DrawingEditorState extends State<DrawingEditor> {
   }
 
   Widget visualWorkspace(DrawingLayout? layout, DMap? leaf) {
-    Widget tools(List<Widget> children) => SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-          child: Row(children: children),
+    Widget tools(List<Widget> children) {
+      // On iPhone a row of tools is UIKit's own glass buttons, one view for
+      // the row; the chosen tool is prominent glass. Dragging a part onto
+      // the drawing stays with the Flutter row elsewhere.
+      final row = [for (final c in children) if (c is DraftTool) c];
+      if (nativeGlass &&
+          row.length == children.length &&
+          row.isNotEmpty &&
+          row.length <= 8) {
+        return NativeGlassButtons(
+          height: 44,
+          width: row.length * 42.0 + (row.length - 1) * 4,
+          spacing: 4,
+          items: [
+            for (var i = 0; i < row.length; i++)
+              GlassButton(
+                '$i',
+                symbol: row[i].opening != null
+                    ? openingSymbols[row[i].opening] ?? 'rectangle'
+                    : row[i].preview != null
+                        ? 'rectangle.split.2x1'
+                        : sfSymbol(row[i].icon) ?? 'square',
+                label: row[i].label,
+                selected: row[i].selected,
+                size: 42,
+                iconSize: 17,
+              ),
+          ],
+          onTap: (id) => row[int.parse(id)].onTap(),
+          fallback: const SizedBox.shrink(),
         );
+      }
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+        child: Row(children: children),
+      );
+    }
     void selectTool(String value) => setState(() {
           show3d = false;
           tool = value;
@@ -4526,6 +4587,21 @@ double distanceToSegment(V p, V a, V b) {
 
 /// The drawing desk's paper, in both themes.
 const paperColor = Color(0xffedf4fb);
+
+/// SF Symbols for the opening types on the native toolbar.
+const openingSymbols = {
+  'fixed': 'rectangle',
+  'left': 'arrow.left.square',
+  'right': 'arrow.right.square',
+  'tiltTurn': 'arrow.up.left.and.arrow.down.right.square',
+  'top': 'arrow.up.square',
+  'bottom': 'arrow.down.square',
+  'slideLeft': 'arrow.left.to.line',
+  'slideRight': 'arrow.right.to.line',
+  'doorLeft': 'door.left.hand.open',
+  'doorRight': 'door.right.hand.open',
+  'passive': 'door.left.hand.closed',
+};
 
 /// The drawing desk follows the theme: black paper with white ink in the
 /// dark, white paper with dark ink in the light.
