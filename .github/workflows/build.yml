@@ -388,6 +388,30 @@ jobs:
             out/RomFlow-Windows/* out/RomFlow-Apple/* out/altstore-source.json out/RomFlow.ipa 2>/dev/null || true)
           [ -n "$files" ] && gh release upload "$tag" $files --clobber
           gh release view "$tag"
+      # Only the newest build stays: older APKs and IPAs in this release and
+      # every other release (with its tag) are deleted. The fixed links
+      # (RomFlow.ipa, the AltStore source) and the demo video stay.
+      - name: Remove older builds and releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          tag="v${version%%+*}"
+          build="${version##*+}"
+          gh release view "$tag" --json assets -q '.assets[].name' | while read -r name; do
+            case "$name" in
+              RomFlow.ipa|altstore-source.json|*.mp4) ;;
+              RomFlow-*-"$build".*|RomFlow-*-"$build"-*) ;;
+              *) echo "delete $name"; gh release delete-asset "$tag" "$name" -y ;;
+            esac
+          done
+          gh release list --limit 100 --json tagName -q '.[].tagName' | while read -r other; do
+            if [ "$other" != "$tag" ]; then
+              echo "delete release $other"
+              gh release delete "$other" -y --cleanup-tag
+            fi
+          done
+          gh release view "$tag"
 
   apple-secrets:
     name: Apple Developer secrets
