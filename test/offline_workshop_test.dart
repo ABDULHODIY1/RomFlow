@@ -191,6 +191,15 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(s.debts.length, 1);
+    // On a slow machine the list shows the saved entry a little later
+    // than the store has it: wait for it (bounded) before scrolling to it.
+    for (var tick = 0;
+        tick < 100 && find.text('Ali').evaluate().isEmpty;
+        tick++) {
+      await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
     // Scroll the entry itself into view rather than looking up a list
     // first: on slow machines the closing dialog's list could be the one
     // found and then vanish.
