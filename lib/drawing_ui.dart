@@ -2333,7 +2333,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
       // 2D | 3D and the photo view as UIKit's glass buttons.
       return NativeGlassButtons(
         height: 40,
-        width: 46 + 46 + 40 + 8,
+        width: 60 + 60 + 40 + 8,
         spacing: 4,
         items: [
           GlassButton('2d', title: '2D', selected: !show3d, height: 40),
@@ -2800,6 +2800,49 @@ class _DrawingEditorState extends State<DrawingEditor> {
     }
   }
 
+  /// A part let go over the drawing: placed in the section under it.
+  void dropPart(DraftPayload payload, Offset? local) {
+    final box = dropCanvasKey.currentContext?.findRenderObject();
+    final next = local == null || box is! RenderBox
+        ? null
+        : plannedDrop(payload, local, box.size);
+    finishPartDrag();
+    if (next == null || !next.valid) {
+      toast(next?.error ?? 'Rom ichidagi mos bo‘limga tashlang');
+      return;
+    }
+    change(() {
+      drawing = next.drawing!;
+      selected = next.selection;
+      selectedFill = null;
+      tool = 'select';
+      serial++;
+    });
+    HapticFeedback.lightImpact();
+  }
+
+  /// A UIKit toolbar button held and dragged: the same preview and drop as
+  /// the Flutter tools' drag.
+  void nativeDrag(DraftTool t, String phase, Offset global) {
+    final payload = t.dragData;
+    if (payload == null) return;
+    switch (phase) {
+      case 'start':
+        HapticFeedback.selectionClick();
+        startPartDrag();
+      case 'move':
+        final local = localDrop(global);
+        setState(() {
+          hoverPayload = payload;
+          hoverPoint = local;
+        });
+      case 'end':
+        dropPart(payload, localDrop(global));
+      default:
+        finishPartDrag();
+    }
+  }
+
   void finishPartDrag() {
     if (mounted) {
       setState(() {
@@ -2944,25 +2987,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 hoverPayload = null;
                 hoverPoint = null;
               }),
-              onAcceptWithDetails: (details) {
-                final local = localDrop(details.offset);
-                final next = local == null
-                    ? null
-                    : plannedDrop(details.data, local, size);
-                finishPartDrag();
-                if (next == null || !next.valid) {
-                  toast(next?.error ?? 'Rom ichidagi mos bo‘limga tashlang');
-                  return;
-                }
-                change(() {
-                  drawing = next.drawing!;
-                  selected = next.selection;
-                  selectedFill = null;
-                  tool = 'select';
-                  serial++;
-                });
-                HapticFeedback.lightImpact();
-              },
+              onAcceptWithDetails: (details) =>
+                  dropPart(details.data, localDrop(details.offset)),
               builder: (context, accepted, rejected) => Stack(
                 fit: StackFit.expand,
                 children: [
@@ -3716,11 +3742,13 @@ class _DrawingEditorState extends State<DrawingEditor> {
                         : sfSymbol(row[i].icon) ?? 'square',
                 label: row[i].label,
                 selected: row[i].selected,
+                draggable: row[i].dragData != null,
                 size: 42,
                 iconSize: 17,
               ),
           ],
           onTap: (id) => row[int.parse(id)].onTap(),
+          onDrag: (id, phase, at) => nativeDrag(row[int.parse(id)], phase, at),
           fallback: const SizedBox.shrink(),
         );
       }

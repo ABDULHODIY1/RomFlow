@@ -793,6 +793,10 @@ class GlassButton {
   final String style;
   final Color? tint;
   final bool selected, enabled, expand, light;
+
+  /// Pressed and held, the button reports the finger's moves (dragging a
+  /// part onto the drawing).
+  final bool draggable;
   final double? size;
   final double height, fontSize, iconSize;
   const GlassButton(
@@ -807,6 +811,7 @@ class GlassButton {
     this.enabled = true,
     this.expand = false,
     this.light = false,
+    this.draggable = false,
     this.size,
     this.height = 48,
     this.fontSize = 15,
@@ -825,6 +830,7 @@ class GlassButton {
         'enabled': enabled,
         'expand': expand,
         'light': light,
+        'draggable': draggable,
         if (size != null) 'size': size,
         'height': height,
         'fontSize': fontSize,
@@ -837,6 +843,10 @@ class GlassButton {
 class NativeGlassButtons extends StatefulWidget {
   final List<GlassButton> items;
   final ValueChanged<String> onTap;
+
+  /// A held button's drag: 'start', 'move', 'end' or 'cancel', with the
+  /// finger's position on the screen.
+  final void Function(String id, String phase, Offset global)? onDrag;
   final Widget fallback;
   final double height;
   final double? width;
@@ -851,6 +861,7 @@ class NativeGlassButtons extends StatefulWidget {
     required this.items,
     required this.onTap,
     required this.fallback,
+    this.onDrag,
     this.height = 48,
     this.width,
     this.vertical = false,
@@ -945,6 +956,22 @@ class _NativeGlassButtonsState extends State<NativeGlassButtons> {
               if (id is String &&
                   widget.items.any((b) => b.id == id && b.enabled)) {
                 widget.onTap(id);
+              }
+            } else if (call.method == 'drag' && mounted && available) {
+              final a = call.arguments;
+              if (a is Map &&
+                  a['id'] is String &&
+                  a['phase'] is String &&
+                  a['x'] is num &&
+                  a['y'] is num) {
+                widget.onDrag?.call(
+                  a['id'] as String,
+                  a['phase'] as String,
+                  Offset(
+                    (a['x'] as num).toDouble(),
+                    (a['y'] as num).toDouble(),
+                  ),
+                );
               }
             }
           });

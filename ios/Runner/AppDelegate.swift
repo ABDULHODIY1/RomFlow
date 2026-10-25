@@ -240,7 +240,21 @@ final class GlassButtons: NSObject, FlutterPlatformView {
     stack.distribution = args["equal"] as? Bool == true ? .fillEqually : .fill
     build(args["items"] as? [[String: Any]] ?? [])
   }
+  private var dragIds: [ObjectIdentifier: String] = [:]
+  @objc private func dragged(_ hold: UILongPressGestureRecognizer) {
+    guard let id = dragIds[ObjectIdentifier(hold)] else { return }
+    let phase: String
+    switch hold.state {
+    case .began: phase = "start"
+    case .changed: phase = "move"
+    case .ended: phase = "end"
+    default: phase = "cancel"
+    }
+    let at = hold.location(in: nil)
+    channel.invokeMethod("drag", arguments: ["id": id, "phase": phase, "x": Double(at.x), "y": Double(at.y)])
+  }
   private func build(_ items: [[String: Any]]) {
+    dragIds.removeAll()
     for view in stack.arrangedSubviews { stack.removeArrangedSubview(view); view.removeFromSuperview() }
     for item in items { stack.addArrangedSubview(make(item)) }
   }
@@ -313,6 +327,14 @@ final class GlassButtons: NSObject, FlutterPlatformView {
     button.accessibilityLabel = item["label"] as? String ?? config.title ?? id
     button.accessibilityHint = item["subtitle"] as? String
     button.addAction(UIAction { [weak self] _ in self?.channel.invokeMethod("onTap", arguments: id) }, for: .touchUpInside)
+    if item["draggable"] as? Bool == true {
+      // Held, the button drags its part onto the drawing: the finger's
+      // position goes to Flutter in screen points.
+      let hold = UILongPressGestureRecognizer(target: self, action: #selector(dragged(_:)))
+      hold.minimumPressDuration = 0.25
+      button.addGestureRecognizer(hold)
+      dragIds[ObjectIdentifier(hold)] = id
+    }
     button.translatesAutoresizingMaskIntoConstraints = false
     if let size = item["size"] as? Double {
       NSLayoutConstraint.activate([

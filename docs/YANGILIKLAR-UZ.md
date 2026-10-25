@@ -14,6 +14,7 @@
 - Pastki menyu yangilandi: balandroq shisha kapsula, tanlangan bo‘lim ajralib turadi, yozuvlar kesilmaydi.
 - Paneldagi ikonka tugmalar (orqaga, bekor qilish, sozlash) qutisiz, Apple uslubida.
 - Yuqori panel Apple uslubida: yaxlit plita yo‘q, sahifa sarlavha ostida yumshoq xiralashadi; orqaga tugmasi shisha doirada, panel asboblari bitta shisha kapsulada.
+- iOS asbob tugmalarini bosib turib chizmaga sudrash mumkin (bo‘lish, deraza, eshik, to‘ldirma, furnitura) — tushadigan joy oldindan ko‘rsatiladi; 2D/3D tugmalari kengroq.
 - Chizma stoli menyusi iOS’ning o‘z Liquid Glass tugmalarida (SF Symbols, tanlangani prominent shisha); yuqori paneldagi orqaga va asbob tugmalari, 2D/3D ham tizim tugmalari. Maydon nomlari maydon ichida; sarlavha ostidan sahifa ko‘rinmaydi.
 - Tezlik: tizim (UIKit) shishasi faqat pastki menyu va asosiy tugmalarda; boshqa tugma, chip, panel va oynalar yengil chizilgan shishada, maydon va ro‘yxat qatorlari shishasiz. Telefon qizimaydi va qotmaydi; 3D sahifada tugmalar model ustida qayta yig‘ilmaydi.
 - Shisha tugmalar endi to‘g‘ri kapsula (linza shaklida cho‘zilmaydi); chizma stoli mavzuga mos: qorong‘ida qora fon va oq yozuv/o‘lchamlar, och mavzuda oq fon va qora yozuv.
