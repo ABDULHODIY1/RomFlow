@@ -35,7 +35,7 @@ import 'installments.dart';
 import 'reminder_service.dart';
 import 'demo_overlay.dart';
 
-const appVersion = '1.0.1';
+const appVersion = '1.0.0';
 
 const ink = Color(0xff172b4d),
     blue = Color(0xff206bc4),
@@ -1915,6 +1915,9 @@ Widget glassOver(Widget child, {double radius = 22}) => usesIOSGlass
     ? GlassSurface(
         radius: BorderRadius.circular(radius),
         shadow: false,
+        blur: false,
+        // A light veil on the blue hero; white glass hid the white label.
+        tint: Colors.white.withValues(alpha: .2),
         child: child,
       )
     : child;

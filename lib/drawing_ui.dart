@@ -2342,7 +2342,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
   Widget glassBar(ColorScheme scheme, Widget child) => Padding(
         padding: const EdgeInsets.fromLTRB(12, 2, 12, 0),
         child: usesIOSGlass
-            ? GlassSurface(radius: BorderRadius.circular(22), child: child)
+            ? GlassSurface(
+                radius: BorderRadius.circular(22), blur: false, child: child)
             : DecoratedBox(
                 decoration: BoxDecoration(
                   color: scheme.surface,
@@ -2361,6 +2362,9 @@ class _DrawingEditorState extends State<DrawingEditor> {
         padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
         child: GlassSurface(
           radius: BorderRadius.circular(26),
+          // On the plain desk a blur shows nothing and costs every frame
+          // the drawing is dragged.
+          blur: false,
           child: Padding(padding: padding, child: child),
         ),
       );

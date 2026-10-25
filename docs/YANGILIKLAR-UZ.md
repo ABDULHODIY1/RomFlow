@@ -1,5 +1,16 @@
 # RomFlow yangiliklari
 
+## 1.0.0 — Liquid Glass to‘liq tuzatildi, tezroq va silliqroq
+
+- Status bar (soat, batareya) och sahifalarda yana ko‘rinadi.
+- Shisha endi faqat suzuvchi panellarda (yuqori panel, pastki menyu, asboblar) xiralashtiradi; kartochka, tugma va chiplar xiralashtirishsiz chiziladi. Ro‘yxatlar qotmasdan aylanadi, telefon kamroq qiziydi.
+- 3D ko‘rinishda model ustidagi panellar har kadrda xiralashtirilmaydi — aylantirish silliqroq.
+- 3D: model to‘xtaganda barcha qurilmalarda qirralar silliqlanadi (antialiasing).
+- “Yangi smeta” oq tugmasi o‘qiladi; chip va segmentlar kapsula shaklidagi shishada; maydon yorliqlari (Eni, Bo‘yi) kesilmaydi.
+- Katalog: o‘lcham maydonlari klaviatura ustiga chiqadi; bo‘limlar ko‘k fonda to‘q shishada; “AI kamera” kartasi o‘z rangida.
+- Chizma ekrani, buyurtmalar va bosh sahifada matnlar kesilmaydi; katta shriftda matn ko‘pi bilan 1.15× kattalashadi.
+- Klaviatura ustidagi “Keyingisi / Tayyor” paneli shisha ko‘rinishida.
+
 ## 1.0.1 — rangli Liquid Glass va 3D tuzatishlari
 
 - iOS uchun oddiy, ikonka, matnli va qo‘shish tugmalari umumiy rangli glass ko‘rinishiga moslandi; filtrlar, segmentlar, maydonlar va ro‘yxat boshqaruvlari ham shu uslubda.

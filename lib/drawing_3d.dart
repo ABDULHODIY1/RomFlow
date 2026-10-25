@@ -4130,7 +4130,10 @@ class ModelPainter extends CustomPainter {
           f.bounds.longestSide,
         );
       }
-      final edgeAA = quality == ModelQuality.studio4K && !f.face.glass;
+      // Smooth edges on every device once the model rests; lighter devices
+      // skip the extra strips only while it turns, where jaggies don't read.
+      final edgeAA =
+          !f.face.glass && (quality == ModelQuality.studio4K || !moving);
       final needed = (steps == 1 ? f.p.length : steps * steps * 4) +
           (edgeAA ? f.p.length * 4 : 0);
       if (buffers.vertices + needed > 60000) flush();

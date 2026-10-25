@@ -40,6 +40,13 @@ const _saturate = ColorFilter.matrix(<double>[
 /// a light edge catches the light at the top and the bottom, a soft glare
 /// runs down from the top. [tint] colours it (a primary button); [opaque]
 /// keeps long text readable (sheets).
+///
+/// A backdrop blur is a full offscreen pass every frame the area repaints;
+/// dozens of them on one list made scrolling stutter and the phone warm.
+/// Only floating chrome over moving content blurs (app bar, tab bar,
+/// toolbar buttons). Tinted, opaque and content-level glass sits on a flat
+/// page, where a blur shows nothing: it is painted, not filtered. The 3D
+/// page ([brightness] dark) never blurs over the model it redraws.
 class GlassSurface extends StatelessWidget {
   final Widget child;
   final BorderRadius radius;
@@ -48,6 +55,9 @@ class GlassSurface extends StatelessWidget {
 
   /// Dark glass on a dark page (3D) whatever the app theme.
   final Brightness? brightness;
+
+  /// Blur what is behind; by default only untinted, see-through glass does.
+  final bool? blur;
   const GlassSurface({
     super.key,
     required this.child,
@@ -56,6 +66,7 @@ class GlassSurface extends StatelessWidget {
     this.opaque = false,
     this.shadow = true,
     this.brightness,
+    this.blur,
   });
 
   @override
@@ -65,6 +76,31 @@ class GlassSurface extends StatelessWidget {
     // Shared Flutter surfaces stay glass on iOS too. Native navigation and
     // buttons continue to use UIKit; content keeps the same geometry.
     final solid = MediaQuery.highContrastOf(context);
+    final filtered =
+        this.blur ?? (!opaque && tint == null && brightness == null);
+    if (!solid && !filtered) {
+      final painted = ClipRSuperellipse(
+        borderRadius: radius,
+        child: CustomPaint(
+          painter: _GlassPainter(radius, dark, tint, opaque, frosted: true),
+          child: child,
+        ),
+      );
+      if (!shadow) return painted;
+      return DecoratedBox(
+        decoration: ShapeDecoration(
+          shape: RoundedSuperellipseBorder(borderRadius: radius),
+          shadows: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: dark ? .30 : .10),
+              blurRadius: 22,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: painted,
+      );
+    }
     final blur = ImageFilter.blur(
       sigmaX: opaque ? 30 : 18,
       sigmaY: opaque ? 30 : 18,
@@ -111,7 +147,12 @@ class _GlassPainter extends CustomPainter {
   final BorderRadius radius;
   final bool dark, opaque;
   final Color? tint;
-  _GlassPainter(this.radius, this.dark, this.tint, this.opaque);
+
+  /// No blur behind: a denser body keeps what is behind from reading
+  /// through, as the frosted material does.
+  final bool frosted;
+  _GlassPainter(this.radius, this.dark, this.tint, this.opaque,
+      {this.frosted = false});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -119,9 +160,20 @@ class _GlassPainter extends CustomPainter {
     final shape = radius.toRSuperellipse(rect);
     // Body: a thin milky layer (or a tint) over the blurred backdrop.
     final body = tint != null
-        ? tint!.withValues(alpha: opaque ? .92 : .78)
+        ? tint!.withValues(
+            alpha: opaque
+                ? .92
+                : frosted
+                    // A see-through tint keeps its own alpha; a solid one
+                    // gets a dense frosted body.
+                    ? (tint!.a < 1 ? tint!.a : .86)
+                    : .78)
         : (dark ? const Color(0xff1b2633) : Colors.white).withValues(
-            alpha: opaque ? (dark ? .94 : .90) : (dark ? .42 : .34),
+            alpha: opaque
+                ? (dark ? .94 : .90)
+                : frosted
+                    ? (dark ? .78 : .72)
+                    : (dark ? .42 : .34),
           );
     canvas.drawRSuperellipse(shape, Paint()..color = body);
     // Glare from the top.
@@ -160,6 +212,7 @@ class _GlassPainter extends CustomPainter {
       old.dark != dark ||
       old.tint != tint ||
       old.opaque != opaque ||
+      old.frosted != frosted ||
       old.radius != radius;
 }
 
@@ -872,6 +925,10 @@ class _IOSGlassNavigationState extends State<IOSGlassNavigation> {
         ),
       );
 }
+
+/// [child] wrapped by [glass] when Liquid Glass is on, as it is otherwise.
+Widget whenGlass(Widget child, Widget Function(Widget child) glass) =>
+    usesIOSGlass ? glass(child) : child;
 
 /// Keeps lists and forms at a readable width on tablets and desktops;
 /// phones are unaffected.

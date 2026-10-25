@@ -855,168 +855,187 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
           ),
         ],
       ),
-      bottomNavigationBar: Material(
-        elevation: 10,
-        color: scheme.surface,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
+      // The size fields ride up with the keyboard: they were left under it,
+      // so the width being typed could not be seen.
+      bottomNavigationBar: Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        child: whenGlass(
+          Material(
+            elevation: usesIOSGlass ? 0 : 10,
+            color: usesIOSGlass ? Colors.transparent : scheme.surface,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+            ),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: GlassControl(
-                        child: TextFormField(
-                          key: const ValueKey('catalog-width'),
-                          controller: width,
-                          keyboardType: TextInputType.number,
-                          onChanged: (_) => sizeTyped = true,
-                          decoration: field('Eni'),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GlassControl(
+                            child: TextFormField(
+                              key: const ValueKey('catalog-width'),
+                              controller: width,
+                              keyboardType: TextInputType.number,
+                              onChanged: (_) => sizeTyped = true,
+                              decoration: field('Eni'),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: GlassControl(
-                        child: TextFormField(
-                          key: const ValueKey('catalog-height'),
-                          controller: height,
-                          keyboardType: TextInputType.number,
-                          onChanged: (_) => sizeTyped = true,
-                          decoration: field('Bo‘yi'),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: GlassControl(
+                            child: TextFormField(
+                              key: const ValueKey('catalog-height'),
+                              controller: height,
+                              keyboardType: TextInputType.number,
+                              onChanged: (_) => sizeTyped = true,
+                              decoration: field('Bo‘yi'),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: scheme.outlineVariant),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            tooltip: 'Kamaytirish',
-                            visualDensity: VisualDensity.compact,
-                            onPressed: count > 1
-                                ? () => setState(() => count--)
-                                : null,
-                            icon: const Icon(Icons.remove, size: 18),
+                        const SizedBox(width: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: scheme.outlineVariant),
                           ),
-                          Text(
-                            '$count',
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                          IconButton(
-                            tooltip: 'Ko‘paytirish',
-                            visualDensity: VisualDensity.compact,
-                            onPressed: count < 1000
-                                ? () => setState(() => count++)
-                                : null,
-                            icon: const Icon(Icons.add, size: 18),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                if (problem != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      problem!,
-                      style: TextStyle(color: scheme.error, fontSize: 13),
-                    ),
-                  ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Tooltip(
-                      message: 'Joyi (xona)',
-                      child: OutlinedButton(
-                        key: const ValueKey('catalog-room'),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: room == null ? 0 : 12,
-                          ),
-                          minimumSize: const Size(46, 46),
-                        ),
-                        onPressed: () async {
-                          final value = await pickRoom(context, room);
-                          if (value != null && mounted) {
-                            setState(() => room = value.isEmpty ? null : value);
-                          }
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.place_outlined, size: 20),
-                            if (room != null) ...[
-                              const SizedBox(width: 4),
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 80),
-                                child: Text(
-                                  room!,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                tooltip: 'Kamaytirish',
+                                visualDensity: VisualDensity.compact,
+                                onPressed: count > 1
+                                    ? () => setState(() => count--)
+                                    : null,
+                                icon: const Icon(Icons.remove, size: 18),
+                              ),
+                              Text(
+                                '$count',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w800),
+                              ),
+                              IconButton(
+                                tooltip: 'Ko‘paytirish',
+                                visualDensity: VisualDensity.compact,
+                                onPressed: count < 1000
+                                    ? () => setState(() => count++)
+                                    : null,
+                                icon: const Icon(Icons.add, size: 18),
                               ),
                             ],
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton.outlined(
-                      key: const ValueKey('catalog-3d'),
-                      tooltip: '3D ko‘rish',
-                      style: IconButton.styleFrom(
-                        minimumSize: const Size(46, 46),
-                        side: BorderSide(color: scheme.outlineVariant),
-                      ),
-                      onPressed: preview3d,
-                      icon: Icon(Icons.view_in_ar, color: scheme.primary),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: FilledButton.icon(
-                        key: const ValueKey('catalog-start'),
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(0, 46),
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          textStyle: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
                           ),
                         ),
-                        onPressed: start,
-                        icon: Icon(
-                          widget.replacing ? Icons.check : Icons.draw_outlined,
-                          size: 20,
-                        ),
-                        label: Text(
-                          widget.replacing
-                              ? 'Qo‘llash'
-                              : preset == null
-                                  ? 'Bo‘sh romni chizish'
-                                  : preset.name,
-                          key: const ValueKey('catalog-choice'),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      ],
+                    ),
+                    if (problem != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          problem!,
+                          style: TextStyle(color: scheme.error, fontSize: 13),
                         ),
                       ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Tooltip(
+                          message: 'Joyi (xona)',
+                          child: OutlinedButton(
+                            key: const ValueKey('catalog-room'),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: room == null ? 0 : 12,
+                              ),
+                              minimumSize: const Size(46, 46),
+                            ),
+                            onPressed: () async {
+                              final value = await pickRoom(context, room);
+                              if (value != null && mounted) {
+                                setState(
+                                    () => room = value.isEmpty ? null : value);
+                              }
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.place_outlined, size: 20),
+                                if (room != null) ...[
+                                  const SizedBox(width: 4),
+                                  ConstrainedBox(
+                                    constraints:
+                                        const BoxConstraints(maxWidth: 80),
+                                    child: Text(
+                                      room!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.outlined(
+                          key: const ValueKey('catalog-3d'),
+                          tooltip: '3D ko‘rish',
+                          style: IconButton.styleFrom(
+                            minimumSize: const Size(46, 46),
+                            side: BorderSide(color: scheme.outlineVariant),
+                          ),
+                          onPressed: preview3d,
+                          icon: Icon(Icons.view_in_ar, color: scheme.primary),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: FilledButton.icon(
+                            key: const ValueKey('catalog-start'),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(0, 46),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              textStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            onPressed: start,
+                            icon: Icon(
+                              widget.replacing
+                                  ? Icons.check
+                                  : Icons.draw_outlined,
+                              size: 20,
+                            ),
+                            label: Text(
+                              widget.replacing
+                                  ? 'Qo‘llash'
+                                  : preset == null
+                                      ? 'Bo‘sh romni chizish'
+                                      : preset.name,
+                              key: const ValueKey('catalog-choice'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
+          ),
+          (panel) => GlassSurface(
+            radius: const BorderRadius.vertical(top: Radius.circular(26)),
+            opaque: true,
+            child: panel,
           ),
         ),
       ),

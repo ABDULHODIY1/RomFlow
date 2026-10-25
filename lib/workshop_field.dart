@@ -27,26 +27,42 @@ class WorkshopKeyboardTools extends StatelessWidget {
           bottom: bottom,
           height: 48,
           child: TextFieldTapRegion(
+            // Liquid Glass: a floating glass strip over the keyboard, not a
+            // flat white band cutting through the page.
             child: Material(
-              color: Theme.of(context).colorScheme.surface,
-              elevation: 4,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    onPressed: () =>
-                        FocusManager.instance.primaryFocus?.nextFocus(),
-                    icon: const Icon(Icons.keyboard_tab, size: 18),
-                    label: const Text('Keyingisi'),
+              type: usesIOSGlass
+                  ? MaterialType.transparency
+                  : MaterialType.canvas,
+              color:
+                  usesIOSGlass ? null : Theme.of(context).colorScheme.surface,
+              elevation: usesIOSGlass ? 0 : 4,
+              child: whenGlass(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () =>
+                          FocusManager.instance.primaryFocus?.nextFocus(),
+                      icon: const Icon(Icons.keyboard_tab, size: 18),
+                      label: const Text('Keyingisi'),
+                    ),
+                    TextButton.icon(
+                      onPressed: () =>
+                          FocusManager.instance.primaryFocus?.unfocus(),
+                      icon: const Icon(Icons.keyboard_hide_outlined, size: 20),
+                      label: const Text('Tayyor'),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ),
+                (row) => Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 2, 8, 4),
+                  child: GlassSurface(
+                    radius: BorderRadius.circular(21),
+                    shadow: false,
+                    child: row,
                   ),
-                  TextButton.icon(
-                    onPressed: () =>
-                        FocusManager.instance.primaryFocus?.unfocus(),
-                    icon: const Icon(Icons.keyboard_hide_outlined, size: 20),
-                    label: const Text('Tayyor'),
-                  ),
-                  const SizedBox(width: 8),
-                ],
+                ),
               ),
             ),
           ),
