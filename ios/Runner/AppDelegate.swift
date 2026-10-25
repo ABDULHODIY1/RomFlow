@@ -11,6 +11,7 @@ import UserNotifications
     if let registrar = self.registrar(forPlugin: "RomFlowLiquidNavigation") {
       registrar.register(NativeTabBarFactory(messenger: registrar.messenger()), withId: "romflow/liquid-navigation")
       registrar.register(GlassButtonsFactory(messenger: registrar.messenger()), withId: "romflow/glass-buttons")
+      registrar.register(GlassSurfaceFactory(), withId: "romflow/glass-surface")
     }
     if let vc = window?.rootViewController as? FlutterViewController {
       FlutterMethodChannel(name: "romflow/render-device", binaryMessenger: vc.binaryMessenger).setMethodCallHandler { call, result in
@@ -116,15 +117,28 @@ final class NativeTabBarFactory: NSObject, FlutterPlatformViewFactory {
   }
 }
 
+/// Reports its layout, so the tab bar's own height (with the home
+/// indicator's safe area) can be handed to Flutter.
+final class TabBarRoot: UIView {
+  var onLayout: (() -> Void)?
+  override func layoutSubviews() { super.layoutSubviews(); onLayout?() }
+  override func safeAreaInsetsDidChange() { super.safeAreaInsetsDidChange(); onLayout?() }
+}
+
 final class NativeTabBar: NSObject, FlutterPlatformView, UITabBarDelegate {
-  private let root = UIView()
+  private let root = TabBarRoot()
   private let bar = UITabBar()
   private let channel: FlutterMethodChannel
+  private var reported: CGFloat = 0
   init(frame: CGRect, id: Int64, args: [String: Any]?, messenger: FlutterBinaryMessenger) {
     channel = FlutterMethodChannel(name: "romflow/liquid-navigation/\(id)", binaryMessenger: messenger)
     super.init()
     root.frame = frame
     root.backgroundColor = .clear
+    // The view reaches the bottom of the screen like a system tab bar; the
+    // bar keeps its items above the home indicator by its safe area and
+    // tells Flutter the height it needs, so the capsule is never squeezed.
+    root.onLayout = { [weak self] in self?.reportHeight() }
     let titles = args?["titles"] as? [String] ?? ["Asosiy", "Buyurtmalar", "Katalog", "Sozlamalar"]
     let icons = args?["icons"] as? [String] ?? ["square.grid.2x2", "doc.text", "square.grid.3x3", "slider.horizontal.3"]
     var items: [UITabBarItem] = []
@@ -160,6 +174,13 @@ final class NativeTabBar: NSObject, FlutterPlatformView, UITabBarDelegate {
   private func select(_ index: Int) {
     guard let items = bar.items, index >= 0, index < items.count else { return }
     bar.selectedItem = items[index]
+  }
+  private func reportHeight() {
+    guard root.bounds.width > 0 else { return }
+    let height = bar.sizeThatFits(CGSize(width: root.bounds.width, height: .greatestFiniteMagnitude)).height
+    guard height > 0, abs(height - reported) > 0.5 else { return }
+    reported = height
+    channel.invokeMethod("height", arguments: Double(height))
   }
   func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) { channel.invokeMethod("onTab", arguments: item.tag) }
   func view() -> UIView { root }
@@ -301,4 +322,59 @@ final class GlassButtons: NSObject, FlutterPlatformView {
   }
   func view() -> UIView { root }
   deinit { channel.setMethodCallHandler(nil) }
+}
+
+
+/// Apple's own Liquid Glass material behind a Flutter surface (app bar,
+/// sheets, dialogs, floating buttons): UIGlassEffect with the iOS 26 SDK,
+/// the system's thin material before it. Flutter draws the content on top.
+final class GlassSurfaceFactory: NSObject, FlutterPlatformViewFactory {
+  func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol { FlutterStandardMessageCodec.sharedInstance() }
+  func create(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?) -> FlutterPlatformView {
+    GlassSurfaceView(frame: frame, args: args as? [String: Any] ?? [:])
+  }
+}
+
+final class GlassSurfaceView: NSObject, FlutterPlatformView {
+  private let effectView: UIVisualEffectView
+  init(frame: CGRect, args: [String: Any]) {
+    let dark = args["dark"] as? Bool == true
+    var tint: UIColor?
+    if let argb = args["tint"] as? NSNumber {
+      let value = argb.uint32Value
+      tint = UIColor(red: CGFloat((value >> 16) & 255) / 255,
+        green: CGFloat((value >> 8) & 255) / 255,
+        blue: CGFloat(value & 255) / 255,
+        alpha: CGFloat((value >> 24) & 255) / 255)
+    }
+    var effect: UIVisualEffect = UIBlurEffect(style: dark ? .systemThinMaterialDark : .systemThinMaterial)
+    #if compiler(>=6.2)
+    if #available(iOS 26.0, *) {
+      let glass = UIGlassEffect(style: args["clear"] as? Bool == true ? .clear : .regular)
+      glass.tintColor = tint
+      effect = glass
+    }
+    #endif
+    effectView = UIVisualEffectView(effect: effect)
+    super.init()
+    effectView.frame = frame
+    effectView.overrideUserInterfaceStyle = dark ? .dark : .light
+    effectView.isUserInteractionEnabled = false
+    // Corners: top-left, top-right, bottom-right, bottom-left (a sheet is
+    // rounded only at the top).
+    let corners = (args["corners"] as? [Double] ?? [0, 0, 0, 0]).map { CGFloat($0) }
+    let radius = corners.max() ?? 0
+    var masked: CACornerMask = []
+    if corners.count == 4 {
+      if corners[0] > 0 { masked.insert(.layerMinXMinYCorner) }
+      if corners[1] > 0 { masked.insert(.layerMaxXMinYCorner) }
+      if corners[2] > 0 { masked.insert(.layerMaxXMaxYCorner) }
+      if corners[3] > 0 { masked.insert(.layerMinXMaxYCorner) }
+    }
+    effectView.layer.cornerRadius = radius
+    effectView.layer.maskedCorners = masked
+    effectView.layer.cornerCurve = .continuous
+    effectView.clipsToBounds = radius > 0
+  }
+  func view() -> UIView { effectView }
 }

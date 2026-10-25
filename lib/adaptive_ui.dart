@@ -78,6 +78,23 @@ class GlassSurface extends StatelessWidget {
     final solid = MediaQuery.highContrastOf(context);
     final filtered =
         this.blur ?? (!opaque && tint == null && brightness == null);
+    // On iPhone and iPad the floating glass is Apple's own: a UIGlassEffect
+    // view behind the Flutter content, which bends and lights what is under
+    // it as the system bars do.
+    if (!solid && filtered && nativeGlass) {
+      return _NativeGlass(
+        radius: radius,
+        // Sheets and dialogs carry long text: a denser tint of the page
+        // colour keeps it readable over whatever is behind.
+        tint: opaque
+            ? (tint ?? Theme.of(context).colorScheme.surface)
+                .withValues(alpha: .6)
+            : tint?.withValues(alpha: .35),
+        dark: dark,
+        shadow: shadow,
+        child: child,
+      );
+    }
     if (!solid && !filtered) {
       final painted = ClipRSuperellipse(
         borderRadius: radius,
@@ -143,6 +160,66 @@ class GlassSurface extends StatelessWidget {
   }
 }
 
+class _NativeGlass extends StatelessWidget {
+  final BorderRadius radius;
+  final Color? tint;
+  final bool dark, shadow;
+  final Widget child;
+  const _NativeGlass({
+    required this.radius,
+    required this.tint,
+    required this.dark,
+    required this.shadow,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final params = <String, Object?>{
+      'dark': dark,
+      'corners': [
+        radius.topLeft.x,
+        radius.topRight.x,
+        radius.bottomRight.x,
+        radius.bottomLeft.x,
+      ],
+      // UIKit tints the glass itself; a light touch, as in Apple's apps.
+      if (tint != null) 'tint': tint!.toARGB32(),
+    };
+    final glass = Stack(
+      children: [
+        Positioned.fill(
+          // Taps go to the Flutter content; the glass only shows.
+          child: IgnorePointer(
+            child: UiKitView(
+              // New look, new view: UIKit glass is configured once.
+              key: ValueKey(jsonEncode(params)),
+              viewType: 'romflow/glass-surface',
+              creationParams: params,
+              creationParamsCodec: const StandardMessageCodec(),
+            ),
+          ),
+        ),
+        ClipRSuperellipse(borderRadius: radius, child: child),
+      ],
+    );
+    if (!shadow) return glass;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        shape: RoundedSuperellipseBorder(borderRadius: radius),
+        shadows: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: dark ? .30 : .10),
+            blurRadius: 22,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: glass,
+    );
+  }
+}
+
 class _GlassPainter extends CustomPainter {
   final BorderRadius radius;
   final bool dark, opaque;
@@ -176,10 +253,41 @@ class _GlassPainter extends CustomPainter {
                     : (dark ? .42 : .34),
           );
     canvas.drawRSuperellipse(shape, Paint()..color = body);
-    // Painted (frosted) glass is a plain soft fill: the glare and the light
-    // rim belong to real glass floating over content. On every button they
-    // drew a second outline around the control's own.
-    if (frosted) return;
+    // Painted (frosted) glass: a soft sheen from the top and light caught
+    // only along the upper edge, fading down the sides, as on Apple's glass
+    // controls. A full bright rim read as a second outline on every button.
+    if (frosted) {
+      canvas.drawRSuperellipse(
+        shape,
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white.withValues(alpha: dark ? .07 : .22),
+              Colors.white.withValues(alpha: 0),
+              Colors.black.withValues(alpha: dark ? .10 : .03),
+            ],
+            stops: const [0, .55, 1],
+          ).createShader(rect),
+      );
+      canvas.drawRSuperellipse(
+        radius.toRSuperellipse(rect.deflate(.5)),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white.withValues(alpha: dark ? .22 : .7),
+              Colors.white.withValues(alpha: 0),
+            ],
+            stops: const [0, .4],
+          ).createShader(rect),
+      );
+      return;
+    }
     // Glare from the top.
     canvas.drawRSuperellipse(
       shape,
@@ -716,11 +824,12 @@ class _NativeGlassButtonsState extends State<NativeGlassButtons> {
   }
 }
 
-/// The floating Liquid Glass tab bar: one blurred capsule over the page,
-/// the chosen tab on a tinted pill inside it. Drawn by Flutter so its
-/// height and labels are the same on every iPhone; the system bar in a
-/// platform view came out thin with its labels cut.
-class IOSGlassNavigation extends StatelessWidget {
+/// The tab bar. On iPhone and iPad it is Apple's own UITabBar, the real
+/// Liquid Glass that bends the page behind it like a lens; it reaches the
+/// bottom of the screen as a system bar does and takes the height it asks
+/// for, so the capsule is never squeezed. Elsewhere a Flutter glass capsule
+/// stands in.
+class IOSGlassNavigation extends StatefulWidget {
   final int selected;
   final ValueChanged<int> onChanged;
   const IOSGlassNavigation({
@@ -728,7 +837,11 @@ class IOSGlassNavigation extends StatelessWidget {
     required this.selected,
     required this.onChanged,
   });
+  @override
+  State<IOSGlassNavigation> createState() => _IOSGlassNavigationState();
+}
 
+class _IOSGlassNavigationState extends State<IOSGlassNavigation> {
   static const _icons = [
     Icons.dashboard_outlined,
     Icons.receipt_long_outlined,
@@ -737,8 +850,52 @@ class IOSGlassNavigation extends StatelessWidget {
   ];
   static const _labels = ['Asosiy', 'Buyurtmalar', 'Katalog', 'Sozlamalar'];
 
+  MethodChannel? channel;
+  bool available = true;
+  String? lastConfiguration;
+
+  /// The system bar's own height, reported by UIKit once laid out.
+  double? nativeHeight;
+
+  Future<void> sync() async {
+    final current = channel;
+    if (current == null) return;
+    try {
+      final next = {
+        'selected': widget.selected,
+        'dark': Theme.brightnessOf(context) == Brightness.dark,
+      };
+      final signature = jsonEncode(next);
+      if (signature == lastConfiguration) return;
+      lastConfiguration = signature;
+      await current.invokeMethod<void>('configure', next);
+    } on PlatformException {
+      if (mounted) setState(() => available = false);
+    } on MissingPluginException {
+      if (mounted) setState(() => available = false);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    unawaited(sync());
+  }
+
+  @override
+  void didUpdateWidget(covariant IOSGlassNavigation old) {
+    super.didUpdateWidget(old);
+    if (old.selected != widget.selected) unawaited(sync());
+  }
+
+  @override
+  void dispose() {
+    channel?.setMethodCallHandler(null);
+    super.dispose();
+  }
+
   Widget item(BuildContext context, int i) {
-    final scheme = Theme.of(context).colorScheme, on = i == selected;
+    final scheme = Theme.of(context).colorScheme, on = i == widget.selected;
     final color = on ? scheme.primary : scheme.onSurface.withValues(alpha: .72);
     return Expanded(
       child: Semantics(
@@ -746,7 +903,7 @@ class IOSGlassNavigation extends StatelessWidget {
         button: true,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => onChanged(i),
+          onTap: () => widget.onChanged(i),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
@@ -785,50 +942,90 @@ class IOSGlassNavigation extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) => Stack(
-        fit: StackFit.passthrough,
-        children: [
-          // The page fades out under the floating bar, so the rows passing
-          // behind the glass never read through its labels.
-          Positioned.fill(
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [0, .45],
-                    colors: [
-                      Theme.of(context)
-                          .scaffoldBackgroundColor
-                          .withValues(alpha: 0),
-                      Theme.of(context)
-                          .scaffoldBackgroundColor
-                          .withValues(alpha: .94),
-                    ],
-                  ),
-                ),
+  Widget system(BuildContext context) {
+    final bottom = MediaQuery.paddingOf(context).bottom;
+    return SizedBox(
+      height: (nativeHeight ?? 62 + bottom).clamp(49.0, 140.0),
+      child: UiKitView(
+        viewType: 'romflow/liquid-navigation',
+        creationParams: {
+          'selected': widget.selected,
+          'dark': Theme.brightnessOf(context) == Brightness.dark,
+          'titles': _labels,
+        },
+        creationParamsCodec: const StandardMessageCodec(),
+        onPlatformViewCreated: (id) {
+          channel?.setMethodCallHandler(null);
+          channel = MethodChannel('romflow/liquid-navigation/$id');
+          lastConfiguration = null;
+          channel!.setMethodCallHandler((call) async {
+            if (!mounted) return;
+            if (call.method == 'onTab') {
+              final index = call.arguments;
+              if (index is int && index >= 0 && index < 4) {
+                widget.onChanged(index);
+              }
+            } else if (call.method == 'height') {
+              final h = call.arguments;
+              if (h is num && (h - (nativeHeight ?? 0)).abs() > .5) {
+                setState(() => nativeHeight = h.toDouble());
+              }
+            }
+          });
+          unawaited(sync());
+        },
+      ),
+    );
+  }
+
+  Widget flutterBar(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 68,
+            child: GlassSurface(
+              radius: BorderRadius.circular(34),
+              child: Row(
+                children: [for (var i = 0; i < 4; i++) item(context, i)],
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
-            child: SafeArea(
-              top: false,
-              child: SizedBox(
-                height: 68,
-                child: GlassSurface(
-                  radius: BorderRadius.circular(34),
-                  child: Row(
-                    children: [for (var i = 0; i < 4; i++) item(context, i)],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       );
+
+  @override
+  Widget build(BuildContext context) {
+    final native = nativeGlass && available;
+    return Stack(
+      fit: StackFit.passthrough,
+      children: [
+        // A soft edge under the bar, as Apple's scroll edge effect: the page
+        // still shows through the glass, but rows don't fight its labels.
+        Positioned.fill(
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Theme.of(context)
+                        .scaffoldBackgroundColor
+                        .withValues(alpha: 0),
+                    Theme.of(context)
+                        .scaffoldBackgroundColor
+                        .withValues(alpha: native ? .55 : .9),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        native ? system(context) : flutterBar(context),
+      ],
+    );
+  }
 }
 
 /// [child] wrapped by [glass] when Liquid Glass is on, as it is otherwise.
