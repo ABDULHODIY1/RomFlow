@@ -324,7 +324,12 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-      - run: xcodebuild -version
+      # Liquid Glass (tab bar, glass buttons) needs the iOS 26 SDK.
+      - name: Newest released Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | grep -vi -e beta -e rc | sort -V | tail -1)
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
       - run: flutter pub get
       - run: flutter build macos --release
         if: github.event_name == 'workflow_dispatch' && inputs.full
