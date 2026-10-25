@@ -651,10 +651,15 @@ class Kpi extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
+                  // Two short lines rather than a cut-off "Faol buyur…".
                   child: Text(
                     label,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(height: 1.15),
                   ),
                 ),
               ],

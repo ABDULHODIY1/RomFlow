@@ -569,20 +569,25 @@ class _NativeGlassButtonsState extends State<NativeGlassButtons> {
   MethodChannel? channel;
   bool available = true;
   String? lastConfiguration;
-  Map<String, Object?> get configuration => {
-        'items': [
-          for (final b in widget.items)
-            {
-              ...b.toMap(),
-              'fontSize': MediaQuery.textScalerOf(context).scale(b.fontSize),
-              'subtitleFontSize': MediaQuery.textScalerOf(context).scale(11),
-            },
-        ],
-        'vertical': widget.vertical,
-        'dark': widget.dark || Theme.brightnessOf(context) == Brightness.dark,
-        'equal': widget.equal,
-        'spacing': widget.spacing,
-      };
+  Map<String, Object?> get configuration {
+    // The buttons have a fixed height and share the row: their titles grow
+    // a little with Dynamic Type, never out of the capsule.
+    final scaler = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.15);
+    return {
+      'items': [
+        for (final b in widget.items)
+          {
+            ...b.toMap(),
+            'fontSize': scaler.scale(b.fontSize),
+            'subtitleFontSize': scaler.scale(11),
+          },
+      ],
+      'vertical': widget.vertical,
+      'dark': widget.dark || Theme.brightnessOf(context) == Brightness.dark,
+      'equal': widget.equal,
+      'spacing': widget.spacing,
+    };
+  }
 
   Future<void> sync() async {
     final current = channel;
@@ -753,7 +758,37 @@ class _IOSGlassNavigationState extends State<IOSGlassNavigation> {
         ),
       );
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context) => Stack(
+        fit: StackFit.passthrough,
+        children: [
+          // The page fades out under the floating bar, so the rows passing
+          // behind the glass never read through its labels.
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0, .45],
+                    colors: [
+                      Theme.of(context)
+                          .scaffoldBackgroundColor
+                          .withValues(alpha: 0),
+                      Theme.of(context)
+                          .scaffoldBackgroundColor
+                          .withValues(alpha: .94),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          bar(context),
+        ],
+      );
+
+  Widget bar(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
         child: SafeArea(
           top: false,

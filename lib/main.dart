@@ -707,8 +707,9 @@ class _HomeState extends State<Home> {
           crossAxisCount: columns,
           mainAxisSpacing: 10,
           crossAxisSpacing: 10,
-          // Taller with larger text, so the figures always fit.
-          mainAxisExtent: 58 + MediaQuery.textScalerOf(context).scale(40),
+          // Taller with larger text, so the figures and a two-line label
+          // always fit.
+          mainAxisExtent: 58 + MediaQuery.textScalerOf(context).scale(54),
         ),
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -1629,14 +1630,18 @@ class QuickAction extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: scheme.onSurface,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+            Padding(
+              // The label shrinks inside the tile, never touching its edges.
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: scheme.onSurface,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -1810,6 +1815,7 @@ class DashboardHero extends StatelessWidget {
                   style: 'white',
                   expand: true,
                   height: 50,
+                  fontSize: 14,
                 ),
                 GlassButton(
                   'measure',
@@ -1818,6 +1824,7 @@ class DashboardHero extends StatelessWidget {
                   light: true,
                   expand: true,
                   height: 50,
+                  fontSize: 14,
                 ),
               ],
               onTap: (id) => id == 'draw' ? onDraw() : onMeasure(),

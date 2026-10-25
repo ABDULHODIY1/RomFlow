@@ -1,7 +1,7 @@
 name: romflow
 description: Eshik va rom ustalari uchun smeta va buyurtma boshqaruvi.
 publish_to: none
-version: 1.0.1+28
+version: 1.0.2+29
 environment:
   sdk: '>=3.5.0 <4.0.0'
 dependencies:

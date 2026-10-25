@@ -232,7 +232,9 @@ final class GlassButtons: NSObject, FlutterPlatformView {
     var config: UIButton.Configuration
     #if compiler(>=6.2)
     if #available(iOS 26.0, *) {
-      config = style == "glass" ? .glass() : .prominentGlass()
+      // Prominent glass takes its colours from the tint, so a white one
+      // washed its blue title out to white on white: white stays solid.
+      config = style == "glass" ? .glass() : style == "white" ? .filled() : .prominentGlass()
     } else {
       config = style == "glass" ? .tinted() : .filled()
     }
@@ -240,12 +242,22 @@ final class GlassButtons: NSObject, FlutterPlatformView {
     config = style == "glass" ? .tinted() : .filled()
     #endif
     config.cornerStyle = .capsule
+    var foreground = style == "white" ? GlassButtons.blue : (style == "glass" ? tint : .white)
+    if item["light"] as? Bool == true { foreground = .white }
     let fontSize = CGFloat(item["fontSize"] as? Double ?? 15)
     if let title = item["title"] as? String, !title.isEmpty {
       config.title = title
+      // One line: a long title shrinks (below) instead of breaking in two.
+      config.titleLineBreakMode = .byTruncatingTail
       config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attributes in
-        var a = attributes; a.font = .systemFont(ofSize: fontSize, weight: .semibold); return a
+        var a = attributes
+        a.font = .systemFont(ofSize: fontSize, weight: .semibold)
+        if style == "white" { a.foregroundColor = foreground }
+        return a
       }
+    }
+    if item["expand"] as? Bool == true {
+      config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 10, bottom: 6, trailing: 10)
     }
     if let subtitle = item["subtitle"] as? String, !subtitle.isEmpty {
       config.subtitle = subtitle
@@ -261,10 +273,10 @@ final class GlassButtons: NSObject, FlutterPlatformView {
         pointSize: CGFloat(item["iconSize"] as? Double ?? 16), weight: .semibold)
     }
     config.baseBackgroundColor = style == "white" ? .white : tint
-    config.baseForegroundColor = style == "white" ? GlassButtons.blue : (style == "glass" ? tint : .white)
-    if item["light"] as? Bool == true { config.baseForegroundColor = .white }
+    config.baseForegroundColor = foreground
+    if style == "white" { config.imageColorTransformer = UIConfigurationColorTransformer { _ in foreground } }
     let button = UIButton(configuration: config)
-    button.tintColor = style == "white" ? .white : tint
+    button.tintColor = style == "white" ? GlassButtons.blue : tint
     button.titleLabel?.numberOfLines = 1
     button.titleLabel?.adjustsFontSizeToFitWidth = true
     button.titleLabel?.minimumScaleFactor = 0.75
