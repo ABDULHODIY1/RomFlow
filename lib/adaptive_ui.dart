@@ -317,7 +317,21 @@ class GlassControl extends StatelessWidget {
       tint: soft,
       shadow: false,
       brightness: brightness,
-      child: child,
+      // The control fills the glass exactly: without the padded tap target
+      // the glass was taller than the pill and showed as a second band.
+      child: capsule
+          ? Theme(
+              data: Theme.of(context).copyWith(
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                chipTheme: Theme.of(context).chipTheme.copyWith(
+                      shape: const StadiumBorder(),
+                      side: BorderSide.none,
+                      backgroundColor: Colors.transparent,
+                    ),
+              ),
+              child: child,
+            )
+          : child,
     );
   }
 }

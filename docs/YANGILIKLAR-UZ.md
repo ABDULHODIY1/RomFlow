@@ -3,6 +3,7 @@
 ## 1.0.0 — Liquid Glass to‘liq tuzatildi, tezroq va silliqroq
 
 - Chizmadagi ochilish belgisi: chiziqlar tutqichda tutashadi, ochiq tomoni petlyalarga qaraydi — 3D bilan bir xil.
+- Filtr chiplari va segment tugmalari: shisha endi tugmaning o‘ziga teng kapsula — ikki qatlam va pastdan kesilish yo‘q.
 - Tarjima: katalog bo‘limlari va filtrlar soni bilan ("Derazalar 27" → "Окна 27"), Android pastki menyusi, rang, to‘ldirma, material nomlari ham tarjima qilinadi; tugma matni kesilmaydi.
 - iPhone (Liquid Glass): asbob tugmasini bosib turib chizmaga sudrash endi ishlaydi — Flutter bosishni UIKit’ga darhol beradi.
 - Oddiy rejimda ham chizish asboblari alohida dumaloq, faqat ikonli tugmalar; sudralayotgan qism ham faqat ikon.
