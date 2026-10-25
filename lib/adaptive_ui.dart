@@ -89,7 +89,7 @@ class GlassSurface extends StatelessWidget {
         tint: opaque
             ? (tint ?? Theme.of(context).colorScheme.surface)
                 .withValues(alpha: .6)
-            : tint?.withValues(alpha: .35),
+            : tint,
         dark: dark,
         shadow: shadow,
         child: child,
@@ -186,7 +186,11 @@ class _NativeGlass extends StatelessWidget {
       // UIKit tints the glass itself; a light touch, as in Apple's apps.
       if (tint != null) 'tint': tint!.toARGB32(),
     };
+    // Passthrough: the content takes the surface's full size, as on the
+    // painted glass; loose, an icon sat in the top-left corner of its
+    // circle.
     final glass = Stack(
+      fit: StackFit.passthrough,
       children: [
         Positioned.fill(
           // Taps go to the Flutter content; the glass only shows.
@@ -374,6 +378,18 @@ class GlassControl extends StatelessWidget {
         c is InputChip ||
         c is SegmentedButton;
     final radius = BorderRadius.circular(capsule ? 100 : 12);
+    // Capsule controls and the search field are Apple's own glass on
+    // iPhone: the selected chip or segment carries a tint of the accent.
+    if (nativeGlass && (capsule || c is TextField)) {
+      return GlassSurface(
+        radius: radius,
+        tint: selected ? accent.withValues(alpha: .35) : null,
+        shadow: false,
+        blur: true,
+        brightness: brightness,
+        child: child,
+      );
+    }
     // A field's floating label sits on its top edge: the glass goes behind
     // the field and never clips the label.
     if (c is TextField || c is FormField) {
@@ -430,6 +446,19 @@ ButtonStyle glassButtonStyle(
           : prominent || states.contains(WidgetState.selected)
               ? accent
               : Color.alphaBlend(accent.withValues(alpha: .12), scheme.surface);
+      // On iPhone a button is a capsule of Apple's glass: tinted with its
+      // colour when prominent (as UIKit's prominent glass), clear with a
+      // coloured label otherwise.
+      if (nativeGlass && !disabled) {
+        final strong = prominent || states.contains(WidgetState.selected);
+        return GlassSurface(
+          radius: BorderRadius.circular(100),
+          tint: strong ? accent : null,
+          shadow: false,
+          blur: true,
+          child: child ?? const SizedBox.shrink(),
+        );
+      }
       return GlassSurface(
         radius: BorderRadius.circular(12),
         tint: colour,

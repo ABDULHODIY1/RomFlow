@@ -2204,8 +2204,9 @@ class _DrawingEditorState extends State<DrawingEditor> {
 
   Widget viewSwitch() {
     final scheme = Theme.of(context).colorScheme;
-    Widget side(String label, bool on, VoidCallback tap) => GlassControl(
-            child: InkWell(
+    Widget side(String label, bool on, VoidCallback tap) => Material(
+        type: MaterialType.transparency,
+        child: InkWell(
           key: ValueKey('view-$label'),
           borderRadius: BorderRadius.circular(14),
           onTap: tap,
@@ -2225,40 +2226,50 @@ class _DrawingEditorState extends State<DrawingEditor> {
             ),
           ),
         ));
-    return Material(
-      color: scheme.surface,
-      elevation: 2,
-      borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.all(2),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            side('2D', !show3d, () => setState(() => show3d = false)),
-            side('3D', show3d, () => setState(() => show3d = true)),
-            // The window on a photo of its opening.
-            GlassControl(
-                child: InkWell(
-              key: const ValueKey('view-place'),
-              borderRadius: BorderRadius.circular(14),
-              onTap: placeOnPhoto,
-              child: Tooltip(
-                message: 'Joyida ko‘rish',
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 5,
-                  ),
-                  child: Icon(
-                    Icons.add_a_photo_outlined,
-                    size: 18,
-                    color: scheme.primary,
-                  ),
-                ),
-              ),
-            )),
-          ],
+    // One glass capsule, the chosen view on a tinted lens inside it.
+    return whenGlass(
+      Material(
+        color: usesIOSGlass ? Colors.transparent : scheme.surface,
+        elevation: usesIOSGlass ? 0 : 2,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(3),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              side('2D', !show3d, () => setState(() => show3d = false)),
+              side('3D', show3d, () => setState(() => show3d = true)),
+              // The window on a photo of its opening.
+              Material(
+                  type: MaterialType.transparency,
+                  child: InkWell(
+                    key: const ValueKey('view-place'),
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: placeOnPhoto,
+                    child: Tooltip(
+                      message: 'Joyida ko‘rish',
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 5,
+                        ),
+                        child: Icon(
+                          Icons.add_a_photo_outlined,
+                          size: 18,
+                          color: scheme.primary,
+                        ),
+                      ),
+                    ),
+                  )),
+            ],
+          ),
         ),
+      ),
+      (capsule) => GlassSurface(
+        radius: BorderRadius.circular(20),
+        shadow: false,
+        blur: true,
+        child: capsule,
       ),
     );
   }
@@ -2284,57 +2295,65 @@ class _DrawingEditorState extends State<DrawingEditor> {
           'empty': 'bo‘sh',
         }[leaf['fill']] ??
         '';
-    return Material(
-      key: const ValueKey('section-bar'),
-      color: scheme.primaryContainer,
-      borderRadius: BorderRadius.circular(12),
-      child: GlassControl(
-          child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => sectionMenu(selected),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 4, 4, 4),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 12,
-                backgroundColor: scheme.primary,
-                child: Text(
-                  '${index + 1}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onPrimary,
+    return whenGlass(
+      Material(
+        key: const ValueKey('section-bar'),
+        color: usesIOSGlass ? Colors.transparent : scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(usesIOSGlass ? 22 : 12),
+        child: (InkWell(
+          borderRadius: BorderRadius.circular(usesIOSGlass ? 22 : 12),
+          onTap: () => sectionMenu(selected),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 4, 4, 4),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: scheme.primary,
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: scheme.onPrimary,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '${(box[2] - box[0]).round()} × ${(box[3] - box[1]).round()} mm • $opening • $fill',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${(box[2] - box[0]).round()} × ${(box[3] - box[1]).round()} mm • $opening • $fill',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Sozlash',
                   style: TextStyle(
                     fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: scheme.onPrimaryContainer,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.primary,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Sozlash',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                  color: scheme.primary,
-                ),
-              ),
-              Icon(Icons.chevron_right, size: 20, color: scheme.primary),
-            ],
+                Icon(Icons.chevron_right, size: 20, color: scheme.primary),
+              ],
+            ),
           ),
-        ),
-      )),
+        )),
+      ),
+      // The chosen section on a capsule of Apple's glass.
+      (bar) => GlassSurface(
+        radius: BorderRadius.circular(22),
+        shadow: false,
+        blur: true,
+        child: bar,
+      ),
     );
   }
 
@@ -2342,8 +2361,10 @@ class _DrawingEditorState extends State<DrawingEditor> {
   Widget glassBar(ColorScheme scheme, Widget child) => Padding(
         padding: const EdgeInsets.fromLTRB(12, 2, 12, 0),
         child: usesIOSGlass
+            // A floating toolbar: one capsule of Apple's glass, its tools on
+            // it, as the tab bar.
             ? GlassSurface(
-                radius: BorderRadius.circular(22), blur: false, child: child)
+                radius: BorderRadius.circular(26), blur: true, child: child)
             : DecoratedBox(
                 decoration: BoxDecoration(
                   color: scheme.surface,
@@ -2361,10 +2382,10 @@ class _DrawingEditorState extends State<DrawingEditor> {
       return Padding(
         padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
         child: GlassSurface(
-          radius: BorderRadius.circular(26),
-          // On the plain desk a blur shows nothing and costs every frame
+          radius: BorderRadius.circular(30),
+          // Apple's glass, drawn by UIKit: it costs Flutter nothing while
           // the drawing is dragged.
-          blur: false,
+          blur: true,
           child: Padding(padding: padding, child: child),
         ),
       );
@@ -2396,53 +2417,54 @@ class _DrawingEditorState extends State<DrawingEditor> {
         .map((p) => '${p['name']}')
         .firstOrNull;
     final canCompare = widget.store.catalog != null;
-    return GlassControl(
+    return Material(
+        type: MaterialType.transparency,
         child: InkWell(
-      key: const ValueKey('compare-prices'),
-      borderRadius: BorderRadius.circular(10),
-      onTap: canCompare ? comparePrices : null,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(4, 2, 0, 2),
-        child: Row(
-          children: [
-            Icon(
-              Icons.factory_outlined,
-              size: 16,
-              color: scheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                name ?? '',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
+          key: const ValueKey('compare-prices'),
+          borderRadius: BorderRadius.circular(10),
+          onTap: canCompare ? comparePrices : null,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(4, 2, 0, 2),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.factory_outlined,
+                  size: 16,
                   color: scheme.onSurfaceVariant,
                 ),
-              ),
-            ),
-            if (canCompare) ...[
-              Flexible(
-                flex: 0,
-                child: Text(
-                  'Zavodlar narxi',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.primary,
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    name ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
-              ),
-              Icon(Icons.chevron_right, size: 18, color: scheme.primary),
-            ],
-          ],
-        ),
-      ),
-    ));
+                if (canCompare) ...[
+                  Flexible(
+                    flex: 0,
+                    child: Text(
+                      'Zavodlar narxi',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: scheme.primary,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.chevron_right, size: 18, color: scheme.primary),
+                ],
+              ],
+            ),
+          ),
+        ));
   }
 
   Future<void> comparePrices() async {
@@ -2487,42 +2509,44 @@ class _DrawingEditorState extends State<DrawingEditor> {
     Widget cell(String key, String caption, Widget value, VoidCallback onTap) =>
         Expanded(
           child: Padding(
-            // Each cell its own piece of glass, not one glued strip.
             padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: GlassControl(
+            // Plain on the panel's glass; glass on glass reads as clutter.
+            child: Material(
+                type: MaterialType.transparency,
                 child: InkWell(
-              key: ValueKey('spec-$key'),
-              borderRadius: BorderRadius.circular(10),
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // One line in every cell, so the row stays level.
-                    SizedBox(
-                      height: 15,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          caption,
-                          maxLines: 1,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            color: scheme.onSurfaceVariant,
+                  key: ValueKey('spec-$key'),
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: onTap,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // One line in every cell, so the row stays level.
+                        SizedBox(
+                          height: 15,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              caption,
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 2),
+                        SizedBox(
+                          height: 20,
+                          child: FittedBox(fit: BoxFit.scaleDown, child: value),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
-                    SizedBox(
-                      height: 20,
-                      child: FittedBox(fit: BoxFit.scaleDown, child: value),
-                    ),
-                  ],
-                ),
-              ),
-            )),
+                  ),
+                )),
           ),
         );
     TextStyle strong = TextStyle(
@@ -3669,146 +3693,150 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 );
               },
             ),
-            tools([
-              if (palette == 'split') ...[
-                DraftTool(
-                  label: 'Tanlash',
-                  icon: Icons.touch_app_outlined,
-                  width: fit,
-                  selected: tool == 'select',
-                  onTap: () => selectTool('select'),
-                ),
-                part(
-                  'Tik bo‘lish',
-                  const DraftPayload('split', 'v', 'Tik impost'),
-                  icon: Icons.vertical_split_outlined,
-                  width: fit,
-                  selected: tool == 'v',
-                  onTap: () => selectTool('v'),
-                ),
-                part(
-                  'Yotiq bo‘lish',
-                  const DraftPayload('split', 'h', 'Yotiq impost'),
-                  icon: Icons.horizontal_split_outlined,
-                  width: fit,
-                  selected: tool == 'h',
-                  onTap: () => selectTool('h'),
-                ),
-                DraftTool(
-                  label: 'Tenglash',
-                  icon: Icons.view_column_outlined,
-                  width: fit,
-                  onTap: () => equalize(),
-                ),
-                DraftTool(
-                  label: 'Tortish',
-                  icon: Icons.open_in_full,
-                  width: fit,
-                  selected: tool == 'size',
-                  onTap: () => selectTool('size'),
-                ),
-                DraftTool(
-                  label: 'Ko‘zgu',
-                  icon: Icons.flip,
-                  width: fit,
-                  onTap: mirror,
-                ),
-              ],
-              if (palette == 'window' || palette == 'door')
-                for (final key in palette == 'window'
-                    ? [
-                        'fixed',
-                        'left',
-                        'right',
-                        'tiltTurn',
-                        'top',
-                        'bottom',
-                        'slideLeft',
-                        'slideRight',
-                      ]
-                    : ['doorLeft', 'doorRight', 'passive', 'fixed'])
+            const SizedBox(height: 6),
+            glassBar(
+              scheme,
+              tools([
+                if (palette == 'split') ...[
+                  DraftTool(
+                    label: 'Tanlash',
+                    icon: Icons.touch_app_outlined,
+                    width: fit,
+                    selected: tool == 'select',
+                    onTap: () => selectTool('select'),
+                  ),
                   part(
-                    openingNames[key]!,
-                    DraftPayload('opening', key, openingNames[key]!),
-                    opening: key,
-                    selected: tool == 'opening' && openingTool == key,
-                    onTap: () => setState(() {
-                      openingTool = key;
-                      tool = 'opening';
-                      error = null;
-                    }),
+                    'Tik bo‘lish',
+                    const DraftPayload('split', 'v', 'Tik impost'),
+                    icon: Icons.vertical_split_outlined,
+                    width: fit,
+                    selected: tool == 'v',
+                    onTap: () => selectTool('v'),
                   ),
-              if (palette == 'fill')
-                for (final entry in <(String, String, IconData)>[
-                  ('glass', 'Shisha', Icons.crop_square),
-                  ('panel', 'Panel', Icons.square_outlined),
-                  ('lambris', 'Lambir', Icons.view_week_outlined),
-                  ('empty', 'Bo‘sh', Icons.check_box_outline_blank),
-                ])
                   part(
-                    entry.$2,
-                    DraftPayload('fill', entry.$1, entry.$2),
-                    icon: entry.$3,
-                    selected: tool == 'fill' && fillTool == entry.$1,
-                    onTap: () => setState(() {
-                      fillTool = entry.$1;
-                      tool = 'fill';
-                      error = null;
-                    }),
+                    'Yotiq bo‘lish',
+                    const DraftPayload('split', 'h', 'Yotiq impost'),
+                    icon: Icons.horizontal_split_outlined,
+                    width: fit,
+                    selected: tool == 'h',
+                    onTap: () => selectTool('h'),
                   ),
-              if (palette == 'hardware' && hardware.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 18,
+                  DraftTool(
+                    label: 'Tenglash',
+                    icon: Icons.view_column_outlined,
+                    width: fit,
+                    onTap: () => equalize(),
                   ),
-                  child: Text(
-                    'Avval “Deraza” yoki “Eshik”dan ochiladigan qanot qo‘ying',
-                    style: Theme.of(context).textTheme.bodySmall,
+                  DraftTool(
+                    label: 'Tortish',
+                    icon: Icons.open_in_full,
+                    width: fit,
+                    selected: tool == 'size',
+                    onTap: () => selectTool('size'),
                   ),
-                ),
-              if (palette == 'hardware')
-                for (final (key, label, icon) in hardware)
-                  part(
-                    label,
-                    DraftPayload('hardware', key, label),
-                    icon: icon,
-                    selected: tool == 'hardware' && hardwareTool == key,
-                    onTap: () => setState(() {
-                      hardwareTool = key;
-                      tool = 'hardware';
-                      error = null;
-                    }),
+                  DraftTool(
+                    label: 'Ko‘zgu',
+                    icon: Icons.flip,
+                    width: fit,
+                    onTap: mirror,
                   ),
-              if (palette == 'preset') ...[
-                DraftTool(
-                  key: const ValueKey('open-catalog'),
-                  label: 'Katalog',
-                  icon: Icons.apps,
-                  selected: true,
-                  onTap: openCatalog,
-                ),
-                for (final preset in drawingPresets.where(
-                  (p) => quickPresets.contains(p.id),
-                ))
-                  part(
-                    preset.name,
-                    DraftPayload('preset', preset.id, preset.name),
-                    preview: PresetThumb(preset: preset, recipe: recipe),
-                    onTap: () => applyPreset(preset),
+                ],
+                if (palette == 'window' || palette == 'door')
+                  for (final key in palette == 'window'
+                      ? [
+                          'fixed',
+                          'left',
+                          'right',
+                          'tiltTurn',
+                          'top',
+                          'bottom',
+                          'slideLeft',
+                          'slideRight',
+                        ]
+                      : ['doorLeft', 'doorRight', 'passive', 'fixed'])
+                    part(
+                      openingNames[key]!,
+                      DraftPayload('opening', key, openingNames[key]!),
+                      opening: key,
+                      selected: tool == 'opening' && openingTool == key,
+                      onTap: () => setState(() {
+                        openingTool = key;
+                        tool = 'opening';
+                        error = null;
+                      }),
+                    ),
+                if (palette == 'fill')
+                  for (final entry in <(String, String, IconData)>[
+                    ('glass', 'Shisha', Icons.crop_square),
+                    ('panel', 'Panel', Icons.square_outlined),
+                    ('lambris', 'Lambir', Icons.view_week_outlined),
+                    ('empty', 'Bo‘sh', Icons.check_box_outline_blank),
+                  ])
+                    part(
+                      entry.$2,
+                      DraftPayload('fill', entry.$1, entry.$2),
+                      icon: entry.$3,
+                      selected: tool == 'fill' && fillTool == entry.$1,
+                      onTap: () => setState(() {
+                        fillTool = entry.$1;
+                        tool = 'fill';
+                        error = null;
+                      }),
+                    ),
+                if (palette == 'hardware' && hardware.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 18,
+                    ),
+                    child: Text(
+                      'Avval “Deraza” yoki “Eshik”dan ochiladigan qanot qo‘ying',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ),
-                DraftTool(
-                  label: 'Saqlash',
-                  icon: Icons.bookmark_add_outlined,
-                  onTap: saveAsTemplate,
-                ),
-                DraftTool(
-                  label: 'Mening',
-                  icon: Icons.folder_open,
-                  onTap: loadTemplate,
-                ),
-              ],
-            ]),
+                if (palette == 'hardware')
+                  for (final (key, label, icon) in hardware)
+                    part(
+                      label,
+                      DraftPayload('hardware', key, label),
+                      icon: icon,
+                      selected: tool == 'hardware' && hardwareTool == key,
+                      onTap: () => setState(() {
+                        hardwareTool = key;
+                        tool = 'hardware';
+                        error = null;
+                      }),
+                    ),
+                if (palette == 'preset') ...[
+                  DraftTool(
+                    key: const ValueKey('open-catalog'),
+                    label: 'Katalog',
+                    icon: Icons.apps,
+                    selected: true,
+                    onTap: openCatalog,
+                  ),
+                  for (final preset in drawingPresets.where(
+                    (p) => quickPresets.contains(p.id),
+                  ))
+                    part(
+                      preset.name,
+                      DraftPayload('preset', preset.id, preset.name),
+                      preview: PresetThumb(preset: preset, recipe: recipe),
+                      onTap: () => applyPreset(preset),
+                    ),
+                  DraftTool(
+                    label: 'Saqlash',
+                    icon: Icons.bookmark_add_outlined,
+                    onTap: saveAsTemplate,
+                  ),
+                  DraftTool(
+                    label: 'Mening',
+                    icon: Icons.folder_open,
+                    onTap: loadTemplate,
+                  ),
+                ],
+              ]),
+            ),
             SizedBox(
               height: 38,
               child: Padding(

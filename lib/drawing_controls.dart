@@ -43,11 +43,16 @@ class DraftTool extends StatelessWidget {
         selected: selected,
         child: Tooltip(
           message: label,
+          // On the toolbar's glass: the chosen tool on a tinted lens, the
+          // rest bare, as the tab bar's items.
           child: Material(
-            color: selected ? colors.primaryContainer : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-            child: GlassControl(
-                child: InkWell(
+            color: selected
+                ? (usesIOSGlass
+                    ? colors.primary.withValues(alpha: .2)
+                    : colors.primaryContainer)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(usesIOSGlass ? 18 : 10),
+            child: (InkWell(
               onTap: onTap,
               borderRadius: BorderRadius.circular(10),
               child: SizedBox(

@@ -33,9 +33,10 @@ ThemeData romFlowTheme(Brightness brightness) {
     borderRadius: BorderRadius.circular(16),
     side: BorderSide(color: border, width: .8),
   );
-  final buttonShape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(12),
-  );
+  // Apple's glass buttons are capsules; the ripple follows the same shape.
+  final OutlinedBorder buttonShape = nativeGlass
+      ? const StadiumBorder()
+      : RoundedRectangleBorder(borderRadius: BorderRadius.circular(12));
   final input = OutlineInputBorder(
     borderRadius: BorderRadius.circular(12),
     borderSide: BorderSide(color: border),
@@ -171,7 +172,8 @@ ThemeData romFlowTheme(Brightness brightness) {
       // Under glass the chip is the glass capsule itself, not a second
       // darker pill inside it.
       backgroundColor: usesIOSGlass ? Colors.transparent : surface,
-      selectedColor: selected,
+      // On iPhone the selected chip is tinted glass, not a flat fill.
+      selectedColor: nativeGlass ? Colors.transparent : selected,
       disabledColor: field,
       side: usesIOSGlass ? BorderSide.none : BorderSide(color: border),
       labelStyle: TextStyle(color: text, fontSize: 13),

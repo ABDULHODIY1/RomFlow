@@ -14,6 +14,8 @@
 - Pastki menyu yangilandi: balandroq shisha kapsula, tanlangan bo‘lim ajralib turadi, yozuvlar kesilmaydi.
 - Paneldagi ikonka tugmalar (orqaga, bekor qilish, sozlash) qutisiz, Apple uslubida.
 - Yuqori panel Apple uslubida: yaxlit plita yo‘q, sahifa sarlavha ostida yumshoq xiralashadi; orqaga tugmasi shisha doirada, panel asboblari bitta shisha kapsulada.
+- Chizma ekrani to‘liq suyuq shishada: ikki qator asboblar, tanlangan bo‘lim, 2D/3D almashtirgich va pastki panel — har biri Apple’ning suzuvchi shisha kapsulasi, tanlangani ichida linzadek ajraladi. Ilova tugmalari, chiplar, segmentlar va qidiruv ham asl shisha kapsulada.
+- “Orqaga” doirasidagi belgi markazda.
 - iPhone’da asl Apple Liquid Glass: pastki menyu tizimning o‘z UITabBar’i (ekran pastigacha, balandligini iOS o‘zi beradi); yuqori panel, pastdan chiquvchi oynalar, dialoglar, suzuvchi tugmalar va klaviatura paneli ortida UIGlassEffect.
 
 ## 1.0.1 — rangli Liquid Glass va 3D tuzatishlari
