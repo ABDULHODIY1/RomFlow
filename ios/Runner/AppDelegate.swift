@@ -341,8 +341,19 @@ final class GlassSurfaceFactory: NSObject, FlutterPlatformViewFactory {
   }
 }
 
+/// Keeps the glass's corners at most half its side: a 100 pt radius on a
+/// 50 pt button turned a capsule into a pointed lens.
+final class GlassEffectView: UIVisualEffectView {
+  var wantedRadius: CGFloat = 0
+  override func layoutSubviews() {
+    super.layoutSubviews()
+    let radius = min(wantedRadius, bounds.height / 2, bounds.width / 2)
+    if layer.cornerRadius != radius { layer.cornerRadius = radius }
+  }
+}
+
 final class GlassSurfaceView: NSObject, FlutterPlatformView {
-  private let effectView: UIVisualEffectView
+  private let effectView: GlassEffectView
   init(frame: CGRect, args: [String: Any]) {
     let dark = args["dark"] as? Bool == true
     var tint: UIColor?
@@ -361,7 +372,7 @@ final class GlassSurfaceView: NSObject, FlutterPlatformView {
       effect = glass
     }
     #endif
-    effectView = UIVisualEffectView(effect: effect)
+    effectView = GlassEffectView(effect: effect)
     super.init()
     effectView.frame = frame
     effectView.overrideUserInterfaceStyle = dark ? .dark : .light
@@ -377,7 +388,8 @@ final class GlassSurfaceView: NSObject, FlutterPlatformView {
       if corners[2] > 0 { masked.insert(.layerMaxXMaxYCorner) }
       if corners[3] > 0 { masked.insert(.layerMinXMaxYCorner) }
     }
-    effectView.layer.cornerRadius = radius
+    effectView.wantedRadius = radius
+    effectView.layer.cornerRadius = min(radius, frame.height / 2, frame.width / 2)
     effectView.layer.maskedCorners = masked
     effectView.layer.cornerCurve = .continuous
     effectView.clipsToBounds = radius > 0

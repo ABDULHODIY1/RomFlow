@@ -1888,6 +1888,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                               drawing,
                               recipe,
                               paper: !bare,
+                              ink: bare ? deskInk(context) : null,
                               selected: selected,
                               points: points,
                               editVertices: tool == 'vertices',
@@ -3723,19 +3724,24 @@ class _DrawingEditorState extends State<DrawingEditor> {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       // The whole screen is the drawing paper; the bars float over it.
-      backgroundColor: paperColor,
+      backgroundColor: deskPaper(context),
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(
         // Ink on the paper in both themes, the paper fading under it.
-        foregroundColor: const Color(0xff1c293b),
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        flexibleSpace: const DecoratedBox(
+        foregroundColor: deskInk(context),
+        systemOverlayStyle: Theme.of(context).brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+        flexibleSpace: DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [paperColor, Color(0x00edf4fb)],
-              stops: [.6, 1],
+              colors: [
+                deskPaper(context),
+                deskPaper(context).withValues(alpha: 0),
+              ],
+              stops: const [.6, 1],
             ),
           ),
         ),
@@ -3749,7 +3755,11 @@ class _DrawingEditorState extends State<DrawingEditor> {
               widget.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: deskInk(context),
+              ),
             ),
             Tx(
               label == null
@@ -3757,7 +3767,10 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   : '$label • ${drawing['widthMm']}×${drawing['heightMm']}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, color: Color(0xff526981)),
+              style: TextStyle(
+                fontSize: 12,
+                color: deskInk(context).withValues(alpha: .7),
+              ),
             ),
           ],
         ),
@@ -3787,7 +3800,13 @@ class _DrawingEditorState extends State<DrawingEditor> {
       ),
       body: Stack(
         children: [
-          const Positioned.fill(child: CustomPaint(painter: PaperPainter())),
+          Positioned.fill(
+            child: CustomPaint(
+              painter: PaperPainter(
+                Theme.of(context).brightness == Brightness.dark,
+              ),
+            ),
+          ),
           SafeArea(
             child: Column(
               children: [
@@ -4043,9 +4062,12 @@ class _DrawingEditorState extends State<DrawingEditor> {
                                               },
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-// On the paper, whatever the theme.
-                                    style: const TextStyle(
-                                        fontSize: 12, color: Color(0xff526981)),
+// The desk's ink: white on black paper, dark on white.
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: deskInk(context)
+                                          .withValues(alpha: .7),
+                                    ),
                                   ),
                           ),
                         ),
@@ -4502,14 +4524,26 @@ double distanceToSegment(V p, V a, V b) {
 /// The drawing desk's paper, in both themes.
 const paperColor = Color(0xffedf4fb);
 
+/// The drawing desk follows the theme: black paper with white ink in the
+/// dark, white paper with dark ink in the light.
+Color deskPaper(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xff000000)
+        : const Color(0xffffffff);
+Color deskInk(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xffffffff)
+        : const Color(0xff111a24);
+
 /// The dotted paper across the whole drawing desk.
 class PaperPainter extends CustomPainter {
-  const PaperPainter();
+  final bool dark;
+  const PaperPainter(this.dark);
   @override
   void paint(Canvas canvas, Size size) {
     final dot = Paint()
       ..isAntiAlias = true
-      ..color = const Color(0xffd5e2ef);
+      ..color = dark ? const Color(0xff222a33) : const Color(0xffd9e1ea);
     for (double x = 12; x < size.width; x += 18) {
       for (double y = 12; y < size.height; y += 18) {
         canvas.drawCircle(Offset(x, y), .7, dot);
@@ -4518,7 +4552,7 @@ class PaperPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(PaperPainter old) => false;
+  bool shouldRepaint(PaperPainter old) => old.dark != dark;
 }
 
 class DrawingPainter extends CustomPainter {
@@ -4529,10 +4563,14 @@ class DrawingPainter extends CustomPainter {
 
   /// Draws the dotted paper; off where the screen's paper is behind.
   final bool paper;
+
+  /// Sizes and their lines: white on the dark desk, ink on the light one.
+  final Color? ink;
   DrawingPainter(
     this.drawing,
     this.recipe, {
     this.paper = true,
+    this.ink,
     this.selected,
     this.points = const [],
     this.editVertices = false,
@@ -4546,7 +4584,8 @@ class DrawingPainter extends CustomPainter {
           drawing,
           sectionDimensions: sectionDimensions,
         ),
-        paint = Paint()..isAntiAlias = true;
+        paint = Paint()..isAntiAlias = true,
+        dimColor = ink ?? const Color(0xff526981);
     for (double x = 12; paper && x < size.width; x += 18) {
       for (double y = 12; y < size.height; y += 18) {
         canvas.drawCircle(
@@ -4842,7 +4881,7 @@ class DrawingPainter extends CustomPainter {
         b = t.to(V(w, h));
     paint
       ..style = PaintingStyle.stroke
-      ..color = const Color(0xff526981)
+      ..color = dimColor
       ..strokeWidth = .8;
     canvas.drawLine(
       Offset(a.dx, b.dy + (sectionDimensions ? 46 : 26)),
@@ -4872,11 +4911,12 @@ class DrawingPainter extends CustomPainter {
       '${w.round()} mm',
       Offset((a.dx + b.dx) / 2, b.dy + (sectionDimensions ? 58 : 37)),
       font: 12,
+      color: dimColor,
     );
     canvas.save();
     canvas.translate(a.dx - (sectionDimensions ? 51 : 35), (a.dy + b.dy) / 2);
     canvas.rotate(-math.pi / 2);
-    label('${h.round()} mm', Offset.zero, font: 12);
+    label('${h.round()} mm', Offset.zero, font: 12, color: dimColor);
     canvas.restore();
     if (sectionDimensions) {
       for (final horizontal in [true, false]) {
@@ -4889,7 +4929,7 @@ class DrawingPainter extends CustomPainter {
           );
           paint
             ..style = PaintingStyle.stroke
-            ..color = const Color(0xff526981)
+            ..color = dimColor
             ..strokeWidth = .8;
           if (horizontal) {
             canvas.drawLine(
@@ -4909,6 +4949,7 @@ class DrawingPainter extends CustomPainter {
                 '${(stops[i + 1] - stops[i]).round()}',
                 Offset((first.dx + last.dx) / 2, b.dy + 27),
                 font: 11,
+                color: dimColor,
               );
             }
           } else {
@@ -4932,6 +4973,7 @@ class DrawingPainter extends CustomPainter {
                 '${(stops[i + 1] - stops[i]).round()}',
                 Offset.zero,
                 font: 11,
+                color: dimColor,
               );
               canvas.restore();
             }
