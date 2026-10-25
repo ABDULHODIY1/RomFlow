@@ -25,9 +25,10 @@ void main() {
     final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).first);
     expect(scaffold.extendBody, isTrue);
     expect(scaffold.extendBodyBehindAppBar, isTrue);
-    // Bars, the tab bar and the hero's second button are glass.
-    expect(find.byType(GlassSurface), findsAtLeastNWidgets(3));
-    expect(find.byType(BackdropFilter), findsAtLeastNWidgets(3));
+    // The tab bar and the bar's tariff button are blurred glass; the app
+    // bar itself is no slab, the page fades out under its title.
+    expect(find.byType(GlassSurface), findsAtLeastNWidgets(2));
+    expect(find.byType(BackdropFilter), findsAtLeastNWidgets(2));
     // The first row is not hidden under the glass app bar.
     final appBar = tester.getRect(find.byType(GlassAppBar).first);
     expect(tester.getRect(find.text('Mening ustaxonam')).top,

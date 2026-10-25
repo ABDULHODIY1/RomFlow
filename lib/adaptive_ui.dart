@@ -568,10 +568,10 @@ class GlassIconButton extends StatelessWidget {
 class GlassAppBar extends AppBar {
   GlassAppBar({
     super.key,
-    super.leading,
-    super.automaticallyImplyLeading,
+    Widget? leading,
+    super.automaticallyImplyLeading = true,
     super.title,
-    super.actions,
+    List<Widget>? actions,
     Widget? flexibleSpace,
     super.bottom,
     super.elevation,
@@ -584,19 +584,126 @@ class GlassAppBar extends AppBar {
     super.systemOverlayStyle,
     Brightness? glassBrightness,
   }) : super(
-          flexibleSpace: flexibleSpace ??
-              (usesIOSGlass
-                  ? GlassSurface(
-                      radius: BorderRadius.zero,
-                      shadow: false,
-                      brightness: glassBrightness,
-                      child: const SizedBox.expand(),
-                    )
+          // Liquid Glass, as in Apple's apps: no slab across the top; the
+          // page fades out under the title, and the back button and the
+          // tools float on glass of their own.
+          leading: leading ??
+              (usesIOSGlass &&
+                      automaticallyImplyLeading &&
+                      glassBrightness == null
+                  ? const _GlassBackButton()
                   : null),
+          actions: glassBrightness == null ? _glassActions(actions) : actions,
+          flexibleSpace: flexibleSpace ??
+              (!usesIOSGlass
+                  ? null
+                  : glassBrightness == null
+                      ? const _TopEdge()
+                      : GlassSurface(
+                          radius: BorderRadius.zero,
+                          shadow: false,
+                          brightness: glassBrightness,
+                          child: const SizedBox.expand(),
+                        )),
           backgroundColor: usesIOSGlass ? Colors.transparent : backgroundColor,
           surfaceTintColor: usesIOSGlass ? Colors.transparent : null,
           scrolledUnderElevation: usesIOSGlass ? 0 : null,
         );
+
+  /// Plain icon buttons and menus share one glass capsule, as Apple groups
+  /// a bar's tools; native glass buttons keep their own glass.
+  static List<Widget>? _glassActions(List<Widget>? actions) {
+    if (!usesIOSGlass || actions == null) return actions;
+    final out = <Widget>[], group = <Widget>[];
+    void flush() {
+      if (group.isEmpty) return;
+      out.add(_GlassCapsule(children: List.of(group)));
+      group.clear();
+    }
+
+    for (final a in actions) {
+      if (a is IconButton || a is PopupMenuButton) {
+        group.add(a);
+      } else if (a is SizedBox && a.child == null) {
+        // Spacing that only made room for a bare icon.
+      } else {
+        flush();
+        out.add(a);
+      }
+    }
+    flush();
+    out.add(const SizedBox(width: 12));
+    return out;
+  }
+}
+
+/// The page fading out under the title, Apple's scroll edge effect.
+class _TopEdge extends StatelessWidget {
+  const _TopEdge();
+  @override
+  Widget build(BuildContext context) {
+    final bg = Theme.of(context).scaffoldBackgroundColor;
+    return IgnorePointer(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [bg.withValues(alpha: .96), bg.withValues(alpha: 0)],
+            stops: const [.55, 1],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bar tools on one capsule of Apple's glass.
+class _GlassCapsule extends StatelessWidget {
+  final List<Widget> children;
+  const _GlassCapsule({required this.children});
+  @override
+  Widget build(BuildContext context) => Center(
+        child: SizedBox(
+          height: 44,
+          child: GlassSurface(
+            radius: BorderRadius.circular(22),
+            shadow: false,
+            child: IconButtonTheme(
+              data: IconButtonThemeData(
+                style: IconButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.onSurface,
+                  minimumSize: const Size(44, 44),
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Row(mainAxisSize: MainAxisSize.min, children: children),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+/// Back (or close, for a full-screen form) on a glass circle; nothing on a
+/// page that cannot go back.
+class _GlassBackButton extends StatelessWidget {
+  const _GlassBackButton();
+  @override
+  Widget build(BuildContext context) {
+    final route = ModalRoute.of(context);
+    if (route == null || !route.canPop) return const SizedBox.shrink();
+    final close = route is PageRoute && route.fullscreenDialog;
+    return Center(
+      child: GlassIconButton(
+        icon: close ? Icons.close : Icons.arrow_back_ios_new,
+        tooltip: close ? 'Yopish' : 'Orqaga',
+        onPressed: () => Navigator.maybePop(context),
+      ),
+    );
+  }
 }
 
 /// [showModalBottomSheet], as a glass sheet when Liquid Glass is on.

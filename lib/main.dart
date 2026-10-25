@@ -395,6 +395,7 @@ class _HomeState extends State<Home> {
             extendBody: usesIOSGlass && !wide,
             extendBodyBehindAppBar: usesIOSGlass && !wide,
             appBar: GlassAppBar(
+              automaticallyImplyLeading: false,
               title: Row(
                 children: [
                   const BrandLogo(size: 38),

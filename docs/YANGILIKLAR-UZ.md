@@ -13,6 +13,7 @@
 - Liquid Glass faqat kerakli joyda: yuqori panel, pastki menyu, suzuvchi tugmalar va pastdan chiquvchi oynalar. Boshqa tugma, chip va plitkalar chegarasiz, yumshoq xira fonli — ikki qavat chiziqlar yo‘q.
 - Pastki menyu yangilandi: balandroq shisha kapsula, tanlangan bo‘lim ajralib turadi, yozuvlar kesilmaydi.
 - Paneldagi ikonka tugmalar (orqaga, bekor qilish, sozlash) qutisiz, Apple uslubida.
+- Yuqori panel Apple uslubida: yaxlit plita yo‘q, sahifa sarlavha ostida yumshoq xiralashadi; orqaga tugmasi shisha doirada, panel asboblari bitta shisha kapsulada.
 - iPhone’da asl Apple Liquid Glass: pastki menyu tizimning o‘z UITabBar’i (ekran pastigacha, balandligini iOS o‘zi beradi); yuqori panel, pastdan chiquvchi oynalar, dialoglar, suzuvchi tugmalar va klaviatura paneli ortida UIGlassEffect.
 
 ## 1.0.1 — rangli Liquid Glass va 3D tuzatishlari
