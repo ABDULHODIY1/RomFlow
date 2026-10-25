@@ -414,6 +414,10 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
   }
 
   /// Two quick starts side by side: a blank window, or one from a photo.
+  /// Phones up to the iPhone SE / 8 size: the header starts folded and the
+  /// two first cards drop their second line, so designs show at once.
+  bool get short => MediaQuery.sizeOf(context).height < 740;
+
   Widget quickStarts() {
     final scheme = Theme.of(context).colorScheme, on = chosen == null;
     Widget card(
@@ -469,16 +473,17 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
                                 color: gradient == null
                                     ? scheme.onSurface
                                     : Colors.white)),
-                        const SizedBox(height: 2),
-                        Text(subtitle,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontSize: 12,
-                                height: 1.25,
-                                color: gradient == null
-                                    ? scheme.onSurfaceVariant
-                                    : Colors.white.withValues(alpha: .82))),
+                        if (!short) const SizedBox(height: 2),
+                        if (!short)
+                          Text(subtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  height: 1.25,
+                                  color: gradient == null
+                                      ? scheme.onSurfaceVariant
+                                      : Colors.white.withValues(alpha: .82))),
                       ]),
                 ),
               ),
@@ -697,6 +702,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
           pinned: true,
           delegate: _CatalogHeader(
               top: MediaQuery.paddingOf(context).top,
+              folded: short,
               group: group,
               recipe: widget.recipe,
               onGroup: (g) {
@@ -711,7 +717,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
         ),
         SliverToBoxAdapter(
           child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+              padding: EdgeInsets.fromLTRB(16, short ? 10 : 14, 16, 6),
               child: quickStarts()),
         ),
         SliverToBoxAdapter(
@@ -722,10 +728,11 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
               Text('Tayyor dizaynlar',
                   style:
                       text.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
-              const SizedBox(height: 2),
-              Text('Bosing — chizma ochiladi. Bosib tursangiz — tanlanadi.',
-                  style:
-                      text.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+              if (!short) const SizedBox(height: 2),
+              if (!short)
+                Text('Bosing — chizma ochiladi. Bosib tursangiz — tanlanadi.',
+                    style: text.bodySmall
+                        ?.copyWith(color: scheme.onSurfaceVariant)),
             ]),
           ),
         ),
@@ -918,12 +925,16 @@ Set<String> designTags(DrawingPreset p, DMap recipe) => _tags[p.id] ??= () {
 
 class _CatalogHeader extends SliverPersistentHeaderDelegate {
   final double top;
+
+  /// Starts folded (short screens).
+  final bool folded;
   final String group;
   final DMap recipe;
   final ValueChanged<String> onGroup;
   final VoidCallback onBack;
   _CatalogHeader(
       {required this.top,
+      this.folded = false,
       required this.group,
       required this.recipe,
       required this.onGroup,
@@ -937,13 +948,14 @@ class _CatalogHeader extends SliverPersistentHeaderDelegate {
   };
 
   @override
-  double get maxExtent => top + 204;
+  double get maxExtent => top + (folded ? 112 : 204);
   @override
   double get minExtent => top + 112;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlaps) {
-    final t = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
+    final t =
+        folded ? 1.0 : (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -1034,5 +1046,8 @@ class _CatalogHeader extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(_CatalogHeader old) =>
-      old.group != group || old.top != top || old.recipe != recipe;
+      old.group != group ||
+      old.top != top ||
+      old.recipe != recipe ||
+      old.folded != folded;
 }

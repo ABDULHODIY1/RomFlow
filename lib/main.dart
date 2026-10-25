@@ -145,9 +145,13 @@ class RomFlow extends StatelessWidget {
         builder: (context, _) => MaterialApp(
           key: ValueKey(_designKey(store.designPreference)),
           title: 'RomFlow',
-          builder: (context, child) => demoMode
-              ? DemoOverlay(child: WorkshopKeyboardTools(child: child!))
-              : WorkshopKeyboardTools(child: child!),
+          // Very large Dynamic Type would push controls over each other on
+          // a small phone: text grows at most 1.3×.
+          builder: (context, child) => MediaQuery.withClampedTextScaling(
+              maxScaleFactor: 1.3,
+              child: demoMode
+                  ? DemoOverlay(child: WorkshopKeyboardTools(child: child!))
+                  : WorkshopKeyboardTools(child: child!)),
           themeMode: store.themePreference == 'dark'
               ? ThemeMode.dark
               : store.themePreference == 'light'
@@ -404,7 +408,9 @@ class _HomeState extends State<Home> {
                     NavigationRail(
                       selectedIndex: page,
                       extended: width >= 1180,
-                      labelType: width >= 1180
+                      // A phone on its side is too low for the labels.
+                      labelType: width >= 1180 ||
+                              MediaQuery.sizeOf(context).height < 520
                           ? NavigationRailLabelType.none
                           : NavigationRailLabelType.all,
                       onDestinationSelected: (p) => setState(() => page = p),
@@ -586,7 +592,8 @@ class _HomeState extends State<Home> {
             crossAxisCount: columns,
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
-            mainAxisExtent: 112),
+            // Taller with larger text, so the figures always fit.
+            mainAxisExtent: 68 + MediaQuery.textScalerOf(context).scale(46)),
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         children: kpis,

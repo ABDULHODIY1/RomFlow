@@ -10,6 +10,14 @@
 - Shisha: orqasi xiralashadi va rangi to‘yinadi, cheti yorug‘likni ushlaydi, tepadan yumshoq yaltirash; iOS “Kontrastni oshirish” yoqilgan bo‘lsa — to‘liq qoplangan.
 - **Sozlamalar → Ko‘rinish → Dizayn**: Avto (iPhone’da Liquid Glass), Liquid Glass (Android’da ham) yoki Oddiy.
 
+## Har qanday iPhone, iPad va kichik telefon
+- iPhone SE (1 va 3), mini, oddiy, Pro Max, iPad mini / Air / Pro va yotiq telefonda tekshirildi: hech narsa bir-birini to‘smaydi, sig‘may qolmaydi.
+- Juda katta shrift (iOS “Matn o‘lchami”) yoqilganda ham tugma va kartalar shishib ketmaydi: matn ko‘pi bilan 1,3 baravar kattalashadi.
+- Bosh sahifadagi ko‘rsatkich kartalari matn kattaligiga moslashadi; pastki menyu tugmalari kichrayib sig‘adi.
+- Kichik ekranda (SE, 8) katalog ixcham: sarlavha yig‘ilgan holda ochiladi, dizaynlar darhol ko‘rinadi.
+- Smetada 2D | 3D tugmasi chizmani endi to‘smaydi.
+- Tarif va moliya sahifalarida uzun yozuvlar qatorga sig‘adi; yotiq telefonda yon menyu faqat belgilar bilan.
+
 # RomFlow 2.1.0 — O‘zbekiston zavodlari narxi
 
 ## Ishlab chiqaruvchilar katalogi

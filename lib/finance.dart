@@ -607,7 +607,10 @@ class _BarChartState extends State<BarChart> {
                                   color: seriesColor(s.slot, theme.brightness),
                                   borderRadius: BorderRadius.circular(2))),
                           const SizedBox(width: 5),
-                          Text(s.name, style: theme.textTheme.bodySmall),
+                          Flexible(
+                              child: Text(s.name,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall)),
                         ]),
                     ])),
               const SizedBox(height: 10),

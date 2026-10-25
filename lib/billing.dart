@@ -124,30 +124,32 @@ class TariffPage extends StatelessWidget {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(children: [
-                      const Icon(Icons.workspace_premium,
-                          color: Colors.white, size: 28),
-                      const SizedBox(width: 10),
-                      Text(current.name,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800)),
-                      const SizedBox(width: 10),
-                      if (free)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                              color: const Color(0xff4cc36b),
-                              borderRadius: BorderRadius.circular(20)),
-                          child: const Text('Hozircha bepul',
-                              style: TextStyle(
+                    Wrap(
+                        spacing: 10,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          const Icon(Icons.workspace_premium,
+                              color: Colors.white, size: 28),
+                          Text(current.name,
+                              style: const TextStyle(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 12)),
-                        ),
-                    ]),
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800)),
+                          if (free)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                  color: const Color(0xff4cc36b),
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: const Text('Hozircha bepul',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 12)),
+                            ),
+                        ]),
                     const SizedBox(height: 10),
                     Text(
                         free

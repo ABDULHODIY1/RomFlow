@@ -313,31 +313,33 @@ class _IOSGlassNavigationState extends State<IOSGlassNavigation> {
               onTap: () => widget.onChanged(i),
               borderRadius: BorderRadius.circular(24),
               child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(
-                        const [
-                          Icons.dashboard_outlined,
-                          Icons.receipt_long_outlined,
-                          Icons.grid_view_outlined,
-                          Icons.tune
-                        ][i],
-                        color: i == widget.selected
-                            ? const Color(0xff206bc4)
-                            : Colors.blueGrey),
-                    Text(
-                        const [
-                          'Asosiy',
-                          'Buyurtmalar',
-                          'Katalog',
-                          'Sozlamalar'
-                        ][i],
-                        style: TextStyle(
-                            fontSize: 10,
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(
+                            const [
+                              Icons.dashboard_outlined,
+                              Icons.receipt_long_outlined,
+                              Icons.grid_view_outlined,
+                              Icons.tune
+                            ][i],
                             color: i == widget.selected
                                 ? const Color(0xff206bc4)
-                                : Colors.blueGrey)),
-                  ])))));
+                                : Colors.blueGrey),
+                        Text(
+                            const [
+                              'Asosiy',
+                              'Buyurtmalar',
+                              'Katalog',
+                              'Sozlamalar'
+                            ][i],
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: i == widget.selected
+                                    ? const Color(0xff206bc4)
+                                    : Colors.blueGrey)),
+                      ]))))));
   @override
   Widget build(BuildContext context) => Padding(
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),

@@ -2257,11 +2257,15 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       fontWeight: FontWeight.w600,
                       color: scheme.onSurfaceVariant))),
           if (canCompare) ...[
-            Text('Zavodlar narxi',
-                style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.primary)),
+            Flexible(
+                flex: 0,
+                child: Text('Zavodlar narxi',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: scheme.primary))),
             Icon(Icons.chevron_right, size: 18, color: scheme.primary),
           ],
         ]),
@@ -3387,11 +3391,14 @@ class _DrawingEditorState extends State<DrawingEditor> {
             child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Stack(children: [
+                  // The drawing starts below the 2D | 3D switch, so the
+                  // switch never covers a grip or a size.
                   Positioned.fill(
+                      top: 48,
                       child: show3d && layout != null
                           ? Live3D(drawing: drawing, recipe: recipe)
                           : dropWorkspace(layout)),
-                  Positioned(top: 8, right: 8, child: viewSwitch()),
+                  Positioned(top: 4, right: 8, child: viewSwitch()),
                 ]))),
         deskPanel(
           scheme,
