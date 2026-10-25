@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'i18n.dart';
 
 /// Liquid Glass design (iOS 26 and later): navigation bars, tab bar,
 /// sheets and controls float as glass over the content. On by default on
@@ -728,7 +729,7 @@ class _GlassBackButton extends StatelessWidget {
     return Center(
       child: GlassIconButton(
         icon: close ? Icons.close : Icons.arrow_back_ios_new,
-        tooltip: close ? 'Yopish' : 'Orqaga',
+        tooltip: tr(close ? 'Yopish' : 'Orqaga'),
         onPressed: () => Navigator.maybePop(context),
       ),
     );
@@ -827,9 +828,10 @@ class GlassButton {
   Map<String, Object?> toMap() => {
         'id': id,
         if (symbol != null) 'symbol': symbol,
-        if (title != null) 'title': title,
-        if (subtitle != null) 'subtitle': subtitle,
-        if (label != null) 'label': label,
+        // UIKit draws these: they go over in the chosen language.
+        if (title != null) 'title': tr(title!),
+        if (subtitle != null) 'subtitle': tr(subtitle!),
+        if (label != null) 'label': tr(label!),
         'style': style,
         'tint': (tint ?? glassActionTint(id)).toARGB32(),
         'selected': selected,
@@ -1059,7 +1061,7 @@ class _IOSGlassNavigationState extends State<IOSGlassNavigation> {
                   children: [
                     Icon(_icons[i], size: 25, color: color),
                     const SizedBox(height: 3),
-                    Text(
+                    Tx(
                       _labels[i],
                       maxLines: 1,
                       style: TextStyle(
@@ -1087,7 +1089,7 @@ class _IOSGlassNavigationState extends State<IOSGlassNavigation> {
         creationParams: {
           'selected': widget.selected,
           'dark': Theme.brightnessOf(context) == Brightness.dark,
-          'titles': _labels,
+          'titles': [for (final l in _labels) tr(l)],
         },
         creationParamsCodec: const StandardMessageCodec(),
         onPlatformViewCreated: (id) {

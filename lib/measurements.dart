@@ -5,6 +5,7 @@ import 'main.dart'
     show BuilderPage, callNumber, confirm, guarded, message, uzbekDay;
 import 'store.dart';
 import 'adaptive_ui.dart';
+import 'i18n.dart';
 
 String _time(DateTime d) =>
     '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
@@ -100,7 +101,7 @@ class MeasurementsPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Expanded(
-                    child: Text(
+                    child: Tx(
                       '${uzbekDay(at)} • ${_time(at)}',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
@@ -110,22 +111,22 @@ class MeasurementsPage extends StatelessWidget {
                   ),
                   Chip(
                     visualDensity: VisualDensity.compact,
-                    label: Text(Store.measurementStatuses[m['status']]!),
+                    label: Tx(Store.measurementStatuses[m['status']]!),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
-              Text(
+              Tx(
                 m['customer'],
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               if ('${m['address'] ?? ''}'.isNotEmpty)
-                Text(
+                Tx(
                   m['address'],
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               const SizedBox(height: 4),
-              Text(
+              Tx(
                 sizesSummary(m['sizes'] as List),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
@@ -136,7 +137,7 @@ class MeasurementsPage extends StatelessWidget {
                     TextButton.icon(
                       onPressed: () => callNumber(context, m['phone']),
                       icon: const Icon(Icons.call_outlined),
-                      label: const Text('Qo‘ng‘iroq'),
+                      label: const Tx('Qo‘ng‘iroq'),
                     ),
                   if (planned)
                     TextButton.icon(
@@ -145,7 +146,7 @@ class MeasurementsPage extends StatelessWidget {
                         () => store.setMeasurementStatus(m['id'], 'done'),
                       ),
                       icon: const Icon(Icons.check),
-                      label: const Text('O‘lchandi'),
+                      label: const Tx('O‘lchandi'),
                     ),
                   TextButton.icon(
                     key: ValueKey('to-quote-${m['id']}'),
@@ -153,7 +154,7 @@ class MeasurementsPage extends StatelessWidget {
                         ? null
                         : () => toQuote(context, m),
                     icon: const Icon(Icons.request_quote_outlined),
-                    label: const Text('Smetaga'),
+                    label: const Tx('Smetaga'),
                   ),
                 ],
               ),
@@ -177,7 +178,7 @@ class MeasurementsPage extends StatelessWidget {
                   .reversed
                   .toList();
           return Scaffold(
-            appBar: GlassAppBar(title: const Text('Razmer — o‘lchash')),
+            appBar: GlassAppBar(title: const Tx('Razmer — o‘lchash')),
             floatingActionButton: GlassActionButton.extended(
               onPressed: () => Navigator.push(
                 context,
@@ -185,7 +186,7 @@ class MeasurementsPage extends StatelessWidget {
                     builder: (_) => MeasurementEditor(store: store)),
               ),
               icon: const Icon(Icons.add),
-              label: const Text('Razmer'),
+              label: const Tx('Razmer'),
             ),
             body: Align(
               alignment: Alignment.topCenter,
@@ -194,25 +195,25 @@ class MeasurementsPage extends StatelessWidget {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                   children: [
-                    Text(
+                    Tx(
                       'Mijozning uyiga borib o‘lchash rejasi. Bir soat oldin eslatma keladi; o‘lchamlarni yozib, bitta tugma bilan smetaga aylantiring.',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: 12),
-                    Text(
+                    Tx(
                       'Rejada (${planned.length})',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
                     if (planned.isEmpty)
-                      Text(
+                      Tx(
                         'Rejalashtirilgan razmer yo‘q.',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     for (final m in planned) card(context, m),
                     if (past.isNotEmpty) ...[
                       const SizedBox(height: 12),
-                      Text('Tarix',
+                      Tx('Tarix',
                           style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 8),
                       for (final m in past) card(context, m),
@@ -359,12 +360,12 @@ class _MeasurementEditorState extends State<MeasurementEditor> {
     final picked = await showSettledDialog<Json>(
       context: context,
       builder: (c) => SimpleDialog(
-        title: const Text('Mijoz'),
+        title: const Tx('Mijoz'),
         children: [
           for (final x in s.customers)
             SimpleDialogOption(
               onPressed: () => Navigator.pop(c, x),
-              child: Text('${x['name']}  ${x['phone'] ?? ''}'),
+              child: Tx('${x['name']}  ${x['phone'] ?? ''}'),
             ),
         ],
       ),
@@ -392,12 +393,13 @@ class _MeasurementEditorState extends State<MeasurementEditor> {
                     child: DropdownButtonFormField<String>(
                       initialValue: r.template,
                       isExpanded: true,
-                      decoration: InputDecoration(labelText: '${i + 1}. Turi'),
+                      decoration:
+                          InputDecoration(labelText: tr('${i + 1}. Turi')),
                       items: [
                         for (final t in templates)
                           DropdownMenuItem(
                             value: t['id'] as String,
-                            child: Text(
+                            child: Tx(
                               t['name'],
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -408,7 +410,7 @@ class _MeasurementEditorState extends State<MeasurementEditor> {
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Olib tashlash',
+                  tooltip: tr('Olib tashlash'),
                   onPressed: rows.length == 1
                       ? null
                       : () => setState(() => rows.removeAt(i).dispose()),
@@ -430,7 +432,7 @@ class _MeasurementEditorState extends State<MeasurementEditor> {
                         key: ValueKey('size-$i-$label'),
                         controller: c,
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(labelText: label),
+                        decoration: InputDecoration(labelText: tr(label)),
                       ),
                     ),
                   ),
@@ -444,8 +446,8 @@ class _MeasurementEditorState extends State<MeasurementEditor> {
               child: GlassControl(
                 child: TextField(
                   controller: r.note,
-                  decoration: const InputDecoration(
-                    labelText: 'Izoh (xona, qavat, ochilishi…)',
+                  decoration: InputDecoration(
+                    labelText: tr('Izoh (xona, qavat, ochilishi…)'),
                   ),
                 ),
               ),
@@ -459,7 +461,7 @@ class _MeasurementEditorState extends State<MeasurementEditor> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: GlassAppBar(
-          title: Text(widget.measurement == null ? 'Yangi razmer' : 'Razmer'),
+          title: Tx(widget.measurement == null ? 'Yangi razmer' : 'Razmer'),
         ),
         bottomNavigationBar: SafeArea(
           child: Padding(
@@ -468,7 +470,7 @@ class _MeasurementEditorState extends State<MeasurementEditor> {
               key: const ValueKey('save-measurement'),
               onPressed: save,
               icon: const Icon(Icons.save_outlined),
-              label: const Text('Saqlash'),
+              label: const Tx('Saqlash'),
             ),
           ),
         ),
@@ -487,13 +489,13 @@ class _MeasurementEditorState extends State<MeasurementEditor> {
                           key: const ValueKey('measurement-customer'),
                           controller: customer,
                           onChanged: (_) => customerId = null,
-                          decoration: const InputDecoration(labelText: 'Mijoz'),
+                          decoration: InputDecoration(labelText: tr('Mijoz')),
                         ),
                       ),
                     ),
                     if (s.customers.isNotEmpty)
                       IconButton(
-                        tooltip: 'Mijozlardan tanlash',
+                        tooltip: tr('Mijozlardan tanlash'),
                         onPressed: chooseCustomer,
                         icon: const Icon(Icons.contacts_outlined),
                       ),
@@ -504,14 +506,14 @@ class _MeasurementEditorState extends State<MeasurementEditor> {
                   child: TextField(
                     controller: phone,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(labelText: 'Telefon'),
+                    decoration: InputDecoration(labelText: tr('Telefon')),
                   ),
                 ),
                 const SizedBox(height: 12),
                 GlassControl(
                   child: TextField(
                     controller: address,
-                    decoration: const InputDecoration(labelText: 'Manzil'),
+                    decoration: InputDecoration(labelText: tr('Manzil')),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -519,27 +521,26 @@ class _MeasurementEditorState extends State<MeasurementEditor> {
                     child: ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.event_outlined),
-                  title: Text('${uzbekDay(date)} • ${_time(date)}'),
-                  subtitle: const Text('Bir soat oldin eslatma'),
+                  title: Tx('${uzbekDay(date)} • ${_time(date)}'),
+                  subtitle: const Tx('Bir soat oldin eslatma'),
                   trailing: const Icon(Icons.edit_calendar_outlined),
                   onTap: pickDate,
                 )),
                 const SizedBox(height: 8),
-                Text('O‘lchamlar',
-                    style: Theme.of(context).textTheme.titleLarge),
+                Tx('O‘lchamlar', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
                 for (var i = 0; i < rows.length; i++) sizeRow(i),
                 OutlinedButton.icon(
                   onPressed: () => setState(() => rows.add(_SizeRow())),
                   icon: const Icon(Icons.add),
-                  label: const Text('O‘lcham qo‘shish'),
+                  label: const Tx('O‘lcham qo‘shish'),
                 ),
                 const SizedBox(height: 12),
                 GlassControl(
                   child: TextField(
                     controller: note,
                     maxLines: 3,
-                    decoration: const InputDecoration(labelText: 'Umumiy izoh'),
+                    decoration: InputDecoration(labelText: tr('Umumiy izoh')),
                   ),
                 ),
               ],

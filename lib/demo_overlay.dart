@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'i18n.dart';
 
 /// Recording aid, compiled in only with --dart-define=ROMFLOW_DEMO=true:
 /// a caption strip explaining each step and a dot where the finger is.
@@ -68,7 +69,7 @@ class _DemoOverlayState extends State<DemoOverlay> {
                                 horizontal: 14,
                                 vertical: 10,
                               ),
-                              child: Text(
+                              child: Tx(
                                 text,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(

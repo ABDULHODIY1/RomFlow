@@ -61,6 +61,12 @@ import UserNotifications
 
       FlutterMethodChannel(name: "romflow/offline", binaryMessenger: vc.binaryMessenger).setMethodCallHandler { [weak self] call, result in
         guard let self = self else { return }
+        if call.method == "open" {
+          if let text = (call.arguments as? [String:Any])?["url"] as? String,
+             text.hasPrefix("https://") || text.hasPrefix("itms-apps://"),
+             let url = URL(string: text) { UIApplication.shared.open(url) }
+          result(nil); return
+        }
         if call.method == "dial" {
           let digits = ((call.arguments as? [String:Any])?["phone"] as? String ?? "").filter { "+0123456789".contains($0) }
           if let url = URL(string: "tel:\(digits)"), !digits.isEmpty { UIApplication.shared.open(url) }

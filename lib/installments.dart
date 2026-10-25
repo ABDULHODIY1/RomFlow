@@ -4,6 +4,7 @@ import 'calculator.dart';
 import 'dialogs.dart';
 import 'main.dart' show guarded, uzbekDay;
 import 'store.dart';
+import 'i18n.dart';
 
 enum InstallmentState { paid, waiting, late }
 
@@ -44,21 +45,21 @@ class InstallmentCard extends StatelessWidget {
       context: context,
       builder: (c) => StatefulBuilder(
         builder: (c, set) => GlassAlertDialog(
-          title: const Text('Bo‘lib to‘lash'),
+          title: const Tx('Bo‘lib to‘lash'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Qoldiq: ${money(quote['balance'])}'),
+              Tx('Qoldiq: ${money(quote['balance'])}'),
               const SizedBox(height: 12),
               GlassControl(
                 child: DropdownButtonFormField<int>(
                   initialValue: months,
-                  decoration: const InputDecoration(labelText: 'Necha oyga'),
+                  decoration: InputDecoration(labelText: tr('Necha oyga')),
                   items: [
                     for (final m in [2, 3, 4, 6, 9, 12, 18, 24])
                       DropdownMenuItem(
                         value: m,
-                        child: Text(
+                        child: Tx(
                           '$m oy • oyiga ~${money((quote['balance'] as num) / m)}',
                         ),
                       ),
@@ -69,7 +70,7 @@ class InstallmentCard extends StatelessWidget {
               GlassControl(
                   child: ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text('Birinchi to‘lov: ${uzbekDay(first)}'),
+                title: Tx('Birinchi to‘lov: ${uzbekDay(first)}'),
                 trailing: const Icon(Icons.edit_calendar_outlined),
                 onTap: () async {
                   final d = await showDatePicker(
@@ -86,11 +87,11 @@ class InstallmentCard extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(c, false),
-              child: const Text('Bekor qilish'),
+              child: const Tx('Bekor qilish'),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(c, true),
-              child: const Text('Jadval tuzish'),
+              child: const Tx('Jadval tuzish'),
             ),
           ],
         ),
@@ -117,7 +118,7 @@ class InstallmentCard extends StatelessWidget {
           key: const ValueKey('plan-installments'),
           onPressed: () => plan(context),
           icon: const Icon(Icons.calendar_month_outlined),
-          label: const Text('Bo‘lib to‘lash jadvali'),
+          label: const Tx('Bo‘lib to‘lash jadvali'),
         ),
       );
     }
@@ -133,13 +134,13 @@ class InstallmentCard extends StatelessWidget {
                 const Icon(Icons.calendar_month_outlined),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
+                  child: Tx(
                     'Bo‘lib to‘lash • ${rows.length} oy',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Jadvalni olib tashlash',
+                  tooltip: tr('Jadvalni olib tashlash'),
                   onPressed: () => guarded(
                     context,
                     () => store.clearPaymentSchedule(quote['id']),
@@ -165,13 +166,13 @@ class InstallmentCard extends StatelessWidget {
                     InstallmentState.waiting => scheme.onSurfaceVariant,
                   },
                 ),
-                title: Text(uzbekDay(DateTime.parse(row['due']))),
-                subtitle: Text(switch (state) {
+                title: Tx(uzbekDay(DateTime.parse(row['due']))),
+                subtitle: Tx(switch (state) {
                   InstallmentState.paid => 'To‘langan',
                   InstallmentState.late => 'Muddati o‘tgan',
                   InstallmentState.waiting => 'Kutilmoqda',
                 }),
-                trailing: Text(
+                trailing: Tx(
                   money(row['amount']),
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),

@@ -4,6 +4,7 @@ import 'calculator.dart';
 import 'dialogs.dart';
 import 'store.dart';
 import 'workshop_field.dart';
+import 'i18n.dart';
 
 String _day(String raw) {
   final d = DateTime.parse(raw).toLocal();
@@ -37,11 +38,11 @@ class StaffPage extends StatelessWidget {
             (sum, w) => sum + store.staffBalance(w['id']),
           );
           return Scaffold(
-            appBar: GlassAppBar(title: const Text('Xodimlar va ish haqi')),
+            appBar: GlassAppBar(title: const Tx('Xodimlar va ish haqi')),
             floatingActionButton: GlassActionButton.extended(
               onPressed: () => editWorker(context, store),
               icon: const Icon(Icons.person_add_alt),
-              label: const Text('Xodim'),
+              label: const Tx('Xodim'),
             ),
             body: readable(
               ListView(
@@ -51,11 +52,11 @@ class StaffPage extends StatelessWidget {
                     child: GlassControl(
                         child: ListTile(
                       leading: const Icon(Icons.payments_outlined),
-                      title: const Text('Xodimlarga berilishi kerak'),
-                      subtitle: const Text(
+                      title: const Tx('Xodimlarga berilishi kerak'),
+                      subtitle: const Tx(
                         'Hisoblangan ish haqi va bonus − avans, to‘lov va jarima',
                       ),
-                      trailing: Text(
+                      trailing: Tx(
                         money(owed),
                         style: const TextStyle(
                           fontWeight: FontWeight.w800,
@@ -68,7 +69,7 @@ class StaffPage extends StatelessWidget {
                   if (store.staff.isEmpty)
                     const Padding(
                       padding: EdgeInsets.all(24),
-                      child: Text(
+                      child: Tx(
                         'Xodim qo‘shing: ism, vazifa va ish haqi turi (oylik, kunlik, m², buyurtmadan % yoki dona).',
                       ),
                     ),
@@ -77,26 +78,26 @@ class StaffPage extends StatelessWidget {
                       child: GlassControl(
                           child: ListTile(
                         leading: CircleAvatar(
-                          child: Text(
+                          child: Tx(
                             (w['name'] as String).isEmpty
                                 ? '?'
                                 : (w['name'] as String)[0].toUpperCase(),
                           ),
                         ),
-                        title: Text(w['name']),
-                        subtitle: Text(
+                        title: Tx(w['name']),
+                        subtitle: Tx(
                           '${(w['role'] ?? '').toString().isEmpty ? 'Vazifa yo‘q' : w['role']} • ${rateLabel(w)}',
                         ),
                         trailing: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
+                            Tx(
                               money(store.staffBalance(w['id'])),
                               style:
                                   const TextStyle(fontWeight: FontWeight.w700),
                             ),
-                            Text(
+                            Tx(
                               'qoldiq',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
@@ -140,7 +141,7 @@ Future<void> editWorker(
     context: context,
     builder: (c) => StatefulBuilder(
       builder: (c, set) => GlassAlertDialog(
-        title: Text(worker == null ? 'Yangi xodim' : 'Xodimni tahrirlash'),
+        title: Tx(worker == null ? 'Yangi xodim' : 'Xodimni tahrirlash'),
         content: SingleChildScrollView(
           child: Form(
             key: form,
@@ -169,12 +170,12 @@ Future<void> editWorker(
                   child: DropdownButtonFormField<String>(
                     isExpanded: true,
                     initialValue: payType,
-                    decoration: const InputDecoration(
-                      labelText: 'Ish haqi turi',
+                    decoration: InputDecoration(
+                      labelText: tr('Ish haqi turi'),
                     ),
                     items: [
                       for (final e in Store.payTypes.entries)
-                        DropdownMenuItem(value: e.key, child: Text(e.value)),
+                        DropdownMenuItem(value: e.key, child: Tx(e.value)),
                     ],
                     onChanged: (v) => set(() => payType = v!),
                   ),
@@ -213,17 +214,17 @@ Future<void> editWorker(
                   if (c.mounted) {
                     ScaffoldMessenger.of(c).showSnackBar(
                       SnackBar(
-                        content: Text('$e'.replaceFirst('Exception: ', '')),
+                        content: Tx('$e'.replaceFirst('Exception: ', '')),
                       ),
                     );
                   }
                 }
               },
-              child: const Text('O‘chirish'),
+              child: const Tx('O‘chirish'),
             ),
           TextButton(
             onPressed: () => Navigator.pop(c),
-            child: const Text('Bekor'),
+            child: const Tx('Bekor'),
           ),
           FilledButton(
             onPressed: () async {
@@ -239,7 +240,7 @@ Future<void> editWorker(
               });
               if (c.mounted) Navigator.pop(c);
             },
-            child: const Text('Saqlash'),
+            child: const Tx('Saqlash'),
           ),
         ],
       ),
@@ -270,7 +271,7 @@ Future<void> payrollDialog(
     context: context,
     builder: (c) => StatefulBuilder(
       builder: (c, set) => GlassAlertDialog(
-        title: const Text('Ish haqi yozuvi'),
+        title: const Tx('Ish haqi yozuvi'),
         content: SingleChildScrollView(
           child: Form(
             key: form,
@@ -281,10 +282,10 @@ Future<void> payrollDialog(
                   child: DropdownButtonFormField<String>(
                     isExpanded: true,
                     initialValue: chosen,
-                    decoration: const InputDecoration(labelText: 'Turi'),
+                    decoration: InputDecoration(labelText: tr('Turi')),
                     items: [
                       for (final e in Store.payKinds.entries)
-                        DropdownMenuItem(value: e.key, child: Text(e.value)),
+                        DropdownMenuItem(value: e.key, child: Tx(e.value)),
                     ],
                     onChanged: (v) => set(() => chosen = v!),
                   ),
@@ -315,13 +316,13 @@ Future<void> payrollDialog(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Bekor'),
+            child: const Tx('Bekor'),
           ),
           FilledButton(
             onPressed: () {
               if (form.currentState!.validate()) Navigator.pop(c, true);
             },
-            child: const Text('Yozish'),
+            child: const Tx('Yozish'),
           ),
         ],
       ),
@@ -339,7 +340,7 @@ Future<void> payrollDialog(
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$e'.replaceFirst('Exception: ', ''))),
+          SnackBar(content: Tx('$e'.replaceFirst('Exception: ', ''))),
         );
       }
     }
@@ -365,7 +366,7 @@ class StaffDetailPage extends StatelessWidget {
           if (found.isEmpty) {
             return Scaffold(
               appBar: GlassAppBar(),
-              body: const Center(child: Text('Xodim topilmadi')),
+              body: const Center(child: Tx('Xodim topilmadi')),
             );
           }
           final w = found.first;
@@ -377,10 +378,10 @@ class StaffDetailPage extends StatelessWidget {
               store.quotes.where((q) => q['staffId'] == staffId).toList();
           return Scaffold(
             appBar: GlassAppBar(
-              title: Text(w['name']),
+              title: Tx(w['name']),
               actions: [
                 IconButton(
-                  tooltip: 'Tahrirlash',
+                  tooltip: tr('Tahrirlash'),
                   onPressed: () => editWorker(context, store, w),
                   icon: const Icon(Icons.edit_outlined),
                 ),
@@ -390,7 +391,7 @@ class StaffDetailPage extends StatelessWidget {
               ListView(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
                 children: [
-                  Text(
+                  Tx(
                     '${(w['role'] ?? '').toString().isEmpty ? 'Xodim' : w['role']} • ${rateLabel(w)}${(w['phone'] ?? '').toString().isEmpty ? '' : ' • ${w['phone']}'}',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
@@ -401,11 +402,11 @@ class StaffDetailPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          Tx(
                             'Berilishi kerak',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          Text(
+                          Tx(
                             money(store.staffBalance(staffId)),
                             style: TextStyle(
                               fontSize: 26,
@@ -414,7 +415,7 @@ class StaffDetailPage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text(
+                          Tx(
                             'Hisoblangan: ${money(total({
                                   'accrual'
                                 }))} • bonus ${money(total({
@@ -446,13 +447,13 @@ class StaffDetailPage extends StatelessWidget {
                               : null,
                         ),
                         icon: const Icon(Icons.add),
-                        label: const Text('Ish haqi yozish'),
+                        label: const Tx('Ish haqi yozish'),
                       ),
                       OutlinedButton.icon(
                         onPressed: () => payrollDialog(context, store, staffId,
                             kind: 'advance'),
                         icon: const Icon(Icons.north_east),
-                        label: const Text('Avans'),
+                        label: const Tx('Avans'),
                       ),
                       OutlinedButton.icon(
                         onPressed: () => payrollDialog(
@@ -463,13 +464,13 @@ class StaffDetailPage extends StatelessWidget {
                           suggested: store.staffBalance(staffId),
                         ),
                         icon: const Icon(Icons.payments_outlined),
-                        label: const Text('To‘lash'),
+                        label: const Tx('To‘lash'),
                       ),
                     ],
                   ),
                   if (orders.isNotEmpty) ...[
                     const SizedBox(height: 18),
-                    Text(
+                    Tx(
                       'Biriktirilgan buyurtmalar',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
@@ -477,8 +478,8 @@ class StaffDetailPage extends StatelessWidget {
                       GlassControl(
                           child: ListTile(
                         dense: true,
-                        title: Text(q['title']),
-                        subtitle: Text(
+                        title: Tx(q['title']),
+                        subtitle: Tx(
                           '${statuses[q['status']]} • stavka bo‘yicha ${money(Store.suggestedPay(w, q))}',
                         ),
                         trailing: store.payroll.any(
@@ -497,16 +498,16 @@ class StaffDetailPage extends StatelessWidget {
                                   quoteId: q['id'],
                                   note: q['title'],
                                 ),
-                                child: const Text('Yozish'),
+                                child: const Tx('Yozish'),
                               ),
                       )),
                   ],
                   const SizedBox(height: 18),
-                  Text('Tarix', style: Theme.of(context).textTheme.titleMedium),
+                  Tx('Tarix', style: Theme.of(context).textTheme.titleMedium),
                   if (rows.isEmpty)
                     const Padding(
                       padding: EdgeInsets.all(16),
-                      child: Text('Hali yozuv yo‘q.'),
+                      child: Tx('Hali yozuv yo‘q.'),
                     ),
                   for (final e in rows)
                     GlassCard(
@@ -517,15 +518,15 @@ class StaffDetailPage extends StatelessWidget {
                               ? Icons.add_circle_outline
                               : Icons.remove_circle_outline,
                         ),
-                        title: Text(Store.payKinds[e['kind']]!),
-                        subtitle: Text(
+                        title: Tx(Store.payKinds[e['kind']]!),
+                        subtitle: Tx(
                           [
                             _day(e['created']),
                             if ((e['note'] ?? '').toString().isNotEmpty)
                               e['note'],
                           ].join(' • '),
                         ),
-                        trailing: Text(
+                        trailing: Tx(
                           '${const {
                             'accrual',
                             'bonus'
@@ -535,15 +536,15 @@ class StaffDetailPage extends StatelessWidget {
                           final yes = await showDialog<bool>(
                             context: context,
                             builder: (c) => GlassAlertDialog(
-                              title: const Text('Yozuv o‘chirilsinmi?'),
+                              title: const Tx('Yozuv o‘chirilsinmi?'),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(c, false),
-                                  child: const Text('Bekor'),
+                                  child: const Tx('Bekor'),
                                 ),
                                 FilledButton(
                                   onPressed: () => Navigator.pop(c, true),
-                                  child: const Text('O‘chirish'),
+                                  child: const Tx('O‘chirish'),
                                 ),
                               ],
                             ),

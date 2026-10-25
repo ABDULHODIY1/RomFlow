@@ -2,6 +2,7 @@ import 'adaptive_ui.dart';
 import 'package:flutter/material.dart';
 import 'design_engine.dart';
 import 'dialogs.dart';
+import 'i18n.dart';
 
 class DraftPayload {
   final String kind, value, label;
@@ -76,7 +77,7 @@ class DraftTool extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text(
+                        child: Tx(
                           label,
                           maxLines: 1,
                           style: TextStyle(
@@ -129,7 +130,7 @@ class DraftTool extends StatelessWidget {
                 else
                   Icon(icon, color: colors.primary, size: 28),
                 const SizedBox(height: 4),
-                Text(
+                Tx(
                   label,
                   style: TextStyle(
                     fontSize: 12,
@@ -199,7 +200,7 @@ Future<double?> draftNumber(
     builder: (context) => StatefulBuilder(
       builder: (context, set) => GlassAlertDialog(
         scrollable: true,
-        title: Text(title),
+        title: Tx(title),
         content: SizedBox(
           width: 300,
           child: Column(
@@ -212,7 +213,7 @@ Future<double?> draftNumber(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
+                child: Tx(
                   '${value.isEmpty ? '0' : value} $unit',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
@@ -224,7 +225,7 @@ Future<double?> draftNumber(
               if (error != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
-                  child: Text(
+                  child: Tx(
                     error!,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
@@ -270,7 +271,7 @@ Future<double?> draftNumber(
                                 value += key;
                               }
                             }),
-                            child: Text(
+                            child: Tx(
                               key,
                               style: const TextStyle(fontSize: 21),
                             ),
@@ -279,7 +280,7 @@ Future<double?> draftNumber(
                       ),
                   ],
                 ),
-              Text(
+              Tx(
                 '$min–$max $unit',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
@@ -289,7 +290,7 @@ Future<double?> draftNumber(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Bekor qilish'),
+            child: const Tx('Bekor qilish'),
           ),
           FilledButton(
             onPressed: () {
@@ -307,7 +308,7 @@ Future<double?> draftNumber(
               }
               Navigator.pop(context, n);
             },
-            child: const Text('Saqlash'),
+            child: const Tx('Saqlash'),
           ),
         ],
       ),

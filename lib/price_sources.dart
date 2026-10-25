@@ -12,6 +12,7 @@ import 'platform_files.dart';
 import 'store.dart';
 import 'workshop_tools.dart' show localDate;
 import 'adaptive_ui.dart';
+import 'i18n.dart';
 
 /// Price lists from sources the workshop is allowed to use: a dealer's or
 /// supplier's feed, or its own published spreadsheet (Google Sheets →
@@ -412,7 +413,7 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
 
   void say(Object text) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$text'.replaceFirst(RegExp(r'^\w*Exception: '), '')),
+          content: Tx('$text'.replaceFirst(RegExp(r'^\w*Exception: '), '')),
         ),
       );
 
@@ -424,7 +425,7 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
       context: context,
       builder: (c) => StatefulBuilder(
         builder: (c, setDialog) => GlassAlertDialog(
-          title: Text(
+          title: Tx(
             source == null ? 'Narx manbasi qo‘shish' : 'Manbani tahrirlash',
           ),
           content: SingleChildScrollView(
@@ -434,8 +435,8 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
                 GlassControl(
                   child: TextField(
                     controller: name,
-                    decoration: const InputDecoration(
-                      labelText: 'Nomi (masalan: Diler)',
+                    decoration: InputDecoration(
+                      labelText: tr('Nomi (masalan: Diler)'),
                     ),
                   ),
                 ),
@@ -445,14 +446,14 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
                     key: const ValueKey('price-source-url'),
                     controller: url,
                     keyboardType: TextInputType.url,
-                    decoration: const InputDecoration(
-                      labelText: 'Havola (CSV yoki JSON)',
-                      hintText: 'https://…',
+                    decoration: InputDecoration(
+                      labelText: tr('Havola (CSV yoki JSON)'),
+                      hintText: tr('https://…'),
                     ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
+                Tx(
                   'Google Sheets: Fayl → Ulashish → Internetda e’lon qilish → CSV havolasini nusxalang.',
                   style: Theme.of(c).textTheme.bodySmall,
                 ),
@@ -462,8 +463,8 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
                     contentPadding: EdgeInsets.zero,
                     value: auto == true,
                     onChanged: (v) => setDialog(() => auto = v),
-                    title: const Text('Har kuni o‘zi yangilansin'),
-                    subtitle: const Text(
+                    title: const Tx('Har kuni o‘zi yangilansin'),
+                    subtitle: const Tx(
                       'Ilova ochilganda kuniga bir marta narxlar shu havoladan olinadi',
                     ),
                   ),
@@ -474,11 +475,11 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(c, false),
-              child: const Text('Bekor qilish'),
+              child: const Tx('Bekor qilish'),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(c, true),
-              child: const Text('Saqlash'),
+              child: const Tx('Saqlash'),
             ),
           ],
         ),
@@ -567,11 +568,11 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
     return AnimatedBuilder(
       animation: s,
       builder: (context, _) => Scaffold(
-        appBar: GlassAppBar(title: const Text('Narxlarni yangilash')),
+        appBar: GlassAppBar(title: const Tx('Narxlarni yangilash')),
         floatingActionButton: GlassActionButton.extended(
           onPressed: () => editSource(),
           icon: const Icon(Icons.add_link),
-          label: const Text('Manba'),
+          label: const Tx('Manba'),
         ),
         body: Align(
           alignment: Alignment.topCenter,
@@ -580,7 +581,7 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               children: [
-                Text(
+                Tx(
                   'Narxlarni diler, yetkazib beruvchi yoki o‘zingizning Google Sheets jadvalingizdan oling. Ochiq havola yoki ruxsat berilgan API bo‘lsa yetarli: CSV yoki JSON. Qo‘llashdan oldin har bir o‘zgarish ko‘rsatiladi.',
                   style: text.bodyMedium,
                 ),
@@ -592,23 +593,23 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
                     OutlinedButton.icon(
                       onPressed: fromFile,
                       icon: const Icon(Icons.upload_file),
-                      label: const Text('Fayldan yuklash'),
+                      label: const Tx('Fayldan yuklash'),
                     ),
                     OutlinedButton.icon(
                       onPressed: template,
                       icon: const Icon(Icons.table_view_outlined),
-                      label: const Text('Namuna jadval'),
+                      label: const Tx('Namuna jadval'),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text('Manbalar', style: text.titleLarge),
+                Tx('Manbalar', style: text.titleLarge),
                 const SizedBox(height: 8),
                 if (s.priceSources.isEmpty)
                   GlassCard(
                     child: Padding(
                       padding: const EdgeInsets.all(18),
-                      child: Text(
+                      child: Tx(
                         'Hali manba yo‘q. “Manba” tugmasi bilan diler havolasini yoki e’lon qilingan jadvalingizni qo‘shing.',
                         style: text.bodySmall,
                       ),
@@ -619,8 +620,8 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
                     child: GlassControl(
                         child: ListTile(
                       leading: const Icon(Icons.cloud_download_outlined),
-                      title: Text(src['name']),
-                      subtitle: Text(
+                      title: Tx(src['name']),
+                      subtitle: Tx(
                         [
                           src['url'],
                           if (src['lastFetched'] != null)
@@ -643,14 +644,14 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : IconButton(
-                              tooltip: 'Yangilash',
+                              tooltip: tr('Yangilash'),
                               onPressed: () => refresh(src),
                               icon: const Icon(Icons.sync),
                             ),
                     )),
                   ),
                 const SizedBox(height: 12),
-                Text(
+                Tx(
                   'Ustunlar: material (masalan frame, “Tashqi rama”, kosa, qanot, orta, shtapik, shisha), narx, ixtiyoriy profil va valyuta (USD). Manbani o‘chirish uchun uzoq bosing.',
                   style: text.bodySmall,
                 ),
@@ -701,7 +702,7 @@ class _PriceReviewPageState extends State<PriceReviewPage> {
       error = '$e'.replaceFirst('FormatException: ', '');
     }
     return Scaffold(
-      appBar: GlassAppBar(title: Text('Narxlar • ${widget.sourceName}')),
+      appBar: GlassAppBar(title: Tx('Narxlar • ${widget.sourceName}')),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -719,7 +720,7 @@ class _PriceReviewPageState extends State<PriceReviewPage> {
                     if (context.mounted) Navigator.pop(context, true);
                   },
             icon: const Icon(Icons.check),
-            label: Text(
+            label: Tx(
               changes.isEmpty
                   ? 'O‘zgarish yo‘q'
                   : '${changes.length} ta narxni qo‘llash',
@@ -734,18 +735,18 @@ class _PriceReviewPageState extends State<PriceReviewPage> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text(
+              Tx(
                 '${widget.list.rows.length} ta narx o‘qildi${widget.list.skipped.isEmpty ? '' : ', ${widget.list.skipped.length} ta qator tanilmadi'}.',
                 style: text.bodyMedium,
               ),
               const SizedBox(height: 10),
-              Text('Qaysi profillarga', style: text.titleMedium),
+              Tx('Qaysi profillarga', style: text.titleMedium),
               for (final p in s.profiles)
                 GlassControl(
                   child: CheckboxListTile(
                     contentPadding: EdgeInsets.zero,
                     value: chosen.contains(p['id']),
-                    title: Text(
+                    title: Tx(
                       p['name'],
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -760,7 +761,7 @@ class _PriceReviewPageState extends State<PriceReviewPage> {
               if (error != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
+                  child: Tx(
                     error!,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
@@ -773,22 +774,22 @@ class _PriceReviewPageState extends State<PriceReviewPage> {
                     child: ListTile(
                   contentPadding: EdgeInsets.zero,
                   dense: true,
-                  title: Text(c.label),
-                  subtitle: Text(
+                  title: Tx(c.label),
+                  subtitle: Tx(
                     c.profileName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: Text(
+                  trailing: Tx(
                     '${c.before == null ? '—' : money(c.before!)} → ${money(c.after)}',
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 )),
               if (widget.list.skipped.isNotEmpty) ...[
                 const Divider(),
-                Text('Tanilmagan qatorlar', style: text.titleSmall),
+                Tx('Tanilmagan qatorlar', style: text.titleSmall),
                 for (final line in widget.list.skipped.take(20))
-                  Text(line, style: text.bodySmall),
+                  Tx(line, style: text.bodySmall),
               ],
             ],
           ),

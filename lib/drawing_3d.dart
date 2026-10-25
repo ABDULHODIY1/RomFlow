@@ -16,6 +16,7 @@ import 'calculator.dart' show money;
 import 'in_place_page.dart';
 import 'platform_files.dart';
 import 'adaptive_ui.dart';
+import 'i18n.dart';
 
 class P3 {
   final double x, y, z;
@@ -2462,13 +2463,13 @@ class _View3DState extends State<View3D>
       if (note != null && mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(note)));
+        ).showSnackBar(SnackBar(content: Tx(note)));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Rasmni ulashib bo‘lmadi: $e')));
+        ).showSnackBar(SnackBar(content: Tx('Rasmni ulashib bo‘lmadi: $e')));
       }
     } finally {
       sharing = false;
@@ -2510,13 +2511,12 @@ class _View3DState extends State<View3D>
           child: ListView(
             children: [
               const GlassControl(
-                  child:
-                      ListTile(title: Text('3D detallar • alohida ko‘rish'))),
+                  child: ListTile(title: Tx('3D detallar • alohida ko‘rish'))),
               for (final p in model.parts.values)
                 GlassControl(
                     child: ListTile(
-                  title: Text(p.title),
-                  subtitle: Text(
+                  title: Tx(p.title),
+                  subtitle: Tx(
                     '${materialNames[p.materialKey] ?? p.materialKey} · ${p.extent.x.round()} × ${p.extent.y.round()} × ${p.extent.z.round()} mm',
                   ),
                   trailing: const Icon(Icons.zoom_in),
@@ -2578,21 +2578,21 @@ class _View3DState extends State<View3D>
           backgroundColor: const Color(0xff101d30),
           foregroundColor: Colors.white,
           glassBrightness: Brightness.dark,
-          title: Text(explodeMode ? 'Detallar' : '3D'),
+          title: Tx(explodeMode ? 'Detallar' : '3D'),
           actions: [
             IconButton(
-              tooltip: 'Detallar',
+              tooltip: tr('Detallar'),
               icon: const Icon(Icons.list_alt),
               onPressed: componentList,
             ),
             if (widget.returnToEditor)
               IconButton(
-                tooltip: 'Chizmani qo‘lda o‘zgartirish',
+                tooltip: tr('Chizmani qo‘lda o‘zgartirish'),
                 onPressed: () => Navigator.pop(context),
                 icon: const Icon(Icons.edit_outlined),
               ),
             PopupMenuButton<bool>(
-              tooltip: 'Rasmini ulashish',
+              tooltip: tr('Rasmini ulashish'),
               enabled: !sharing,
               icon: sharing
                   ? const SizedBox.square(
@@ -2602,12 +2602,12 @@ class _View3DState extends State<View3D>
                   : const Icon(Icons.ios_share),
               onSelected: (high) => shareImage(export4K: high),
               itemBuilder: (_) => const [
-                PopupMenuItem(value: false, child: Text('Rasmni ulashish')),
-                PopupMenuItem(value: true, child: Text('4K rasm · 4096 px')),
+                PopupMenuItem(value: false, child: Tx('Rasmni ulashish')),
+                PopupMenuItem(value: true, child: Tx('4K rasm · 4096 px')),
               ],
             ),
             IconButton(
-              tooltip: 'Materiallar tarkibi',
+              tooltip: tr('Materiallar tarkibi'),
               onPressed: inventory,
               icon: const Icon(Icons.inventory_2_outlined),
             ),
@@ -2792,14 +2792,14 @@ class _View3DState extends State<View3D>
                                     ? GlassIconButton(
                                         key: ValueKey(key),
                                         icon: icon,
-                                        tooltip: tip,
+                                        tooltip: tr(tip),
                                         onPressed: () => look(y, p),
                                         size: 40,
                                         brightness: Brightness.dark,
                                       )
                                     : IconButton(
                                         key: ValueKey(key),
-                                        tooltip: tip,
+                                        tooltip: tr(tip),
                                         onPressed: () => look(y, p),
                                         style: IconButton.styleFrom(
                                           backgroundColor: Colors.black26,
@@ -2832,7 +2832,7 @@ class _View3DState extends State<View3D>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            Tx(
                               part?.title ??
                                   materialNames[selectedMaterial] ??
                                   'Yordamchi 3D detal',
@@ -2842,7 +2842,7 @@ class _View3DState extends State<View3D>
                               ),
                             ),
                             if (part != null)
-                              Text(
+                              Tx(
                                 '3D gabarit: ${part.extent.x.toStringAsFixed(0)} × ${part.extent.y.toStringAsFixed(0)} × ${part.extent.z.toStringAsFixed(0)} mm',
                                 style: const TextStyle(
                                   color: Colors.white70,
@@ -2850,14 +2850,14 @@ class _View3DState extends State<View3D>
                                 ),
                               ),
                             if (line != null) ...[
-                              Text(
+                              Tx(
                                 '${bill!['quantity']} ta konstruksiya: sof ${(line['net'] as num).toStringAsFixed(3)} ${line['unit']} · xarid ${(line['quantity'] as num).toStringAsFixed(3)} ${line['unit']}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
                                 ),
                               ),
-                              Text(
+                              Tx(
                                 (line['price'] as num? ?? 0) <= 0
                                     ? 'Narx kiritilmagan — katalogda belgilang'
                                     : 'Xarid summasi: ${money(line['cost'])}',
@@ -2867,7 +2867,7 @@ class _View3DState extends State<View3D>
                                 ),
                               ),
                             ] else
-                              const Text(
+                              const Tx(
                                 'Ko‘rgazmali detal; alohida sarf qatori yo‘q.',
                                 style: TextStyle(
                                   color: Colors.white70,
@@ -2879,7 +2879,7 @@ class _View3DState extends State<View3D>
                       ),
                       if (sashOf(selectedPart) != null)
                         IconButton(
-                          tooltip: 'Shu qanotni ochish / yopish',
+                          tooltip: tr('Shu qanotni ochish / yopish'),
                           onPressed: () => toggleSash(sashOf(selectedPart)!),
                           icon: const Icon(
                             Icons.door_sliding_outlined,
@@ -2888,7 +2888,7 @@ class _View3DState extends State<View3D>
                         ),
                       if (part != null)
                         IconButton(
-                          tooltip: 'Detalni alohida ko‘rish',
+                          tooltip: tr('Detalni alohida ko‘rish'),
                           onPressed: () => setState(() {
                             focused = !focused;
                             zoom = 1;
@@ -2901,7 +2901,7 @@ class _View3DState extends State<View3D>
                           ),
                         ),
                       IconButton(
-                        tooltip: 'Tanlovni olish',
+                        tooltip: tr('Tanlovni olish'),
                         onPressed: () => setState(() {
                           selectedPart = null;
                           focused = false;
@@ -2920,11 +2920,11 @@ class _View3DState extends State<View3D>
                     Row(
                       children: [
                         IconButton(
-                          tooltip: controller.isAnimating
+                          tooltip: tr(controller.isAnimating
                               ? 'To‘xtatish'
                               : explodeMode
                                   ? 'Sochish / yig‘ish animatsiyasi'
-                                  : 'Ochish / yopish',
+                                  : 'Ochish / yopish'),
                           onPressed: !explodeMode && model.groups.isEmpty
                               ? null
                               : togglePlayback,
@@ -2975,7 +2975,7 @@ class _View3DState extends State<View3D>
                       ],
                     ),
                     if (calculationError != null)
-                      Text(
+                      Tx(
                         'Hisob uchun me’yorni tekshiring: $calculationError',
                         maxLines: 2,
                         style: const TextStyle(
@@ -3146,7 +3146,7 @@ class _View3DState extends State<View3D>
             ? GlassIconButton(
                 key: key,
                 icon: icon,
-                tooltip: name,
+                tooltip: tr(name),
                 selected: on,
                 onPressed: onTap,
                 size: 42,
@@ -3154,7 +3154,7 @@ class _View3DState extends State<View3D>
               )
             : IconButton(
                 key: key,
-                tooltip: name,
+                tooltip: tr(name),
                 isSelected: on,
                 onPressed: onTap,
                 style: IconButton.styleFrom(
@@ -3183,7 +3183,7 @@ class _View3DState extends State<View3D>
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text(
+                child: Tx(
                   'Ichida nima bor? • ${bill?['quantity'] ?? 1} ta konstruksiya',
                   style: const TextStyle(
                     fontSize: 19,
@@ -3193,14 +3193,14 @@ class _View3DState extends State<View3D>
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
+                child: Tx(
                   'Sof sarf → butun tayoq/list bilan xarid. Materialni tanlab 3D’da ajrating.',
                 ),
               ),
               if (bill == null)
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text(calculationError ?? 'Hisob yo‘q'),
+                  child: Tx(calculationError ?? 'Hisob yo‘q'),
                 )
               else
                 Expanded(
@@ -3220,11 +3220,11 @@ class _View3DState extends State<View3D>
                                 visible ? Icons.view_in_ar : Icons.receipt_long,
                                 color: const Color(0xff206bc4),
                               ),
-                              title: Text(p['name']),
-                              subtitle: Text(
+                              title: Tx(p['name']),
+                              subtitle: Tx(
                                 '${(p['net'] as num).toStringAsFixed(3)} → ${(p['quantity'] as num).toStringAsFixed(3)} ${p['unit']}\n${visible ? '3D’da ko‘rsatish' : 'Hisobda bor; 3D shakli modellashtirilmagan'}',
                               ),
-                              trailing: Text(money(p['cost'])),
+                              trailing: Tx(money(p['cost'])),
                               onTap: () {
                                 Navigator.pop(context);
                                 setState(() {
@@ -3325,7 +3325,7 @@ class _ProfileSectionsState extends State<ProfileSections> {
         backgroundColor: const Color(0xff101d30),
         foregroundColor: Colors.white,
         glassBrightness: Brightness.dark,
-        title: const Text('Profil kesimlari'),
+        title: const Tx('Profil kesimlari'),
       ),
       body: SafeArea(
         child: Column(
@@ -3339,7 +3339,7 @@ class _ProfileSectionsState extends State<ProfileSections> {
                   for (var i = 0; i < pieces.length; i++)
                     GlassControl(
                       child: ChoiceChip(
-                        label: Text(pieces[i].$1),
+                        label: Tx(pieces[i].$1),
                         selected: index == i,
                         onSelected: (_) => show(i),
                       ),
@@ -3360,7 +3360,7 @@ class _ProfileSectionsState extends State<ProfileSections> {
                 ),
               ),
             ),
-            Text(
+            Tx(
               size,
               style: const TextStyle(
                 color: Colors.white,
@@ -3370,7 +3370,7 @@ class _ProfileSectionsState extends State<ProfileSections> {
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(16, 4, 16, 14),
-              child: Text(
+              child: Tx(
                 'Yuz eni × chuqurlik. Barmoq bilan aylantiring. O‘lchamlar “Materiallar va narxlar”da o‘zgaradi.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white60, fontSize: 12),

@@ -1,6 +1,7 @@
 import 'adaptive_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'i18n.dart';
 
 /// Number pads on some phones have no return key. Keep completion reachable.
 class WorkshopKeyboardTools extends StatelessWidget {
@@ -44,13 +45,13 @@ class WorkshopKeyboardTools extends StatelessWidget {
                       onPressed: () =>
                           FocusManager.instance.primaryFocus?.nextFocus(),
                       icon: const Icon(Icons.keyboard_tab, size: 18),
-                      label: const Text('Keyingisi'),
+                      label: const Tx('Keyingisi'),
                     ),
                     TextButton.icon(
                       onPressed: () =>
                           FocusManager.instance.primaryFocus?.unfocus(),
                       icon: const Icon(Icons.keyboard_hide_outlined, size: 20),
-                      label: const Text('Tayyor'),
+                      label: const Tx('Tayyor'),
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -189,18 +190,19 @@ class _WorkshopFieldState extends State<WorkshopField> {
           },
           validator: (value) {
             final custom = widget.validator?.call(value);
-            if (custom != null) return custom;
+            if (custom != null) return tr(custom);
             if (widget.number) {
               final n = num.tryParse(value ?? '');
               if (n == null || !n.isFinite || n < 0) {
-                return '0 yoki musbat son kiriting';
+                return tr('0 yoki musbat son kiriting');
               }
             }
             return null;
           },
           decoration: InputDecoration(
-            label: Text(widget.label, maxLines: 2),
-            helperText: widget.helperText,
+            label: Tx(widget.label, maxLines: 2),
+            helperText:
+                widget.helperText == null ? null : tr(widget.helperText!),
             helperMaxLines: 3,
             errorMaxLines: 3,
             suffixText: widget.suffixText,
@@ -209,7 +211,7 @@ class _WorkshopFieldState extends State<WorkshopField> {
               builder: (context, value, _) => value.text.isEmpty
                   ? const SizedBox(width: 48, height: 48)
                   : IconButton(
-                      tooltip: 'Tozalash',
+                      tooltip: tr('Tozalash'),
                       icon: const Icon(Icons.close, size: 20),
                       onPressed: () {
                         widget.controller.clear();

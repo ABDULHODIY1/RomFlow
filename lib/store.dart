@@ -30,6 +30,14 @@ class Store extends ChangeNotifier {
   /// 'auto' (Liquid Glass on iPhone and iPad, Material elsewhere), 'glass'
   /// or 'material'.
   String designPreference = 'auto';
+
+  /// 'uz', 'ru' or 'en'; [languageBuild] is the app build it was chosen in,
+  /// so the choice is offered again after an update.
+  String language = 'uz';
+  int languageBuild = 0;
+
+  /// The newest build whose update offer was turned down.
+  int updateDismissedBuild = 0;
   String? startupMessage;
 
   /// So‘m per US dollar for prices quoted in dollars; 0 when not set.
@@ -303,6 +311,12 @@ class Store extends ChangeNotifier {
     }
     themePreference = d['themePreference'] ?? 'system';
     designPreference = '${d['designPreference'] ?? 'auto'}';
+    language = const {'uz', 'ru', 'en'}.contains(d['language'])
+        ? d['language'] as String
+        : 'uz';
+    languageBuild = d['languageBuild'] is int ? d['languageBuild'] as int : 0;
+    updateDismissedBuild =
+        d['updateDismissedBuild'] is int ? d['updateDismissedBuild'] as int : 0;
     if (!const {'auto', 'glass', 'material'}.contains(designPreference)) {
       designPreference = 'auto';
     }
@@ -359,6 +373,9 @@ class Store extends ChangeNotifier {
         'reminders': reminders,
         'themePreference': themePreference,
         'designPreference': designPreference,
+        'language': language,
+        'languageBuild': languageBuild,
+        'updateDismissedBuild': updateDismissedBuild,
         'inventory': inventory,
         'inventoryMoves': inventoryMoves,
         'drawingTemplates': drawingTemplates,
@@ -861,6 +878,20 @@ class Store extends ChangeNotifier {
           throw Exception('Dizayn noto‘g‘ri');
         }
         designPreference = value;
+      });
+
+  Future<void> setLanguage(String code, int build) =>
+      _change('Til o‘zgartirildi', () {
+        if (!const {'uz', 'ru', 'en'}.contains(code)) {
+          throw Exception('Til noto‘g‘ri');
+        }
+        language = code;
+        languageBuild = build;
+      });
+
+  Future<void> dismissUpdate(int build) =>
+      _change('Yangilanish keyinga qoldirildi', () {
+        updateDismissedBuild = build;
       });
 
   Future<void> setTheme(String value) => _change('Tema o‘zgartirildi', () {

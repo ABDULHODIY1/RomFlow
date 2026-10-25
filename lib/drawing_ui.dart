@@ -14,6 +14,7 @@ import 'in_place_page.dart';
 import 'manufacturers.dart' show comparisonKeys;
 import 'manufacturers_page.dart';
 import 'adaptive_ui.dart';
+import 'i18n.dart';
 
 const _blue = Color(0xff206bc4);
 
@@ -234,7 +235,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
       );
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(error!)));
+      ).showSnackBar(SnackBar(content: Tx(error!)));
       return;
     }
     num whole(num v) => v == v.roundToDouble() ? v.toInt() : v;
@@ -328,14 +329,14 @@ class _DrawingEditorState extends State<DrawingEditor> {
             children: [
               const Padding(
                 padding: EdgeInsets.all(16),
-                child: Text(
+                child: Tx(
                   'Detallardan yig‘ish',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
+                child: Tx(
                   'Avval chizmada bo‘limni tanlang. Detallar shu bo‘limga ulanadi; 3D va sarf birga yangilanadi.',
                 ),
               ),
@@ -430,8 +431,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       GlassControl(
                           child: ListTile(
                         leading: Icon(item.$4, color: _blue),
-                        title: Text(item.$2),
-                        subtitle: Text(item.$3),
+                        title: Tx(item.$2),
+                        subtitle: Tx(item.$3),
                         onTap: () => Navigator.pop(context, item.$1),
                       )),
                   ],
@@ -494,24 +495,24 @@ class _DrawingEditorState extends State<DrawingEditor> {
     final name = await showSettledDialog<String>(
       context: context,
       builder: (c) => GlassAlertDialog(
-        title: const Text('Andoza nomi'),
+        title: const Tx('Andoza nomi'),
         content: GlassControl(
           child: TextField(
             controller: text,
             autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Masalan: ikki qanotli rom',
+            decoration: InputDecoration(
+              labelText: tr('Masalan: ikki qanotli rom'),
             ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c),
-            child: const Text('Bekor'),
+            child: const Tx('Bekor'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(c, text.text.trim()),
-            child: const Text('Saqlash'),
+            child: const Tx('Saqlash'),
           ),
         ],
       ),
@@ -523,7 +524,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Andoza saqlandi')));
+        ).showSnackBar(const SnackBar(content: Tx('Andoza saqlandi')));
       }
     } catch (e) {
       if (mounted) setState(() => error = '$e');
@@ -538,21 +539,21 @@ class _DrawingEditorState extends State<DrawingEditor> {
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(16),
           children: [
-            const Text(
+            const Tx(
               'Saqlangan andozalar',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             if (widget.store.drawingTemplates.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(24),
-                child: Text('Avval chizmani andoza qilib saqlang.'),
+                child: Tx('Avval chizmani andoza qilib saqlang.'),
               ),
             for (final t in widget.store.drawingTemplates)
               GlassControl(
                   child: ListTile(
                 leading: const Icon(Icons.dashboard_customize_outlined),
-                title: Text(t['name']),
-                subtitle: Text(
+                title: Tx(t['name']),
+                subtitle: Tx(
                   '${t['item']['widthMm']} × ${t['item']['heightMm']} mm',
                 ),
                 onTap: () => Navigator.pop(c, t),
@@ -1009,10 +1010,10 @@ class _DrawingEditorState extends State<DrawingEditor> {
     if (visualMode) return visualWorkspace(layout, leaf);
     return Scaffold(
       appBar: GlassAppBar(
-        title: const Text('Batafsil sozlash'),
+        title: const Tx('Batafsil sozlash'),
         actions: [
           IconButton(
-            tooltip: 'Chizma stoliga qaytish',
+            tooltip: tr('Chizma stoliga qaytish'),
             onPressed: () {
               applyTypedSize();
               setState(() => visualMode = true);
@@ -1020,17 +1021,17 @@ class _DrawingEditorState extends State<DrawingEditor> {
             icon: const Icon(Icons.draw_outlined),
           ),
           IconButton(
-            tooltip: 'Detallardan yig‘ish',
+            tooltip: tr('Detallardan yig‘ish'),
             onPressed: partsPalette,
             icon: const Icon(Icons.add_box_outlined),
           ),
           IconButton(
-            tooltip: 'Orqaga',
+            tooltip: tr('Orqaga'),
             onPressed: undo.isEmpty ? null : () => travel(true),
             icon: const Icon(Icons.undo),
           ),
           IconButton(
-            tooltip: 'Qaytarish',
+            tooltip: tr('Qaytarish'),
             onPressed: redo.isEmpty ? null : () => travel(false),
             icon: const Icon(Icons.redo),
           ),
@@ -1042,7 +1043,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
           physics: editingGesture ? const NeverScrollableScrollPhysics() : null,
           padding: const EdgeInsets.all(16),
           children: [
-            const Text(
+            const Tx(
               'KONSTRUKSIYA → MATERIALLAR → RASKROY',
               style: TextStyle(
                 fontSize: 11,
@@ -1054,7 +1055,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
             FilledButton.icon(
               onPressed: partsPalette,
               icon: const Icon(Icons.add_box_outlined),
-              label: const Text('Detallardan yig‘ish'),
+              label: const Tx('Detallardan yig‘ish'),
             ),
             Wrap(
               spacing: 8,
@@ -1062,12 +1063,12 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 TextButton.icon(
                   onPressed: saveAsTemplate,
                   icon: const Icon(Icons.bookmark_add_outlined),
-                  label: const Text('Andoza saqlash'),
+                  label: const Tx('Andoza saqlash'),
                 ),
                 TextButton.icon(
                   onPressed: loadTemplate,
                   icon: const Icon(Icons.folder_open),
-                  label: const Text('Andozalar'),
+                  label: const Tx('Andozalar'),
                 ),
               ],
             ),
@@ -1076,12 +1077,12 @@ class _DrawingEditorState extends State<DrawingEditor> {
               child: DropdownButtonFormField<String>(
                 isExpanded: true,
                 initialValue: profile,
-                decoration: const InputDecoration(
-                  labelText: 'Profil tizimi / seriya',
+                decoration: InputDecoration(
+                  labelText: tr('Profil tizimi / seriya'),
                 ),
                 items: [
                   for (final p in widget.store.profiles)
-                    DropdownMenuItem(value: p['id'], child: Text(p['name'])),
+                    DropdownMenuItem(value: p['id'], child: Tx(p['name'])),
                 ],
                 onChanged: (v) {
                   if (v == null) return;
@@ -1107,17 +1108,17 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 isExpanded: true,
                 key: ValueKey('glazing-${recipe['glazingType'] ?? 'single'}'),
                 initialValue: recipe['glazingType'] ?? 'single',
-                decoration: const InputDecoration(
-                  labelText: 'Shisha qavatlari',
+                decoration: InputDecoration(
+                  labelText: tr('Shisha qavatlari'),
                 ),
                 items: const [
                   DropdownMenuItem(
                     value: 'single',
-                    child: Text('1 oynali • bitta shisha'),
+                    child: Tx('1 oynali • bitta shisha'),
                   ),
                   DropdownMenuItem(
                     value: 'double',
-                    child: Text('2 oynali • shisha + ajratgich + shisha'),
+                    child: Tx('2 oynali • shisha + ajratgich + shisha'),
                   ),
                 ],
                 onChanged: (v) => setState(() {
@@ -1128,7 +1129,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
             ),
             Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: Text(
+              child: Tx(
                 'Shisha: ${GlazingSpec(recipe).label} • jami ${GlazingSpec(recipe).totalMm.toStringAsFixed(1)} mm',
                 style: const TextStyle(fontSize: 12, color: Colors.blueGrey),
               ),
@@ -1139,10 +1140,10 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 isExpanded: true,
                 key: ValueKey(drawing['shape']),
                 initialValue: drawing['shape'],
-                decoration: const InputDecoration(labelText: 'Tashqi shakl'),
+                decoration: InputDecoration(labelText: tr('Tashqi shakl')),
                 items: [
                   for (final e in shapeNames.entries)
-                    DropdownMenuItem(value: e.key, child: Text(e.value)),
+                    DropdownMenuItem(value: e.key, child: Tx(e.value)),
                 ],
                 onChanged: (v) => change(() {
                   drawing['shape'] = v;
@@ -1186,7 +1187,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   resize();
                 },
                 icon: const Icon(Icons.check),
-                label: const Text('O‘lchamni qo‘llash'),
+                label: const Tx('O‘lchamni qo‘llash'),
               ),
             ),
             const SizedBox(height: 10),
@@ -1204,7 +1205,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 }.entries)
                   GlassControl(
                     child: ChoiceChip(
-                      label: Text(e.value),
+                      label: Tx(e.value),
                       selected: tool == e.key,
                       onSelected: (_) => setState(() {
                         tool = e.key;
@@ -1215,7 +1216,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
               ],
             ),
             const SizedBox(height: 8),
-            Text(
+            Tx(
               tool == 'outline'
                   ? 'Kontur bo‘ylab nuqtalarni ketma-ket bosing, so‘ng “Konturni qo‘llash”.'
                   : tool == 'select'
@@ -1249,7 +1250,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 }
               },
               icon: const Icon(Icons.view_in_ar),
-              label: const Text('3D ko‘rinish • ochilish animatsiyasi'),
+              label: const Tx('3D ko‘rinish • ochilish animatsiyasi'),
             ),
             drawingCanvas(layout),
             if (tool == 'outline')
@@ -1260,7 +1261,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     onPressed: points.isEmpty
                         ? null
                         : () => setState(() => points.removeLast()),
-                    child: const Text('Oxirgi nuqtani olish'),
+                    child: const Tx('Oxirgi nuqtani olish'),
                   ),
                   FilledButton(
                     onPressed: points.length < 3
@@ -1274,21 +1275,21 @@ class _DrawingEditorState extends State<DrawingEditor> {
                               tool = 'select';
                               points.clear();
                             }),
-                    child: const Text('Konturni qo‘llash'),
+                    child: const Tx('Konturni qo‘llash'),
                   ),
                 ],
               ),
             if (error != null)
               Padding(
                 padding: const EdgeInsets.all(10),
-                child: Text(error!, style: const TextStyle(color: Colors.red)),
+                child: Tx(error!, style: const TextStyle(color: Colors.red)),
               ),
             if (leaf != null && recipe['glazingType'] == 'double') ...[
               GlassControl(
                 child: SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Shishalar orasidagi oltin shpros'),
-                  subtitle: const Text('Chet ajratgichidan alohida bezak'),
+                  title: const Tx('Shishalar orasidagi oltin shpros'),
+                  subtitle: const Tx('Chet ajratgichidan alohida bezak'),
                   value: leaf['shpros'] == true,
                   onChanged: (v) => change(() => leaf['shpros'] = v),
                 ),
@@ -1296,7 +1297,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
               if (leaf['shpros'] == true) ...[
                 Row(
                   children: [
-                    const Expanded(child: Text('Tik shpros')),
+                    const Expanded(child: Tx('Tik shpros')),
                     IconButton(
                       onPressed: () => change(
                         () => leaf['shprosV'] = math.max(
@@ -1306,7 +1307,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       ),
                       icon: const Icon(Icons.remove_circle_outline),
                     ),
-                    Text('${leaf['shprosV'] ?? 1}'),
+                    Tx('${leaf['shprosV'] ?? 1}'),
                     IconButton(
                       onPressed: () => change(
                         () => leaf['shprosV'] = math.min(
@@ -1320,7 +1321,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 ),
                 Row(
                   children: [
-                    const Expanded(child: Text('Yotiq shpros')),
+                    const Expanded(child: Tx('Yotiq shpros')),
                     IconButton(
                       onPressed: () => change(
                         () => leaf['shprosH'] = math.max(
@@ -1330,7 +1331,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       ),
                       icon: const Icon(Icons.remove_circle_outline),
                     ),
-                    Text('${leaf['shprosH'] ?? 3}'),
+                    Tx('${leaf['shprosH'] ?? 3}'),
                     IconButton(
                       onPressed: () => change(
                         () => leaf['shprosH'] = math.min(
@@ -1345,7 +1346,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 GlassControl(
                   child: SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Shpros bezak tugunlari'),
+                    title: const Tx('Shpros bezak tugunlari'),
                     value: leaf['rosettes'] == true,
                     onChanged: (v) => change(() => leaf['rosettes'] = v),
                   ),
@@ -1354,7 +1355,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
             ],
             if (leaf != null) ...[
               const SizedBox(height: 16),
-              Text(
+              Tx(
                 'Tanlangan bo‘lim • ${layout?.cells.indexWhere((c) => c.node['id'] == selected) != null ? (layout!.cells.indexWhere((c) => c.node['id'] == selected) + 1) : selected}',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
@@ -1367,12 +1368,12 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   isExpanded: true,
                   key: ValueKey('$selected-${leaf['opening']}'),
                   initialValue: leaf['opening'],
-                  decoration: const InputDecoration(
-                    labelText: 'Ochilishi (xonadan ko‘rinish)',
+                  decoration: InputDecoration(
+                    labelText: tr('Ochilishi (xonadan ko‘rinish)'),
                   ),
                   items: [
                     for (final e in openingNames.entries)
-                      DropdownMenuItem(value: e.key, child: Text(e.value)),
+                      DropdownMenuItem(value: e.key, child: Tx(e.value)),
                   ],
                   onChanged: (v) => change(() => leaf['opening'] = v),
                 ),
@@ -1383,17 +1384,17 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   isExpanded: true,
                   key: ValueKey('$selected-${leaf['fill']}'),
                   initialValue: leaf['fill'],
-                  decoration: const InputDecoration(labelText: 'To‘ldirma'),
+                  decoration: InputDecoration(labelText: tr('To‘ldirma')),
                   items: const [
-                    DropdownMenuItem(value: 'glass', child: Text('Shisha')),
+                    DropdownMenuItem(value: 'glass', child: Tx('Shisha')),
                     DropdownMenuItem(
                       value: 'panel',
-                      child: Text('Sendvich panel'),
+                      child: Tx('Sendvich panel'),
                     ),
-                    DropdownMenuItem(value: 'lambris', child: Text('Lambir')),
+                    DropdownMenuItem(value: 'lambris', child: Tx('Lambir')),
                     DropdownMenuItem(
                       value: 'empty',
-                      child: Text('Bo‘sh (to‘ldirmasiz)'),
+                      child: Tx('Bo‘sh (to‘ldirmasiz)'),
                     ),
                   ],
                   onChanged: (v) => change(() => leaf['fill'] = v),
@@ -1403,8 +1404,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 GlassControl(
                   child: SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Tashqariga ochiladi'),
-                    subtitle: const Text('O‘chiq bo‘lsa: ichkariga'),
+                    title: const Tx('Tashqariga ochiladi'),
+                    subtitle: const Tx('O‘chiq bo‘lsa: ichkariga'),
                     value: leaf['outward'] == true,
                     onChanged: (v) => change(() => leaf['outward'] = v),
                   ),
@@ -1412,14 +1413,14 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 GlassControl(
                   child: SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Shu qanotga setka'),
+                    title: const Tx('Shu qanotga setka'),
                     value: leaf['mesh'] == true,
                     onChanged: (v) => change(() => leaf['mesh'] = v),
                   ),
                 ),
                 Row(
                   children: [
-                    const Expanded(child: Text('Qulf / zapor soni')),
+                    const Expanded(child: Tx('Qulf / zapor soni')),
                     IconButton(
                       onPressed: () => change(
                         () => leaf['locks'] = math.max<int>(
@@ -1429,7 +1430,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       ),
                       icon: const Icon(Icons.remove_circle_outline),
                     ),
-                    Text('${leaf['locks'] ?? 1}'),
+                    Tx('${leaf['locks'] ?? 1}'),
                     IconButton(
                       onPressed: () => change(
                         () => leaf['locks'] = math.min<int>(
@@ -1446,7 +1447,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   GlassControl(
                     child: SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Dovodchik'),
+                      title: const Tx('Dovodchik'),
                       value: leaf['closer'] == true,
                       onChanged: (v) => change(() => leaf['closer'] = v),
                     ),
@@ -1454,7 +1455,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   GlassControl(
                     child: SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Ostona'),
+                      title: const Tx('Ostona'),
                       value: leaf['threshold'] != false,
                       onChanged: (v) => change(() => leaf['threshold'] = v),
                     ),
@@ -1477,7 +1478,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                           2,
                     ),
                     icon: const Icon(Icons.vertical_split),
-                    label: const Text('Tik ½'),
+                    label: const Tx('Tik ½'),
                   ),
                   OutlinedButton.icon(
                     onPressed: () => split(
@@ -1492,11 +1493,11 @@ class _DrawingEditorState extends State<DrawingEditor> {
                           2,
                     ),
                     icon: const Icon(Icons.horizontal_split),
-                    label: const Text('Yotiq ½'),
+                    label: const Tx('Yotiq ½'),
                   ),
                   TextButton(
                     onPressed: merge,
-                    child: const Text('Bo‘limni birlashtirish'),
+                    child: const Tx('Bo‘limni birlashtirish'),
                   ),
                 ],
               ),
@@ -1505,16 +1506,16 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   layout!.cells.firstWhere((c) => c.node['id'] == selected),
                 ),
                 icon: const Icon(Icons.straighten),
-                label: const Text('Aniq bo‘lim o‘lchami (mm)'),
+                label: const Tx('Aniq bo‘lim o‘lchami (mm)'),
               ),
             ],
             if (leaf != null) ...[
               const Divider(height: 24),
-              const Text(
+              const Tx(
                 'Qanot ichidagi to‘ldirmalar',
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
-              const Text(
+              const Tx(
                 'Bitta qanot ichida shisha, panel yoki lambirni ajrating. Qulf va petlya soni ko‘paymaydi.',
               ),
               Wrap(
@@ -1523,12 +1524,12 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   TextButton.icon(
                     onPressed: () => splitInfill(true),
                     icon: const Icon(Icons.vertical_split),
-                    label: const Text('Ichki tik bo‘lish'),
+                    label: const Tx('Ichki tik bo‘lish'),
                   ),
                   TextButton.icon(
                     onPressed: () => splitInfill(false),
                     icon: const Icon(Icons.horizontal_split),
-                    label: const Text('Ichki yotiq bo‘lish'),
+                    label: const Tx('Ichki yotiq bo‘lish'),
                   ),
                 ],
               ),
@@ -1553,14 +1554,14 @@ class _DrawingEditorState extends State<DrawingEditor> {
                               'inner-$selected-$id-${sub.cells.length}',
                             ),
                             initialValue: id,
-                            decoration: const InputDecoration(
-                              labelText: 'Ichki to‘ldirmani tanlang',
+                            decoration: InputDecoration(
+                              labelText: tr('Ichki to‘ldirmani tanlang'),
                             ),
                             items: [
                               for (var j = 0; j < sub.cells.length; j++)
                                 DropdownMenuItem(
                                   value: sub.cells[j].node['id'],
-                                  child: Text(
+                                  child: Tx(
                                     '${j + 1} · ${sub.cells[j].node['fill']} · ${(sub.cells[j].box[2] - sub.cells[j].box[0]).round()}×${(sub.cells[j].box[3] - sub.cells[j].box[1]).round()} mm',
                                   ),
                                 ),
@@ -1574,25 +1575,25 @@ class _DrawingEditorState extends State<DrawingEditor> {
                             isExpanded: true,
                             key: ValueKey('innerfill-$id-${target['fill']}'),
                             initialValue: target['fill'],
-                            decoration: const InputDecoration(
-                              labelText: 'Tanlangan ichki material',
+                            decoration: InputDecoration(
+                              labelText: tr('Tanlangan ichki material'),
                             ),
                             items: const [
                               DropdownMenuItem(
                                 value: 'glass',
-                                child: Text('Shisha'),
+                                child: Tx('Shisha'),
                               ),
                               DropdownMenuItem(
                                 value: 'panel',
-                                child: Text('Panel'),
+                                child: Tx('Panel'),
                               ),
                               DropdownMenuItem(
                                 value: 'lambris',
-                                child: Text('Lambir'),
+                                child: Tx('Lambir'),
                               ),
                               DropdownMenuItem(
                                 value: 'empty',
-                                child: Text('Bo‘sh'),
+                                child: Tx('Bo‘sh'),
                               ),
                             ],
                             onChanged: (v) => change(() => target['fill'] = v),
@@ -1601,7 +1602,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                         for (final boundary in sub.splits)
                           Row(
                             children: [
-                              const Text('Ichki chegara'),
+                              const Tx('Ichki chegara'),
                               Expanded(
                                 child: GlassControl(
                                   child: Slider(
@@ -1637,7 +1638,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                             leaf.remove('infill');
                             selectedFill = null;
                           }),
-                          child: const Text('Ichki bo‘linishlarni olish'),
+                          child: const Tx('Ichki bo‘linishlarni olish'),
                         ),
                       ],
                     );
@@ -1662,7 +1663,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 }
               },
               icon: const Icon(Icons.price_change_outlined),
-              label: const Text('Profilning saqlangan yangi narxlarini olish'),
+              label: const Tx('Profilning saqlangan yangi narxlarini olish'),
             ),
             OutlinedButton.icon(
               onPressed: () async {
@@ -1685,7 +1686,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 }
               },
               icon: const Icon(Icons.tune),
-              label: const Text('Barcha materiallar, narx va texnik me’yorlar'),
+              label: const Tx('Barcha materiallar, narx va texnik me’yorlar'),
             ),
             TextButton.icon(
               onPressed: saving
@@ -1704,7 +1705,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text(
+                              content: Tx(
                                 'Retsept shu profil uchun saqlandi',
                               ),
                             ),
@@ -1717,12 +1718,12 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       }
                     },
               icon: const Icon(Icons.save_outlined),
-              label: const Text('Narxlarni shu profil uchun eslab qolish'),
+              label: const Tx('Narxlarni shu profil uchun eslab qolish'),
             ),
             FilledButton.icon(
               onPressed: preview,
               icon: const Icon(Icons.calculate_outlined),
-              label: const Text('Material va chiqindini hisoblash'),
+              label: const Tx('Material va chiqindini hisoblash'),
             ),
             if (report != null) ...[
               DrawingReport(item: report!),
@@ -1736,7 +1737,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   }
                 },
                 icon: const Icon(Icons.playlist_add_check),
-                label: const Text('Smetaga qo‘shish'),
+                label: const Tx('Smetaga qo‘shish'),
               ),
             ],
             const SizedBox(height: 28),
@@ -1754,7 +1755,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
           borderRadius: BorderRadius.circular(18),
         ),
         child: layout == null
-            ? Center(child: Text(error ?? 'Chizma xato'))
+            ? Center(child: Tx(error ?? 'Chizma xato'))
             : LayoutBuilder(
                 builder: (context, cs) {
                   final size = Size(cs.maxWidth, cs.maxHeight);
@@ -2120,7 +2121,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                   children: [
-                    Text(
+                    Tx(
                       'Materiallar va sarf',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
@@ -2138,7 +2139,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     key: const ValueKey('report-add'),
                     onPressed: () => Navigator.pop(context, true),
                     icon: const Icon(Icons.playlist_add_check),
-                    label: Text(
+                    label: Tx(
                       'Smetaga qo‘shish • ${money(current['total'])}',
                     ),
                   ),
@@ -2216,7 +2217,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
               color: on ? scheme.primary : Colors.transparent,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Text(
+            child: Tx(
               label,
               style: TextStyle(
                 fontSize: 12.5,
@@ -2310,7 +2311,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 CircleAvatar(
                   radius: 12,
                   backgroundColor: scheme.primary,
-                  child: Text(
+                  child: Tx(
                     '${index + 1}',
                     style: TextStyle(
                       fontSize: 12,
@@ -2321,7 +2322,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
+                  child: Tx(
                     '${(box[2] - box[0]).round()} × ${(box[3] - box[1]).round()} mm • $opening • $fill',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -2333,7 +2334,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
+                Tx(
                   'Sozlash',
                   style: TextStyle(
                     fontSize: 12.5,
@@ -2434,7 +2435,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 ),
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Text(
+                  child: Tx(
                     name ?? '',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -2448,7 +2449,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 if (canCompare) ...[
                   Flexible(
                     flex: 0,
-                    child: Text(
+                    child: Tx(
                       'Zavodlar narxi',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -2528,7 +2529,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                           height: 15,
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
-                            child: Text(
+                            child: Tx(
                               caption,
                               maxLines: 1,
                               style: TextStyle(
@@ -2559,19 +2560,19 @@ class _DrawingEditorState extends State<DrawingEditor> {
         cell(
           'width',
           'Eni, mm',
-          Text('${drawing['widthMm']}', style: strong),
+          Tx('${drawing['widthMm']}', style: strong),
           () => editOverall(true),
         ),
         cell(
           'height',
           'Bo‘yi, mm',
-          Text('${drawing['heightMm']}', style: strong),
+          Tx('${drawing['heightMm']}', style: strong),
           () => editOverall(false),
         ),
         cell(
           'count',
           'Soni',
-          Text('${quantity.text} dona', style: strong),
+          Tx('${quantity.text} dona', style: strong),
           editQuantity,
         ),
         cell(
@@ -2587,7 +2588,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 ),
               ),
               const SizedBox(width: 4),
-              Text(
+              Tx(
                 (finishNames[recipe['finish'] ?? 'silver'] ?? 'Rang')
                     .split('/')
                     .first
@@ -2598,7 +2599,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
           ),
           appearanceSheet,
         ),
-        cell('room', 'Joyi', Text(label ?? '＋', style: strong), editRoom),
+        cell('room', 'Joyi', Tx(label ?? '＋', style: strong), editRoom),
       ],
     );
   }
@@ -2630,7 +2631,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
     final messenger = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
     messenger.showSnackBar(
       SnackBar(
-        content: Text(text),
+        content: Tx(text),
         duration: const Duration(milliseconds: 2200),
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.fromLTRB(16, 0, 16, visualMode ? 150 : 16),
@@ -2843,7 +2844,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                                     horizontal: 12,
                                     vertical: 8,
                                   ),
-                                  child: Text(
+                                  child: Tx(
                                     valid
                                         ? '${hoverPayload!.label} — shu yerga qo‘yish${placement!.snapped ? ' • teng' : ''}'
                                         : placement?.error ??
@@ -2990,8 +2991,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
 
           Widget title(String text) => Padding(
                 padding: const EdgeInsets.fromLTRB(0, 14, 0, 8),
-                child:
-                    Text(text, style: Theme.of(context).textTheme.titleSmall),
+                child: Tx(text, style: Theme.of(context).textTheme.titleSmall),
               );
           final colours = Map<String, dynamic>.from(recipe['colorPct'] ?? {});
           return SafeArea(
@@ -3000,7 +3000,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 children: [
-                  Text(
+                  Tx(
                     'Profil, rang va furnitura',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
@@ -3013,7 +3013,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                         for (final p in widget.store.profiles)
                           DropdownMenuItem(
                             value: p['id'] as String,
-                            child: Text(
+                            child: Tx(
                               p['name'],
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -3059,7 +3059,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                               ),
                               radius: 9,
                             ),
-                            label: Text(
+                            label: Tx(
                               '${e.value}${((colours[e.key] ?? 0) as num) > 0 ? ' +${(colours[e.key] as num).round()}%' : ''}',
                             ),
                             selected: (recipe['finish'] ?? 'silver') == e.key,
@@ -3073,10 +3073,10 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   GlassControl(
                     child: SegmentedButton<String>(
                       segments: const [
-                        ButtonSegment(value: 'single', label: Text('1 oynali')),
+                        ButtonSegment(value: 'single', label: Tx('1 oynali')),
                         ButtonSegment(
                           value: 'double',
-                          label: Text('2 oynali paket'),
+                          label: Tx('2 oynali paket'),
                         ),
                       ],
                       selected: {recipe['glazingType'] ?? 'single'},
@@ -3086,7 +3086,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text(
+                    child: Tx(
                       'Shisha: ${GlazingSpec(recipe).label} • jami ${GlazingSpec(recipe).totalMm.toStringAsFixed(0)} mm',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
@@ -3095,11 +3095,11 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   GlassControl(
                     child: SegmentedButton<String>(
                       segments: const [
-                        ButtonSegment(value: 'dolphin', label: Text('Delfin')),
-                        ButtonSegment(value: 'pull', label: Text('Tortma')),
+                        ButtonSegment(value: 'dolphin', label: Tx('Delfin')),
+                        ButtonSegment(value: 'pull', label: Tx('Tortma')),
                         ButtonSegment(
                           value: 'lever',
-                          label: Text('Buriladigan'),
+                          label: Tx('Buriladigan'),
                         ),
                       ],
                       selected: {recipe['windowHandle'] ?? 'pull'},
@@ -3119,7 +3119,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                           GlassControl(
                             child: FilterChip(
                               key: ValueKey('join-$side'),
-                              label: Text(label),
+                              label: Tx(label),
                               selected: cornerJoins(drawing).contains(side),
                               onSelected: (on) {
                                 change(() {
@@ -3139,7 +3139,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
-                      child: Text(
+                      child: Tx(
                         'Balkon burchagida keyingi rom 90° bilan ulanadi. Profil smetaga rom bo‘yi bilan qo‘shiladi; qo‘shni romda shu burchakni belgilamang.',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
@@ -3151,9 +3151,9 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       segments: const [
                         ButtonSegment(
                           value: 'plate',
-                          label: Text('Uzun planka'),
+                          label: Tx('Uzun planka'),
                         ),
-                        ButtonSegment(value: 'rosette', label: Text('Rozetka')),
+                        ButtonSegment(value: 'rosette', label: Tx('Rozetka')),
                       ],
                       selected: {recipe['handleStyle'] ?? 'plate'},
                       onSelectionChanged: (v) =>
@@ -3164,9 +3164,9 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   GlassControl(
                     child: SegmentedButton<String>(
                       segments: const [
-                        ButtonSegment(value: 'black', label: Text('Qora')),
-                        ButtonSegment(value: 'silver', label: Text('Kumush')),
-                        ButtonSegment(value: 'gold', label: Text('Oltin')),
+                        ButtonSegment(value: 'black', label: Tx('Qora')),
+                        ButtonSegment(value: 'silver', label: Tx('Kumush')),
+                        ButtonSegment(value: 'gold', label: Tx('Oltin')),
                       ],
                       selected: {recipe['hardwareFinish'] ?? 'black'},
                       onSelectionChanged: (v) =>
@@ -3179,11 +3179,11 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       segments: const [
                         ButtonSegment(
                           value: 'net',
-                          label: Text('Sarf + chiqindi %'),
+                          label: Tx('Sarf + chiqindi %'),
                         ),
                         ButtonSegment(
                           value: 'purchase',
-                          label: Text('Butun tayoq/list'),
+                          label: Tx('Butun tayoq/list'),
                         ),
                       ],
                       selected: {recipe['pricingMode'] ?? 'net'},
@@ -3193,7 +3193,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text(
+                    child: Tx(
                       (recipe['pricingMode'] ?? 'net') == 'net'
                           ? 'Mijoz narxi: ishlatilgan metr/m² + ${recipe['wastePct'] ?? 7}% chiqindi. Xarid ro‘yxatida butun tayoq va listlar qoladi.'
                           : 'Mijoz narxiga butun tayoq va list kiradi (qoldiq ham).',
@@ -3218,7 +3218,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       }
                     },
                     icon: const Icon(Icons.price_change_outlined),
-                    label: const Text('Barcha narxlar va me’yorlar'),
+                    label: const Tx('Barcha narxlar va me’yorlar'),
                   ),
                 ],
               ),
@@ -3253,7 +3253,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
 
           Widget title(String text) => Padding(
                 padding: const EdgeInsets.fromLTRB(0, 12, 0, 6),
-                child: Text(text, style: Theme.of(sheet).textTheme.titleSmall),
+                child: Tx(text, style: Theme.of(sheet).textTheme.titleSmall),
               );
           return SafeArea(
             child: SizedBox(
@@ -3261,14 +3261,14 @@ class _DrawingEditorState extends State<DrawingEditor> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 children: [
-                  Text(
+                  Tx(
                     '${index + 1}-bo‘lim • ${(cell.box[2] - cell.box[0]).round()} × ${(cell.box[3] - cell.box[1]).round()} mm',
                     style: Theme.of(sheet).textTheme.titleLarge,
                   ),
                   if (error != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
-                      child: Text(
+                      child: Tx(
                         error!,
                         style: TextStyle(
                           color: Theme.of(sheet).colorScheme.error,
@@ -3301,7 +3301,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       }.entries)
                         GlassControl(
                           child: ChoiceChip(
-                            label: Text(e.value),
+                            label: Tx(e.value),
                             selected:
                                 leaf['infill'] == null && leaf['fill'] == e.key,
                             onSelected: (_) => apply((n) {
@@ -3316,7 +3316,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     GlassControl(
                       child: SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Setka'),
+                        title: const Tx('Setka'),
                         value: leaf['mesh'] == true,
                         onChanged: (v) => apply((n) => n['mesh'] = v),
                       ),
@@ -3324,7 +3324,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     GlassControl(
                       child: SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Tashqariga ochiladi'),
+                        title: const Tx('Tashqariga ochiladi'),
                         value: leaf['outward'] == true,
                         onChanged: (v) => apply((n) => n['outward'] = v),
                       ),
@@ -3332,7 +3332,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     if (opening != 'passive')
                       Row(
                         children: [
-                          const Expanded(child: Text('Qulf / zapor soni')),
+                          const Expanded(child: Tx('Qulf / zapor soni')),
                           IconButton(
                             onPressed: () => apply(
                               (n) => n['locks'] = math.max(
@@ -3342,7 +3342,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                             ),
                             icon: const Icon(Icons.remove_circle_outline),
                           ),
-                          Text('${leaf['locks'] ?? 1}'),
+                          Tx('${leaf['locks'] ?? 1}'),
                           IconButton(
                             onPressed: () => apply(
                               (n) => n['locks'] = math.min(
@@ -3359,7 +3359,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     GlassControl(
                       child: SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Dovodchik'),
+                        title: const Tx('Dovodchik'),
                         value: leaf['closer'] == true,
                         onChanged: (v) => apply((n) => n['closer'] = v),
                       ),
@@ -3367,7 +3367,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     GlassControl(
                       child: SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Ostona'),
+                        title: const Tx('Ostona'),
                         value: leaf['threshold'] != false,
                         onChanged: (v) => apply((n) => n['threshold'] = v),
                       ),
@@ -3377,7 +3377,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     GlassControl(
                       child: SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Bezak shpros'),
+                        title: const Tx('Bezak shpros'),
                         value: leaf['shpros'] == true,
                         onChanged: (v) => apply((n) => n['shpros'] = v),
                       ),
@@ -3398,21 +3398,21 @@ class _DrawingEditorState extends State<DrawingEditor> {
                             Navigator.pop(sheet);
                             splitEqually(id, vertical, parts);
                           },
-                          child: Text(label),
+                          child: Tx(label),
                         ),
                       OutlinedButton(
                         onPressed: () {
                           Navigator.pop(sheet);
                           merge();
                         },
-                        child: const Text('Qo‘shnisi bilan birlashtirish'),
+                        child: const Tx('Qo‘shnisi bilan birlashtirish'),
                       ),
                       OutlinedButton(
                         onPressed: () {
                           Navigator.pop(sheet);
                           positionDialog(cell);
                         },
-                        child: const Text('Aniq o‘lcham'),
+                        child: const Tx('Aniq o‘lcham'),
                       ),
                     ],
                   ),
@@ -3468,7 +3468,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
           children: [
             GlassControl(
                 child: ListTile(
-              title: Text(
+              title: Tx(
                 split.node['axis'] == 'v' ? 'Tik impost' : 'Yotiq impost',
                 style: Theme.of(sheet).textTheme.titleLarge,
               ),
@@ -3476,14 +3476,14 @@ class _DrawingEditorState extends State<DrawingEditor> {
             GlassControl(
                 child: ListTile(
               leading: const Icon(Icons.straighten),
-              title: const Text('Chap/tepa bo‘lim o‘lchamini kiritish'),
+              title: const Tx('Chap/tepa bo‘lim o‘lchamini kiritish'),
               onTap: () => Navigator.pop(sheet, 'size'),
             )),
             if (main)
               GlassControl(
                   child: ListTile(
                 leading: const Icon(Icons.view_column_outlined),
-                title: const Text('Bo‘limlarni teng taqsimlash'),
+                title: const Tx('Bo‘limlarni teng taqsimlash'),
                 onTap: () => Navigator.pop(sheet, 'equal'),
               )),
             GlassControl(
@@ -3492,8 +3492,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 Icons.delete_outline,
                 color: Theme.of(sheet).colorScheme.error,
               ),
-              title: const Text('Impostni olib tashlash'),
-              subtitle: const Text(
+              title: const Tx('Impostni olib tashlash'),
+              subtitle: const Tx(
                 'Yoki impostni sudrab pastdagi “O‘chirish” joyiga tashlang',
               ),
               onTap: () => Navigator.pop(sheet, 'remove'),
@@ -3599,13 +3599,13 @@ class _DrawingEditorState extends State<DrawingEditor> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            Tx(
               widget.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
             ),
-            Text(
+            Tx(
               label == null
                   ? 'Chizing — hisob avtomatik'
                   : '$label • ${drawing['widthMm']}×${drawing['heightMm']}',
@@ -3617,17 +3617,17 @@ class _DrawingEditorState extends State<DrawingEditor> {
         ),
         actions: [
           IconButton(
-            tooltip: 'Orqaga',
+            tooltip: tr('Orqaga'),
             onPressed: undo.isEmpty ? null : () => travel(true),
             icon: const Icon(Icons.undo),
           ),
           IconButton(
-            tooltip: 'Qaytarish',
+            tooltip: tr('Qaytarish'),
             onPressed: redo.isEmpty ? null : () => travel(false),
             icon: const Icon(Icons.redo),
           ),
           IconButton(
-            tooltip: 'Batafsil sozlash',
+            tooltip: tr('Batafsil sozlash'),
             onPressed: () => setState(() => visualMode = false),
             icon: const Icon(Icons.tune),
           ),
@@ -3789,7 +3789,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       horizontal: 8,
                       vertical: 18,
                     ),
-                    child: Text(
+                    child: Tx(
                       'Avval “Deraza” yoki “Eshik”dan ochiladigan qanot qo‘ying',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
@@ -3849,7 +3849,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                           !draggingPart &&
                           !(dragged != null && dragCheckpoint)
                       ? selectionBar(layout, leaf)
-                      : Text(
+                      : Tx(
                           draggingPart
                               ? 'Bo‘lim ustiga qo‘ying.'
                               : dragged != null && dragCheckpoint
@@ -3940,7 +3940,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                             children: [
                               Icon(Icons.view_in_ar, size: 20),
                               SizedBox(width: 4),
-                              Text('3D'),
+                              Tx('3D'),
                             ],
                           ),
                         ),
@@ -3956,7 +3956,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                             children: [
                               Icon(Icons.receipt_long_outlined, size: 20),
                               SizedBox(width: 4),
-                              Text('Sarf'),
+                              Tx('Sarf'),
                             ],
                           ),
                         ),
@@ -3976,12 +3976,12 @@ class _DrawingEditorState extends State<DrawingEditor> {
                               children: [
                                 const FittedBox(
                                   fit: BoxFit.scaleDown,
-                                  child: Text('Smetaga qo‘shish'),
+                                  child: Tx('Smetaga qo‘shish'),
                                 ),
                                 if (price != null)
                                   FittedBox(
                                     fit: BoxFit.scaleDown,
-                                    child: Text(
+                                    child: Tx(
                                       price,
                                       style: const TextStyle(
                                         fontSize: 11.5,
@@ -4012,7 +4012,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
           label: label,
           number: true,
           decimal: c != quantity,
-          helperText: c == quantity ? 'Dona' : 'Millimetrda',
+          helperText: tr(c == quantity ? 'Dona' : 'Millimetrda'),
           validator: (v) {
             final value = num.tryParse(v ?? '');
             if (value == null || !value.isFinite) return 'Son kiriting';
@@ -4059,7 +4059,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
     final ok = await showSettledDialog<bool>(
       context: context,
       builder: (context) => GlassAlertDialog(
-        title: Text(k == 0 ? 'Bo‘lim ichki eni' : 'Bo‘lim ichki bo‘yi'),
+        title: Tx(k == 0 ? 'Bo‘lim ichki eni' : 'Bo‘lim ichki bo‘yi'),
         scrollable: true,
         content: Form(
           key: form,
@@ -4069,7 +4069,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
             number: true,
             action: TextInputAction.done,
             suffixText: 'mm',
-            helperText: 'Profil yuzlari orasidagi ichki masofa',
+            helperText: tr('Profil yuzlari orasidagi ichki masofa'),
             validator: (text) {
               final value = double.tryParse(text ?? '');
               final span = s.box[k + 2] - s.box[k];
@@ -4087,13 +4087,13 @@ class _DrawingEditorState extends State<DrawingEditor> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Bekor'),
+            child: const Tx('Bekor'),
           ),
           FilledButton(
             onPressed: () {
               if (form.currentState!.validate()) Navigator.pop(context, true);
             },
-            child: const Text('Qo‘llash'),
+            child: const Tx('Qo‘llash'),
           ),
         ],
       ),
@@ -4843,7 +4843,7 @@ class DrawingReport extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 18),
-        Text(
+        Tx(
           money(item['total']),
           style: const TextStyle(
             fontSize: 29,
@@ -4851,20 +4851,20 @@ class DrawingReport extends StatelessWidget {
             color: _blue,
           ),
         ),
-        Text(
+        Tx(
           '${item['quantity']} dona uchun · tannarx ${money(item['cost'])}\n${item['openingCount']} ochiladigan qanot / konstruksiya',
         ),
-        Text(
+        Tx(
           'Narx sanasi: ${item['priceDate'] == '' ? 'kiritilmagan' : item['priceDate']}',
         ),
         GlassControl(
             child: ExpansionTile(
-          title: const Text('Materiallar va xarid summasi'),
+          title: const Tx('Materiallar va xarid summasi'),
           initiallyExpanded: true,
           children: [
             const Padding(
               padding: EdgeInsets.all(8),
-              child: Text(
+              child: Tx(
                 'Sof sarf → narxdagi miqdor. Xarid uchun butun tayoq va list soni alohida yozilgan. Barcha sonlar jami konstruksiyalar uchun.',
               ),
             ),
@@ -4872,33 +4872,33 @@ class DrawingReport extends StatelessWidget {
               GlassControl(
                   child: ListTile(
                 dense: true,
-                title: Text(p['name']),
-                subtitle: Text(
+                title: Tx(p['name']),
+                subtitle: Tx(
                   p['charged'] != null && p['charged'] != p['quantity']
                       ? 'Sof ${(p['net'] as num).toStringAsFixed(3)} → narxda ${(p['charged'] as num).toStringAsFixed(3)} ${p['unit']} × ${money(p['price'])}\nXarid: ${(p['quantity'] as num).toStringAsFixed(3)} ${p['unit']} (butun tayoq/list)'
                       : '${(p['net'] as num).toStringAsFixed(3)} → ${(p['quantity'] as num).toStringAsFixed(3)} ${p['unit']} × ${money(p['price'])}',
                 ),
-                trailing: Text(money(p['cost'])),
+                trailing: Tx(money(p['cost'])),
               )),
           ],
         )),
         GlassControl(
             child: ExpansionTile(
-          title: const Text('Profil kesish kartalari va chiqindi'),
+          title: const Tx('Profil kesish kartalari va chiqindi'),
           children: [
             for (final e in cuts.entries)
               GlassControl(
                   child: ExpansionTile(
-                title: Text(
+                title: Tx(
                   '${materialNames[e.key]} • ${(e.value['bars'] as List).length} tayoq',
                 ),
-                subtitle: Text(
+                subtitle: Tx(
                   'Sof ${(e.value['netMm'] / 1000).toStringAsFixed(3)} m · xarid ${(e.value['purchasedMm'] / 1000).toStringAsFixed(3)} m',
                 ),
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(12),
-                    child: Text(
+                    child: Tx(
                       'Arra izi: ${e.value['sawMm']} mm\nYaroqli qoldiq: ${e.value['reusableMm']} mm\nMayda chiqindi: ${e.value['scrapMm']} mm\nJami qoldiq: ${e.value['offcutMm']} mm',
                     ),
                   ),
@@ -4906,10 +4906,10 @@ class DrawingReport extends StatelessWidget {
                     GlassControl(
                         child: ListTile(
                       dense: true,
-                      title: Text(
+                      title: Tx(
                         '${j + 1}: ${(e.value['bars'][j]['pieces'] as List).map((v) => (v as num).round()).join(' + ')} mm',
                       ),
-                      subtitle: Text(
+                      subtitle: Tx(
                         'Qoldiq: ${(e.value['bars'][j]['remaining'] as num).toStringAsFixed(1)} mm',
                       ),
                     )),
@@ -4919,27 +4919,27 @@ class DrawingReport extends StatelessWidget {
         )),
         GlassControl(
             child: ExpansionTile(
-          title: const Text('Shisha, panel va lambir listlari'),
+          title: const Tx('Shisha, panel va lambir listlari'),
           children: [
             for (final e in sheets.entries)
               GlassControl(
                   child: ExpansionTile(
-                title: Text(
+                title: Tx(
                   '${materialNames[e.key]}: ${(e.value['sheets'] as List).length} list',
                 ),
-                subtitle: Text('${e.value['sheetW']}×${e.value['sheetH']} mm'),
+                subtitle: Tx('${e.value['sheetW']}×${e.value['sheetH']} mm'),
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(12),
-                    child: Text(
+                    child: Tx(
                       'Sof ${(e.value['netM2'] as num).toStringAsFixed(3)} m²\nXarid ${(e.value['purchaseM2'] as num).toStringAsFixed(3)} m²\nList qoldig‘i + kesish yo‘qotilishi ${(e.value['offcutM2'] as num).toStringAsFixed(3)} m² (qayta ishlatish avtomatik baholanmagan)',
                     ),
                   ),
                   for (var k = 0; k < (e.value['sheets'] as List).length; k++)
                     GlassControl(
                         child: ListTile(
-                      title: Text('List ${k + 1}'),
-                      subtitle: Text(
+                      title: Tx('List ${k + 1}'),
+                      subtitle: Tx(
                         (e.value['sheets'][k]['rows'] as List)
                             .expand((r) => r['parts'] as List)
                             .map(
@@ -4955,13 +4955,13 @@ class DrawingReport extends StatelessWidget {
         )),
         GlassControl(
             child: ExpansionTile(
-          title: const Text('Har bir bo‘lim tafsiloti'),
+          title: const Tx('Har bir bo‘lim tafsiloti'),
           children: [
             for (final s in item['specs'] as List)
               GlassControl(
                   child: ListTile(
-                title: Text('${s['opening']} · ${s['fill']}'),
-                subtitle: Text(
+                title: Tx('${s['opening']} · ${s['fill']}'),
+                subtitle: Tx(
                   '${(s['widthMm'] as num).toStringAsFixed(1)}×${(s['heightMm'] as num).toStringAsFixed(1)} mm · ${(s['areaM2'] as num).toStringAsFixed(3)} m²\n${s['outward'] == true ? 'Tashqariga' : 'Ichkariga'}${s['lambrisStrips'] != null ? ' · Lambir: ${s['lambrisStrips']} dona ishchi yo‘lak' : ''}',
                 ),
               )),
@@ -4969,7 +4969,7 @@ class DrawingReport extends StatelessWidget {
         )),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 14),
-          child: Text(
+          child: Tx(
             item['warning'] ?? '',
             style: const TextStyle(fontSize: 12, color: Colors.brown),
           ),
@@ -5050,13 +5050,13 @@ class _RecipeEditorState extends State<RecipeEditor> {
       );
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: GlassAppBar(title: const Text('Materiallar va narxlar')),
+        appBar: GlassAppBar(title: const Tx('Materiallar va narxlar')),
         body: SafeArea(
           child: ListView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.all(16),
             children: [
-              const Text(
+              const Tx(
                 'Bu qiymatlar sex retsepti. Namunaviy narxlarni yetkazib beruvchi narxi bilan almashtiring. Internetdan jonli narx olinmaydi; yangi narxni kiritganda hisob yangilanadi.',
               ),
               const SizedBox(height: 16),
@@ -5064,15 +5064,15 @@ class _RecipeEditorState extends State<RecipeEditor> {
                 child: DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: r['sectionStyle'],
-                  decoration: const InputDecoration(labelText: 'Profil kesimi'),
+                  decoration: InputDecoration(labelText: tr('Profil kesimi')),
                   items: const [
                     DropdownMenuItem(
                       value: 'plainHollow',
-                      child: Text('Oddiy alyuminiy • 1 ta bo‘sh kamera'),
+                      child: Tx('Oddiy alyuminiy • 1 ta bo‘sh kamera'),
                     ),
                     DropdownMenuItem(
                       value: 'chambered',
-                      child: Text('Oldingi kamerali namuna'),
+                      child: Tx('Oldingi kamerali namuna'),
                     ),
                   ],
                   onChanged: (v) => setState(() {
@@ -5089,15 +5089,15 @@ class _RecipeEditorState extends State<RecipeEditor> {
                 child: DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: r['glazingType'],
-                  decoration: const InputDecoration(labelText: 'Shisha turi'),
+                  decoration: InputDecoration(labelText: tr('Shisha turi')),
                   items: const [
                     DropdownMenuItem(
                       value: 'single',
-                      child: Text('Bir qavat shisha'),
+                      child: Tx('Bir qavat shisha'),
                     ),
                     DropdownMenuItem(
                       value: 'double',
-                      child: Text('Ikki shisha + metall ajratgich'),
+                      child: Tx('Ikki shisha + metall ajratgich'),
                     ),
                   ],
                   onChanged: (v) => setState(() => r['glazingType'] = v),
@@ -5110,10 +5110,10 @@ class _RecipeEditorState extends State<RecipeEditor> {
                   initialValue: finishNames.containsKey(r['finish'])
                       ? r['finish']
                       : 'silver',
-                  decoration: const InputDecoration(labelText: 'Profil rangi'),
+                  decoration: InputDecoration(labelText: tr('Profil rangi')),
                   items: [
                     for (final e in finishNames.entries)
-                      DropdownMenuItem(value: e.key, child: Text(e.value)),
+                      DropdownMenuItem(value: e.key, child: Tx(e.value)),
                   ],
                   onChanged: (v) => setState(() => r['finish'] = v),
                 ),
@@ -5123,17 +5123,17 @@ class _RecipeEditorState extends State<RecipeEditor> {
                 child: DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: r['pricingMode'] ?? 'net',
-                  decoration: const InputDecoration(
-                    labelText: 'Mijoz narxi qanday hisoblanadi',
+                  decoration: InputDecoration(
+                    labelText: tr('Mijoz narxi qanday hisoblanadi'),
                   ),
                   items: const [
                     DropdownMenuItem(
                       value: 'net',
-                      child: Text('Ishlatilgan metr/m² + chiqindi %'),
+                      child: Tx('Ishlatilgan metr/m² + chiqindi %'),
                     ),
                     DropdownMenuItem(
                       value: 'purchase',
-                      child: Text('Butun tayoq va list (qoldiq bilan)'),
+                      child: Tx('Butun tayoq va list (qoldiq bilan)'),
                     ),
                   ],
                   onChanged: (v) => setState(() => r['pricingMode'] = v),
@@ -5144,17 +5144,17 @@ class _RecipeEditorState extends State<RecipeEditor> {
                 child: DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: r['profileDetail'] ?? 'rebated',
-                  decoration: const InputDecoration(
-                    labelText: 'Oddiy profil 3D shakli',
+                  decoration: InputDecoration(
+                    labelText: tr('Oddiy profil 3D shakli'),
                   ),
                   items: const [
                     DropdownMenuItem(
                       value: 'rebated',
-                      child: Text('Shisha o‘rni va pog‘onali qirra'),
+                      child: Tx('Shisha o‘rni va pog‘onali qirra'),
                     ),
                     DropdownMenuItem(
                       value: 'box',
-                      child: Text('Oldingi to‘rtburchak bo‘sh profil'),
+                      child: Tx('Oldingi to‘rtburchak bo‘sh profil'),
                     ),
                   ],
                   onChanged: (v) => setState(() => r['profileDetail'] = v),
@@ -5165,15 +5165,14 @@ class _RecipeEditorState extends State<RecipeEditor> {
                 child: DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: r['hardwareFinish'] ?? 'black',
-                  decoration: const InputDecoration(
-                    labelText: 'Tutqich va petlya rangi',
+                  decoration: InputDecoration(
+                    labelText: tr('Tutqich va petlya rangi'),
                   ),
                   items: const [
                     DropdownMenuItem(
-                        value: 'black', child: Text('Qora / grafit')),
-                    DropdownMenuItem(
-                        value: 'silver', child: Text('Kumushrang')),
-                    DropdownMenuItem(value: 'gold', child: Text('Oltinrang')),
+                        value: 'black', child: Tx('Qora / grafit')),
+                    DropdownMenuItem(value: 'silver', child: Tx('Kumushrang')),
+                    DropdownMenuItem(value: 'gold', child: Tx('Oltinrang')),
                   ],
                   onChanged: (v) => setState(() => r['hardwareFinish'] = v),
                 ),
@@ -5183,7 +5182,7 @@ class _RecipeEditorState extends State<RecipeEditor> {
               input(source, 'Narx manbasi / yetkazib beruvchi', numeric: false),
               GlassControl(
                   child: ExpansionTile(
-                title: const Text('Geometriya, rezina va texnik me’yorlar'),
+                title: const Tx('Geometriya, rezina va texnik me’yorlar'),
                 children: [
                   for (final e in recipeLabels.entries)
                     input(params[e.key]!, e.value),
@@ -5191,7 +5190,7 @@ class _RecipeEditorState extends State<RecipeEditor> {
               )),
               GlassControl(
                   child: ExpansionTile(
-                title: const Text('Barcha materiallar narxi (UZS)'),
+                title: const Tx('Barcha materiallar narxi (UZS)'),
                 initiallyExpanded: true,
                 children: [
                   Padding(
@@ -5215,7 +5214,7 @@ class _RecipeEditorState extends State<RecipeEditor> {
               )),
               GlassControl(
                   child: ExpansionTile(
-                title: const Text('Rang ustamasi (profil narxiga, %)'),
+                title: const Tx('Rang ustamasi (profil narxiga, %)'),
                 children: [
                   for (final k in finishNames.keys)
                     input(colours[k]!, '${finishNames[k]} (%)'),
@@ -5223,25 +5222,25 @@ class _RecipeEditorState extends State<RecipeEditor> {
               )),
               GlassControl(
                   child: ExpansionTile(
-                title: const Text('Har bir profil tayoq uzunligi'),
+                title: const Tx('Har bir profil tayoq uzunligi'),
                 children: [
                   for (final k in linearStock)
                     input(stocks[k]!, '${materialNames[k]} tayoq (mm)'),
                 ],
               )),
               const SizedBox(height: 16),
-              const Text(
+              const Tx(
                 'Qo‘shimcha xomashyo',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const Text(
+              const Tx(
                 'Armatura, burchak, qo‘shimcha rezina va boshqa material uchun o‘z formulasini qo‘shing.',
               ),
               for (var j = 0; j < (r['customMaterials'] as List).length; j++)
                 GlassControl(
                     child: ListTile(
-                  title: Text(r['customMaterials'][j]['name']),
-                  subtitle: Text(
+                  title: Tx(r['customMaterials'][j]['name']),
+                  subtitle: Tx(
                     '${r['customMaterials'][j]['rate']} × ${r['customMaterials'][j]['basis']} · ${money(r['customMaterials'][j]['price'])}',
                   ),
                   onTap: () => extra(j),
@@ -5254,10 +5253,10 @@ class _RecipeEditorState extends State<RecipeEditor> {
               OutlinedButton.icon(
                 onPressed: () => extra(null),
                 icon: const Icon(Icons.add),
-                label: const Text('Material va formula qo‘shish'),
+                label: const Tx('Material va formula qo‘shish'),
               ),
               if (error != null)
-                Text(error!, style: const TextStyle(color: Colors.red)),
+                Tx(error!, style: const TextStyle(color: Colors.red)),
               FilledButton(
                 onPressed: () {
                   try {
@@ -5291,7 +5290,7 @@ class _RecipeEditorState extends State<RecipeEditor> {
                     setState(() => error = '$e');
                   }
                 },
-                child: const Text('Narx va me’yorlarni qo‘llash'),
+                child: const Tx('Narx va me’yorlarni qo‘llash'),
               ),
               const SizedBox(height: 25),
             ],
@@ -5324,7 +5323,7 @@ class _RecipeEditorState extends State<RecipeEditor> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, set) => GlassAlertDialog(
-          title: const Text('Material formulasi'),
+          title: const Tx('Material formulasi'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -5336,7 +5335,7 @@ class _RecipeEditorState extends State<RecipeEditor> {
                     initialValue: basis,
                     items: [
                       for (final e in bases.entries)
-                        DropdownMenuItem(value: e.key, child: Text(e.value)),
+                        DropdownMenuItem(value: e.key, child: Tx(e.value)),
                     ],
                     onChanged: (v) => set(() => basis = v!),
                   ),
@@ -5346,14 +5345,14 @@ class _RecipeEditorState extends State<RecipeEditor> {
                 input(unit, 'O‘lchov birligi', numeric: false),
                 input(price, 'Birlik narxi, UZS'),
                 if (failure != null)
-                  Text(failure!, style: const TextStyle(color: Colors.red)),
+                  Tx(failure!, style: const TextStyle(color: Colors.red)),
               ],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Bekor'),
+              child: const Tx('Bekor'),
             ),
             FilledButton(
               onPressed: () {
@@ -5379,7 +5378,7 @@ class _RecipeEditorState extends State<RecipeEditor> {
                   set(() => failure = '$e');
                 }
               },
-              child: const Text('Saqlash'),
+              child: const Tx('Saqlash'),
             ),
           ],
         ),

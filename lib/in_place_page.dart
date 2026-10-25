@@ -13,6 +13,7 @@ import 'design_engine.dart';
 import 'platform_files.dart';
 import 'window_photo.dart';
 import 'adaptive_ui.dart';
+import 'i18n.dart';
 
 /// "Joyida": the window or door where it goes, the opening in the wall or
 /// the old window, drawn in perspective so the client sees it installed
@@ -92,7 +93,7 @@ class _InPlacePageState extends State<InPlacePage> {
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
-        content: Text('$text'.replaceFirst(RegExp(r'^\w*Exception: '), '')),
+        content: Tx('$text'.replaceFirst(RegExp(r'^\w*Exception: '), '')),
       ),
     );
 
@@ -260,9 +261,9 @@ class _InPlacePageState extends State<InPlacePage> {
           ),
         ),
         const SizedBox(height: 18),
-        Text('Joyida ko‘rish', style: text.titleLarge),
+        Tx('Joyida ko‘rish', style: text.titleLarge),
         const SizedBox(height: 6),
-        Text(
+        Tx(
           'Telefonni rom qo‘yiladigan o‘ringa — devordagi darchaga yoki eski romga — qarating va rasmga oling. Dastur o‘rnini topadi va chizilgan rom yoki eshikni o‘sha joyga qo‘yib ko‘rsatadi. Rasmni mijozga yuborish mumkin.',
           style: text.bodyMedium,
         ),
@@ -272,24 +273,24 @@ class _InPlacePageState extends State<InPlacePage> {
             key: const ValueKey('in-place-camera'),
             onPressed: busy == null ? () => pick(ImageSource.camera) : null,
             icon: const Icon(Icons.photo_camera),
-            label: const Text('Kamera'),
+            label: const Tx('Kamera'),
           ),
         const SizedBox(height: 10),
         OutlinedButton.icon(
           key: const ValueKey('in-place-gallery'),
           onPressed: busy == null ? () => pick(ImageSource.gallery) : null,
           icon: const Icon(Icons.photo_library_outlined),
-          label: Text(camera ? 'Galereyadan tanlash' : 'Rasm faylini tanlash'),
+          label: Tx(camera ? 'Galereyadan tanlash' : 'Rasm faylini tanlash'),
         ),
         const SizedBox(height: 10),
         TextButton.icon(
           key: const ValueKey('in-place-sample'),
           onPressed: busy == null ? sample : null,
           icon: const Icon(Icons.image_outlined),
-          label: const Text('Namuna rasm bilan sinab ko‘rish'),
+          label: const Tx('Namuna rasm bilan sinab ko‘rish'),
         ),
         const SizedBox(height: 12),
-        Text(
+        Tx(
           widget.aiKey.isEmpty
               ? 'O‘rin telefonda taxminan topiladi; burchaklarni qo‘lda aniqlashtirasiz. Sozlamalar → AI kamera’da Claude kalitini kiritsangiz, o‘rinni AI topadi.'
               : 'O‘rinni AI topadi (rasm Anthropic’ga yuboriladi); burchaklarni qo‘lda ham surish mumkin.',
@@ -382,11 +383,11 @@ class _InPlacePageState extends State<InPlacePage> {
     return Scaffold(
       backgroundColor: photo == null ? null : const Color(0xff10161d),
       appBar: GlassAppBar(
-        title: const Text('Joyida ko‘rish'),
+        title: const Tx('Joyida ko‘rish'),
         actions: [
           if (photo != null)
             IconButton(
-              tooltip: 'Boshqa rasm',
+              tooltip: tr('Boshqa rasm'),
               onPressed: () => setState(() {
                 photo?.dispose();
                 photo = null;
@@ -416,7 +417,7 @@ class _InPlacePageState extends State<InPlacePage> {
                             child: CircularProgressIndicator(strokeWidth: 2.5),
                           ),
                           const SizedBox(width: 14),
-                          Flexible(child: Text(busy!)),
+                          Flexible(child: Tx(busy!)),
                         ],
                       ),
                     ),
@@ -438,7 +439,7 @@ class _InPlacePageState extends State<InPlacePage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
+                      Tx(
                         note ??
                             'Ko‘k nuqtalarni o‘rinning to‘rt burchagiga suring; romning o‘rtasidan ushlab butunini surish mumkin.',
                         style: Theme.of(context).textTheme.bodySmall,
@@ -459,7 +460,7 @@ class _InPlacePageState extends State<InPlacePage> {
                               ),
                               label: FittedBox(
                                 fit: BoxFit.scaleDown,
-                                child: Text(
+                                child: Tx(
                                   widget.aiKey.isEmpty
                                       ? 'O‘rnini topish'
                                       : 'AI bilan topish',
@@ -475,7 +476,7 @@ class _InPlacePageState extends State<InPlacePage> {
                               icon: const Icon(Icons.ios_share),
                               label: const FittedBox(
                                 fit: BoxFit.scaleDown,
-                                child: Text('Mijozga yuborish'),
+                                child: Tx('Mijozga yuborish'),
                               ),
                             ),
                           ),
@@ -750,7 +751,7 @@ class _LiveInPlacePageState extends State<LiveInPlacePage>
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Rasmga olib bo‘lmadi: $e')));
+      ).showSnackBar(SnackBar(content: Tx('Rasmga olib bo‘lmadi: $e')));
       setState(() {
         taking = false;
         tracking = true;
@@ -888,10 +889,10 @@ class _LiveInPlacePageState extends State<LiveInPlacePage>
       appBar: GlassAppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text('Joyida — kamera'),
+        title: const Tx('Joyida — kamera'),
         actions: [
           IconButton(
-            tooltip: 'Rasmdan',
+            tooltip: tr('Rasmdan'),
             onPressed: fromPhoto,
             icon: const Icon(Icons.photo_library_outlined),
           ),
@@ -904,7 +905,7 @@ class _LiveInPlacePageState extends State<LiveInPlacePage>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
+                    Tx(
                       problem!,
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: Colors.white),
@@ -912,7 +913,7 @@ class _LiveInPlacePageState extends State<LiveInPlacePage>
                     const SizedBox(height: 16),
                     FilledButton(
                       onPressed: fromPhoto,
-                      child: const Text('Rasm bilan'),
+                      child: const Tx('Rasm bilan'),
                     ),
                   ],
                 ),
@@ -937,7 +938,7 @@ class _LiveInPlacePageState extends State<LiveInPlacePage>
                             color: Colors.black54,
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          child: Text(
+                          child: Tx(
                             !tracking
                                 ? 'Qo‘lda: burchaklarni suring'
                                 : found
@@ -981,7 +982,7 @@ class _LiveInPlacePageState extends State<LiveInPlacePage>
                           ),
                           label: FittedBox(
                             fit: BoxFit.scaleDown,
-                            child: Text(tracking ? 'Avto' : 'Qo‘lda'),
+                            child: Tx(tracking ? 'Avto' : 'Qo‘lda'),
                           ),
                         ),
                       ),
@@ -1007,7 +1008,7 @@ class _LiveInPlacePageState extends State<LiveInPlacePage>
                               : const Icon(Icons.camera),
                           label: const FittedBox(
                             fit: BoxFit.scaleDown,
-                            child: Text('Rasmga olish'),
+                            child: Tx('Rasmga olish'),
                           ),
                         ),
                       ),

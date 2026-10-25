@@ -7,6 +7,7 @@ import 'drawing_3d.dart';
 import 'dialogs.dart';
 import 'photo_window_page.dart';
 import 'store.dart';
+import 'i18n.dart';
 
 /// Usual places for a window, offered as one-tap labels.
 const roomNames = [
@@ -28,7 +29,7 @@ Future<String?> pickRoom(BuildContext context, String? current) {
   return showSettledDialog<String>(
     context: context,
     builder: (c) => GlassAlertDialog(
-      title: const Text('Rom joyi'),
+      title: const Tx('Rom joyi'),
       scrollable: true,
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -38,8 +39,8 @@ Future<String?> pickRoom(BuildContext context, String? current) {
               key: const ValueKey('room-field'),
               controller: field,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Masalan: Zal, 2-qavat oshxona',
+              decoration: InputDecoration(
+                labelText: tr('Masalan: Zal, 2-qavat oshxona'),
               ),
             ),
           ),
@@ -51,7 +52,7 @@ Future<String?> pickRoom(BuildContext context, String? current) {
               for (final r in roomNames)
                 GlassControl(
                   child: ActionChip(
-                    label: Text(r),
+                    label: Tx(r),
                     onPressed: () => Navigator.pop(c, r),
                   ),
                 ),
@@ -63,15 +64,15 @@ Future<String?> pickRoom(BuildContext context, String? current) {
         if (current != null)
           TextButton(
             onPressed: () => Navigator.pop(c, ''),
-            child: const Text('Olib tashlash'),
+            child: const Tx('Olib tashlash'),
           ),
         TextButton(
           onPressed: () => Navigator.pop(c),
-          child: const Text('Bekor'),
+          child: const Tx('Bekor'),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(c, field.text.trim()),
-          child: const Text('Saqlash'),
+          child: const Tx('Saqlash'),
         ),
       ],
     ),
@@ -538,7 +539,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Text(
+                          Tx(
                             title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -644,7 +645,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
         child: GlassControl(
           child: ChoiceChip(
             key: ValueKey('filter-${tag ?? 'all'}'),
-            label: Text(label),
+            label: Tx(label),
             selected: on,
             showCheckmark: false,
             labelStyle: TextStyle(
@@ -726,7 +727,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
                         top: -6,
                         child: IconButton(
                           key: ValueKey('design-3d-${p.id}'),
-                          tooltip: '3D ko‘rish',
+                          tooltip: tr('3D ko‘rish'),
                           visualDensity: VisualDensity.compact,
                           iconSize: 17,
                           style: IconButton.styleFrom(
@@ -779,7 +780,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
             ? null
             : drawingPresets.firstWhere((p) => p.id == chosen);
     InputDecoration field(String label) => InputDecoration(
-          labelText: label,
+          labelText: tr(label),
           suffixText: 'mm',
           isDense: true,
           contentPadding:
@@ -822,7 +823,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  Tx(
                     'Tayyor dizaynlar',
                     style: text.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
@@ -909,20 +910,20 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                tooltip: 'Kamaytirish',
+                                tooltip: tr('Kamaytirish'),
                                 visualDensity: VisualDensity.compact,
                                 onPressed: count > 1
                                     ? () => setState(() => count--)
                                     : null,
                                 icon: const Icon(Icons.remove, size: 18),
                               ),
-                              Text(
+                              Tx(
                                 '$count',
                                 style: const TextStyle(
                                     fontWeight: FontWeight.w800),
                               ),
                               IconButton(
-                                tooltip: 'Ko‘paytirish',
+                                tooltip: tr('Ko‘paytirish'),
                                 visualDensity: VisualDensity.compact,
                                 onPressed: count < 1000
                                     ? () => setState(() => count++)
@@ -937,7 +938,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
                     if (problem != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: Text(
+                        child: Tx(
                           problem!,
                           style: TextStyle(color: scheme.error, fontSize: 13),
                         ),
@@ -971,7 +972,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
                                   ConstrainedBox(
                                     constraints:
                                         const BoxConstraints(maxWidth: 80),
-                                    child: Text(
+                                    child: Tx(
                                       room!,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -985,7 +986,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
                         const SizedBox(width: 8),
                         IconButton.outlined(
                           key: const ValueKey('catalog-3d'),
-                          tooltip: '3D ko‘rish',
+                          tooltip: tr('3D ko‘rish'),
                           style: IconButton.styleFrom(
                             minimumSize: const Size(46, 46),
                             side: BorderSide(color: scheme.outlineVariant),
@@ -1013,7 +1014,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
                                   : Icons.draw_outlined,
                               size: 20,
                             ),
-                            label: Text(
+                            label: Tx(
                               widget.replacing
                                   ? 'Qo‘llash'
                                   : preset == null
@@ -1136,7 +1137,7 @@ class _CatalogHeader extends SliverPersistentHeaderDelegate {
               children: [
                 const SizedBox(width: 8),
                 IconButton(
-                  tooltip: 'Orqaga',
+                  tooltip: tr('Orqaga'),
                   onPressed: onBack,
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                 ),
@@ -1144,7 +1145,7 @@ class _CatalogHeader extends SliverPersistentHeaderDelegate {
                 Expanded(
                   child: Opacity(
                     opacity: (1 - t * 1.6).clamp(0.0, 1.0),
-                    child: const Text(
+                    child: const Tx(
                       'Qanday rom?',
                       style: TextStyle(
                         color: Colors.white,
@@ -1210,7 +1211,7 @@ class _CatalogHeader extends SliverPersistentHeaderDelegate {
                                       // The name stays readable when the header folds.
                                       FittedBox(
                                         fit: BoxFit.scaleDown,
-                                        child: Text(
+                                        child: Tx(
                                           '${e.value} ${drawingPresets.where((p) => p.group == e.key).length}',
                                           style: TextStyle(
                                             color: Colors.white,

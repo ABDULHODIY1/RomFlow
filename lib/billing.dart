@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'calculator.dart' show Json;
 import 'store.dart';
 import 'adaptive_ui.dart';
+import 'i18n.dart';
 
 /// Tariffs and payments. The paid plans and payment methods are in place,
 /// but charging is switched off: while [BillingConfig.paymentsEnabled] is
@@ -110,7 +111,7 @@ class TariffPage extends StatelessWidget {
         free = !BillingConfig.paymentsEnabled,
         apple = Platform.isIOS || Platform.isMacOS;
     return Scaffold(
-      appBar: GlassAppBar(title: const Text('Tarif va to‘lov')),
+      appBar: GlassAppBar(title: const Tx('Tarif va to‘lov')),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -141,7 +142,7 @@ class TariffPage extends StatelessWidget {
                           color: Colors.white,
                           size: 28,
                         ),
-                        Text(
+                        Tx(
                           current.name,
                           style: const TextStyle(
                             color: Colors.white,
@@ -159,7 +160,7 @@ class TariffPage extends StatelessWidget {
                               color: const Color(0xff4cc36b),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Text(
+                            child: const Tx(
                               'Hozircha bepul',
                               style: TextStyle(
                                 color: Colors.white,
@@ -171,7 +172,7 @@ class TariffPage extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    Text(
+                    Tx(
                       free
                           ? 'Barcha imkoniyatlar ochiq. To‘lov tizimi tayyor, lekin hozircha pul olinmaydi — tariflar ishga tushishidan oldin xabar beramiz.'
                           : current.tagline,
@@ -185,7 +186,7 @@ class TariffPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 18),
-              Text('Tariflar', style: text.titleLarge),
+              Tx('Tariflar', style: text.titleLarge),
               const SizedBox(height: 10),
               for (final p in plans)
                 GlassCard(
@@ -197,7 +198,7 @@ class TariffPage extends StatelessWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: Text(
+                              child: Tx(
                                 p.name,
                                 style: text.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w800,
@@ -206,7 +207,7 @@ class TariffPage extends StatelessWidget {
                             ),
                             if (p.id == current.id)
                               Chip(
-                                label: const Text('Joriy'),
+                                label: const Tx('Joriy'),
                                 avatar: Icon(
                                   Icons.check_circle,
                                   size: 18,
@@ -215,7 +216,7 @@ class TariffPage extends StatelessWidget {
                               ),
                           ],
                         ),
-                        Text(p.tagline, style: text.bodySmall),
+                        Tx(p.tagline, style: text.bodySmall),
                         const SizedBox(height: 8),
                         for (final f in p.features)
                           Padding(
@@ -229,12 +230,12 @@ class TariffPage extends StatelessWidget {
                                   color: scheme.primary,
                                 ),
                                 const SizedBox(width: 8),
-                                Expanded(child: Text(f)),
+                                Expanded(child: Tx(f)),
                               ],
                             ),
                           ),
                         const SizedBox(height: 8),
-                        Text(
+                        Tx(
                           planPrice(p),
                           style: text.titleSmall?.copyWith(
                             color: scheme.primary,
@@ -245,7 +246,7 @@ class TariffPage extends StatelessWidget {
                   ),
                 ),
               const SizedBox(height: 8),
-              Text('To‘lov usullari', style: text.titleLarge),
+              Tx('To‘lov usullari', style: text.titleLarge),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 10,
@@ -265,11 +266,11 @@ class TariffPage extends StatelessWidget {
                         children: [
                           Icon(m.icon, color: scheme.primary),
                           const SizedBox(height: 8),
-                          Text(
+                          Tx(
                             m.name,
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
-                          Text(
+                          Tx(
                             BillingConfig.paymentsEnabled
                                 ? 'Mavjud'
                                 : 'Tez orada',
@@ -281,25 +282,25 @@ class TariffPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              Text(
+              Tx(
                 apple
                     ? 'App Store orqali o‘rnatilgan iPhone, iPad va Mac versiyalarida obuna Apple orqali to‘lanadi.'
                     : 'To‘lovlar Click, Payme, Uzum Bank yoki bank kartasi orqali qabul qilinadi.',
                 style: text.bodySmall,
               ),
               const SizedBox(height: 18),
-              Text('To‘lovlar tarixi', style: text.titleLarge),
+              Tx('To‘lovlar tarixi', style: text.titleLarge),
               const SizedBox(height: 6),
               if ((store.subscription['payments'] as List? ?? const []).isEmpty)
-                Text('Hali to‘lov yo‘q.', style: text.bodySmall)
+                Tx('Hali to‘lov yo‘q.', style: text.bodySmall)
               else
                 for (final p in store.subscription['payments'] as List)
                   GlassControl(
                       child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.receipt_outlined),
-                    title: Text('${p['plan']} • ${p['amount']} so‘m'),
-                    subtitle: Text('${p['date']} • ${p['method']}'),
+                    title: Tx('${p['plan']} • ${p['amount']} so‘m'),
+                    subtitle: Tx('${p['date']} • ${p['method']}'),
                   )),
             ],
           ),

@@ -46,6 +46,13 @@ class MainActivity: FlutterActivity() {
                         startActivity(Intent(Intent.ACTION_DIAL, android.net.Uri.parse("tel:$phone")))
                         result.success(null)
                     }
+                    "open" -> {
+                        val url=call.argument<String>("url")?:""
+                        if (url.startsWith("https://") || url.startsWith("market://")) {
+                            startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)))
+                        }
+                        result.success(null)
+                    }
                     "pickBackup" -> {
                         pending=result
                         val intent=Intent(Intent.ACTION_OPEN_DOCUMENT).apply { addCategory(Intent.CATEGORY_OPENABLE); type="*/*" }

@@ -11,6 +11,7 @@ import 'design_engine.dart';
 import 'store.dart';
 import 'window_photo.dart';
 import 'adaptive_ui.dart';
+import 'i18n.dart';
 
 /// AI camera: a photo of a window becomes its drawing. The window's four
 /// corners are marked on the photo, the frame is straightened, and its bars
@@ -67,7 +68,7 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
 
   void say(Object text) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text('$text')));
+    ..showSnackBar(SnackBar(content: Tx('$text')));
 
   Future<void> pick(ImageSource source) async {
     try {
@@ -288,9 +289,9 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
           ),
         ),
         const SizedBox(height: 18),
-        Text('Romni rasmga oling', style: text.titleLarge),
+        Tx('Romni rasmga oling', style: text.titleLarge),
         const SizedBox(height: 6),
-        Text(
+        Tx(
           'Romni iloji boricha to‘g‘ridan, butunligicha oling: ramaning to‘rt burchagi ko‘rinsin. Keyin burchaklarni belgilaysiz — dastur rasmni to‘g‘rilab, impostlarni topadi.',
           style: text.bodyMedium,
         ),
@@ -300,14 +301,14 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
             key: const ValueKey('photo-camera'),
             onPressed: busy == null ? () => pick(ImageSource.camera) : null,
             icon: const Icon(Icons.photo_camera),
-            label: const Text('Kamera'),
+            label: const Tx('Kamera'),
           ),
         const SizedBox(height: 10),
         OutlinedButton.icon(
           key: const ValueKey('photo-gallery'),
           onPressed: busy == null ? () => pick(ImageSource.gallery) : null,
           icon: const Icon(Icons.photo_library_outlined),
-          label: Text(camera ? 'Galereyadan tanlash' : 'Rasm faylini tanlash'),
+          label: Tx(camera ? 'Galereyadan tanlash' : 'Rasm faylini tanlash'),
         ),
         const SizedBox(height: 18),
         GlassCard(
@@ -317,12 +318,12 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
               widget.store.aiKey.isEmpty ? Icons.memory : Icons.auto_awesome,
               color: scheme.primary,
             ),
-            title: Text(
+            title: Tx(
               widget.store.aiKey.isEmpty
                   ? 'Telefonda aniqlash'
                   : 'Claude AI ulangan',
             ),
-            subtitle: Text(
+            subtitle: Tx(
               widget.store.aiKey.isEmpty
                   ? 'Internet kerak emas. Ochilish turi va aniqroq natija uchun Sozlamalar → AI kamera’da Claude kalitini kiriting.'
                   : 'Rasm Anthropic’ga yuboriladi; impostlar va ochilish turlari aniqlanadi.',
@@ -389,7 +390,7 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: Text(
+          child: Tx(
             'Ko‘k nuqtalarni ramaning to‘rt tashqi burchagiga suring.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
@@ -435,7 +436,7 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
         if (note != null)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-            child: Text(note!, style: Theme.of(context).textTheme.bodySmall),
+            child: Tx(note!, style: Theme.of(context).textTheme.bodySmall),
           ),
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -443,10 +444,10 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
             child: SegmentedButton<String>(
               showSelectedIcon: false,
               segments: const [
-                ButtonSegment(value: 'remove', label: Text('O‘chirish')),
-                ButtonSegment(value: 'v', label: Text('+ Tik')),
-                ButtonSegment(value: 'h', label: Text('+ Yotiq')),
-                ButtonSegment(value: 'opening', label: Text('Ochilish')),
+                ButtonSegment(value: 'remove', label: Tx('O‘chirish')),
+                ButtonSegment(value: 'v', label: Tx('+ Tik')),
+                ButtonSegment(value: 'h', label: Tx('+ Yotiq')),
+                ButtonSegment(value: 'opening', label: Tx('Ochilish')),
               ],
               selected: {mode},
               onSelectionChanged: (v) => setState(() => mode = v.single),
@@ -467,11 +468,11 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
             : 2;
     return Scaffold(
       appBar: GlassAppBar(
-        title: const Text('AI kamera'),
+        title: const Tx('AI kamera'),
         actions: [
           if (photo != null)
             IconButton(
-              tooltip: 'Boshqa rasm',
+              tooltip: tr('Boshqa rasm'),
               onPressed: () => setState(() {
                 photo = null;
                 grid = null;
@@ -507,7 +508,7 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
                             child: CircularProgressIndicator(strokeWidth: 2.5),
                           ),
                           const SizedBox(width: 14),
-                          Flexible(child: Text(busy!)),
+                          Flexible(child: Tx(busy!)),
                         ],
                       ),
                     ),
@@ -538,8 +539,8 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
                                 controller: width,
                                 keyboardType: TextInputType.number,
                                 onChanged: (_) => setState(() {}),
-                                decoration: const InputDecoration(
-                                  labelText: 'Eni',
+                                decoration: InputDecoration(
+                                  labelText: tr('Eni'),
                                   suffixText: 'mm',
                                   isDense: true,
                                 ),
@@ -554,8 +555,8 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
                                 controller: height,
                                 keyboardType: TextInputType.number,
                                 onChanged: (_) => setState(() {}),
-                                decoration: const InputDecoration(
-                                  labelText: 'Bo‘yi',
+                                decoration: InputDecoration(
+                                  labelText: tr('Bo‘yi'),
                                   suffixText: 'mm',
                                   isDense: true,
                                 ),
@@ -567,7 +568,7 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
                       if (field(width) == null || field(height) == null)
                         Padding(
                           padding: const EdgeInsets.only(top: 6),
-                          child: Text(
+                          child: Tx(
                             'Eni va bo‘yini razmerdan yozing: rasmdan o‘lcham taxminiy chiqadi.',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
@@ -584,7 +585,7 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
                                     : null,
                                 icon: const Icon(Icons.memory),
                                 label: const FittedBox(
-                                  child: Text('Telefonda aniqlash'),
+                                  child: Tx('Telefonda aniqlash'),
                                 ),
                               ),
                             ),
@@ -598,7 +599,7 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
                                       : null,
                                   icon: const Icon(Icons.auto_awesome),
                                   label: const FittedBox(
-                                    child: Text('AI bilan'),
+                                    child: Tx('AI bilan'),
                                   ),
                                 ),
                               ),
@@ -610,7 +611,7 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
                           children: [
                             OutlinedButton(
                               onPressed: () => setState(() => grid = null),
-                              child: const Text('Burchaklar'),
+                              child: const Tx('Burchaklar'),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -619,7 +620,7 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
                                 onPressed: finish,
                                 icon: const Icon(Icons.draw_outlined),
                                 label: const FittedBox(
-                                  child: Text('Chizmaga o‘tkazish'),
+                                  child: Tx('Chizmaga o‘tkazish'),
                                 ),
                               ),
                             ),

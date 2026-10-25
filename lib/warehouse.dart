@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'calculator.dart';
 import 'design_engine.dart';
 import 'store.dart';
+import 'i18n.dart';
 
 String materialUnit(String k) => k == 'desiccant'
     ? 'kg'
@@ -39,12 +40,11 @@ class WarehousePage extends StatelessWidget {
           }
           return Scaffold(
             appBar: GlassAppBar(
-              title:
-                  Text(items == null ? 'Ombor' : 'Material yetishmovchiligi'),
+              title: Tx(items == null ? 'Ombor' : 'Material yetishmovchiligi'),
               actions: [
                 if (items != null)
                   IconButton(
-                    tooltip: 'Xarid ro‘yxatini nusxalash',
+                    tooltip: tr('Xarid ro‘yxatini nusxalash'),
                     icon: const Icon(Icons.copy),
                     onPressed: () async {
                       final text = needs
@@ -62,7 +62,7 @@ class WarehousePage extends StatelessWidget {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Xarid ro‘yxati nusxalandi'),
+                            content: Tx('Xarid ro‘yxati nusxalandi'),
                           ),
                         );
                       }
@@ -77,25 +77,25 @@ class WarehousePage extends StatelessWidget {
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
                   children: [
-                    const Text(
+                    const Tx(
                       'Profil tizimi va material turi bo‘yicha alohida qoldiq. Miqdorlar metr, m², kg yoki dona bilan kiritiladi. Tayoq uzunligi va list joylashuvini raskroyda tekshiring.',
                       style: TextStyle(fontSize: 12),
                     ),
                     const SizedBox(height: 16),
                     if (warning != null)
-                      Text(
+                      Tx(
                         warning,
                         style: const TextStyle(color: Colors.deepOrange),
                       ),
                     if (items != null) ...[
-                      Text(
+                      Tx(
                         'Yetishmayotgan material xaridi: ${money(needs.fold<num>(0, (a, r) => a + (r['purchaseCost'] as num)))}',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text(
+                      const Tx(
                         'Narxi 0 bo‘lgan materiallar summaga qo‘shilmaydi. Smeta summasi ombor narxi bilan almashtirilmaydi.',
                         style: TextStyle(fontSize: 12),
                       ),
@@ -103,13 +103,13 @@ class WarehousePage extends StatelessWidget {
                         GlassCard(
                           child: GlassControl(
                               child: ListTile(
-                            title: Text(n['name']),
-                            subtitle: Text(
+                            title: Tx(n['name']),
+                            subtitle: Tx(
                               '${n['profileName']}\nKerak: ${(n['required'] as num).toStringAsFixed(3)} ${n['unit']} • Bor: ${(n['available'] as num).toStringAsFixed(3)}',
                             ),
                             trailing: SizedBox(
                               width: 94,
-                              child: Text(
+                              child: Tx(
                                 (n['missing'] as num) > .000001
                                     ? 'Kam: ${(n['missing'] as num).toStringAsFixed(3)} ${n['unit']}'
                                     : 'Yetarli',
@@ -134,12 +134,12 @@ class WarehousePage extends StatelessWidget {
                             final yes = await showDialog<bool>(
                               context: context,
                               builder: (c) => GlassAlertDialog(
-                                title: Text(
+                                title: Tx(
                                   consume
                                       ? 'Ombordan chiqarish'
                                       : 'Materialni qaytarish',
                                 ),
-                                content: Text(
+                                content: Tx(
                                   consume
                                       ? 'Smetadagi xarid miqdorlari ombor qoldig‘idan ayriladi. Bu amalni keyin qaytarish mumkin.'
                                       : 'Aynan shu buyurtmaga chiqarilgan miqdorlar omborga qaytariladi.',
@@ -147,11 +147,11 @@ class WarehousePage extends StatelessWidget {
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(c, false),
-                                    child: const Text('Bekor'),
+                                    child: const Tx('Bekor'),
                                   ),
                                   FilledButton(
                                     onPressed: () => Navigator.pop(c, true),
-                                    child: const Text('Tasdiqlash'),
+                                    child: const Tx('Tasdiqlash'),
                                   ),
                                 ],
                               ),
@@ -163,13 +163,13 @@ class WarehousePage extends StatelessWidget {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(
                                     context,
-                                  ).showSnackBar(SnackBar(content: Text('$e')));
+                                  ).showSnackBar(SnackBar(content: Tx('$e')));
                                 }
                               }
                             }
                           },
                           icon: const Icon(Icons.inventory),
-                          label: Text(
+                          label: Tx(
                             store.quotes.firstWhere(
                                       (q) => q['id'] == quoteId,
                                     )['stockConsumed'] ==
@@ -180,7 +180,7 @@ class WarehousePage extends StatelessWidget {
                         ),
                       const Divider(height: 30),
                     ],
-                    const Text(
+                    const Tx(
                       'Ombor qoldiqlari',
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -188,14 +188,14 @@ class WarehousePage extends StatelessWidget {
                     if (store.inventory.isEmpty)
                       const Padding(
                         padding: EdgeInsets.all(24),
-                        child: Text('Material qo‘shish tugmasidan boshlang.'),
+                        child: Tx('Material qo‘shish tugmasidan boshlang.'),
                       ),
                     for (final row in store.inventory)
                       GlassCard(
                         child: GlassControl(
                             child: ListTile(
-                          title: Text(materialNames[row['key']] ?? row['key']),
-                          subtitle: Text(
+                          title: Tx(materialNames[row['key']] ?? row['key']),
+                          subtitle: Tx(
                             '${store.profiles.firstWhere((p) => p['id'] == row['profileId'], orElse: () => {
                                   'name': row['profileId']
                                 })['name']}\n${row['quantity']} ${row['unit']} • ${money(row['price'])} / ${row['unit']}',
@@ -219,7 +219,7 @@ class WarehousePage extends StatelessWidget {
             floatingActionButton: GlassActionButton.extended(
               onPressed: () => editStock(context),
               icon: const Icon(Icons.add),
-              label: const Text('Material qo‘shish'),
+              label: const Tx('Material qo‘shish'),
             ),
           );
         },
@@ -246,7 +246,7 @@ class WarehousePage extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('$e')));
+        ).showSnackBar(SnackBar(content: Tx('$e')));
       }
     }
   }
@@ -301,7 +301,7 @@ class _StockFormState extends State<StockForm> {
       );
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: GlassAppBar(title: const Text('Material qoldig‘i')),
+        appBar: GlassAppBar(title: const Tx('Material qoldig‘i')),
         body: readable(
           SafeArea(
             child: Form(
@@ -316,11 +316,11 @@ class _StockFormState extends State<StockForm> {
                       initialValue: profile,
                       isExpanded: true,
                       decoration:
-                          const InputDecoration(labelText: 'Profil tizimi'),
+                          InputDecoration(labelText: tr('Profil tizimi')),
                       items: [
                         for (final p in widget.store.profiles)
                           DropdownMenuItem(
-                              value: p['id'], child: Text(p['name'])),
+                              value: p['id'], child: Tx(p['name'])),
                       ],
                       onChanged: (v) => setState(() => profile = v!),
                     ),
@@ -330,12 +330,11 @@ class _StockFormState extends State<StockForm> {
                     child: DropdownButtonFormField<String>(
                       initialValue: key,
                       isExpanded: true,
-                      decoration: const InputDecoration(labelText: 'Material'),
+                      decoration: InputDecoration(labelText: tr('Material')),
                       items: [
                         for (final e in materialNames.entries)
                           if (!const {'labor', 'bending'}.contains(e.key))
-                            DropdownMenuItem(
-                                value: e.key, child: Text(e.value)),
+                            DropdownMenuItem(value: e.key, child: Tx(e.value)),
                       ],
                       onChanged: (v) => setState(() => key = v!),
                     ),
@@ -359,7 +358,7 @@ class _StockFormState extends State<StockForm> {
                         'minimum': n(minimum),
                       });
                     },
-                    child: const Text('Qoldiqni saqlash'),
+                    child: const Tx('Qoldiqni saqlash'),
                   ),
                 ],
               ),

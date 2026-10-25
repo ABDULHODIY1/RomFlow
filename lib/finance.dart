@@ -4,6 +4,7 @@ import 'calculator.dart';
 import 'dialogs.dart';
 import 'store.dart';
 import 'workshop_field.dart';
+import 'i18n.dart';
 
 /// Income, expenses, salaries and profit, plus order statistics. Everything is
 /// computed from local records; nothing is sent anywhere.
@@ -130,7 +131,7 @@ class _FinancePageState extends State<FinancePage> {
           initialIndex: widget.initialTab,
           child: Scaffold(
             appBar: GlassAppBar(
-              title: const Text('Moliya va statistika'),
+              title: const Tx('Moliya va statistika'),
               bottom: const TabBar(
                 tabs: [
                   Tab(text: 'Moliya'),
@@ -142,7 +143,7 @@ class _FinancePageState extends State<FinancePage> {
               builder: (context) => GlassActionButton.extended(
                 onPressed: () => addExpense(context),
                 icon: const Icon(Icons.add),
-                label: const Text('Xarajat'),
+                label: const Tx('Xarajat'),
               ),
             ),
             body: readable(TabBarView(children: [finance(), statistics()])),
@@ -159,7 +160,7 @@ class _FinancePageState extends State<FinancePage> {
                 padding: const EdgeInsets.only(right: 6),
                 child: GlassControl(
                   child: ChoiceChip(
-                    label: Text(periodNames[p]!),
+                    label: Tx(periodNames[p]!),
                     selected: period == p,
                     onSelected: (_) => setState(() => period = p),
                   ),
@@ -258,29 +259,29 @@ class _FinancePageState extends State<FinancePage> {
           format: (v) => money(v),
         ),
         const SizedBox(height: 18),
-        Text(
+        Tx(
           'Buyurtmalar foydasi',
           style: Theme.of(context).textTheme.titleMedium,
         ),
-        Text(
+        Tx(
           'Smeta summasi − material tannarxi − shu buyurtmaga yozilgan ish haqi va xarajat.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         if (ranked.isEmpty)
           const Padding(
             padding: EdgeInsets.all(16),
-            child: Text('Bu davrda buyurtma yo‘q.'),
+            child: Tx('Bu davrda buyurtma yo‘q.'),
           ),
         for (final (q, p) in ranked.take(8))
           GlassCard(
             child: GlassControl(
                 child: ListTile(
-              title: Text(q['title'], overflow: TextOverflow.ellipsis),
-              subtitle: Text(
+              title: Tx(q['title'], overflow: TextOverflow.ellipsis),
+              subtitle: Tx(
                 '${q['customer']} • ${money(p.total)}\nMaterial ${money(p.material)} • ish haqi ${money(p.labour)} • xarajat ${money(p.extra)}',
               ),
               isThreeLine: true,
-              trailing: Text(
+              trailing: Tx(
                 money(p.profit),
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
@@ -292,11 +293,11 @@ class _FinancePageState extends State<FinancePage> {
             )),
           ),
         const SizedBox(height: 18),
-        Text('Xarajatlar', style: Theme.of(context).textTheme.titleMedium),
+        Tx('Xarajatlar', style: Theme.of(context).textTheme.titleMedium),
         if (expenses.isEmpty)
           const Padding(
             padding: EdgeInsets.all(16),
-            child: Text(
+            child: Tx(
               '“Xarajat” tugmasi bilan ijara, transport, material va boshqa xarajatlarni yozing.',
             ),
           ),
@@ -305,8 +306,8 @@ class _FinancePageState extends State<FinancePage> {
             child: GlassControl(
                 child: ListTile(
               leading: const Icon(Icons.receipt_long_outlined),
-              title: Text(Store.expenseCategories[e['category']]!),
-              subtitle: Text(
+              title: Tx(Store.expenseCategories[e['category']]!),
+              subtitle: Tx(
                 [
                   _date(e['created']),
                   if ((e['note'] ?? '').toString().isNotEmpty) e['note'],
@@ -318,7 +319,7 @@ class _FinancePageState extends State<FinancePage> {
                         '',
                 ].join(' • '),
               ),
-              trailing: Text(money(e['amount'])),
+              trailing: Tx(money(e['amount'])),
               onLongPress: () => deleteExpense(e),
             )),
           ),
@@ -435,7 +436,7 @@ class _FinancePageState extends State<FinancePage> {
           format: (v) => '${v.round()} ta',
         ),
         const SizedBox(height: 18),
-        Text(
+        Tx(
           'Bosqichlar bo‘yicha',
           style: Theme.of(context).textTheme.titleMedium,
         ),
@@ -447,22 +448,22 @@ class _FinancePageState extends State<FinancePage> {
             max: byStatus.values.fold(1, (a, b) => a > b ? a : b),
           ),
         const SizedBox(height: 18),
-        Text(
+        Tx(
           'Eng yirik mijozlar',
           style: Theme.of(context).textTheme.titleMedium,
         ),
         if (top.isEmpty)
           const Padding(
             padding: EdgeInsets.all(16),
-            child: Text('Bu davrda buyurtma yo‘q.'),
+            child: Tx('Bu davrda buyurtma yo‘q.'),
           ),
         for (final (i, e) in top.take(5).indexed)
           GlassControl(
               child: ListTile(
             dense: true,
-            leading: CircleAvatar(radius: 13, child: Text('${i + 1}')),
-            title: Text(e.key),
-            trailing: Text(money(e.value)),
+            leading: CircleAvatar(radius: 13, child: Tx('${i + 1}')),
+            title: Tx(e.key),
+            trailing: Tx(money(e.value)),
           )),
       ],
     );
@@ -478,18 +479,18 @@ class _FinancePageState extends State<FinancePage> {
     final yes = await showDialog<bool>(
       context: context,
       builder: (c) => GlassAlertDialog(
-        title: const Text('Xarajat o‘chirilsinmi?'),
-        content: Text(
+        title: const Tx('Xarajat o‘chirilsinmi?'),
+        content: Tx(
           '${Store.expenseCategories[e['category']]} • ${money(e['amount'])}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Bekor'),
+            child: const Tx('Bekor'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(c, true),
-            child: const Text('O‘chirish'),
+            child: const Tx('O‘chirish'),
           ),
         ],
       ),
@@ -515,7 +516,7 @@ Future<void> expenseDialog(
     context: context,
     builder: (c) => StatefulBuilder(
       builder: (c, set) => GlassAlertDialog(
-        title: const Text('Xarajat yozish'),
+        title: const Tx('Xarajat yozish'),
         content: SingleChildScrollView(
           child: Form(
             key: form,
@@ -526,10 +527,10 @@ Future<void> expenseDialog(
                   child: DropdownButtonFormField<String>(
                     isExpanded: true,
                     initialValue: category,
-                    decoration: const InputDecoration(labelText: 'Turi'),
+                    decoration: InputDecoration(labelText: tr('Turi')),
                     items: [
                       for (final e in Store.expenseCategories.entries)
-                        DropdownMenuItem(value: e.key, child: Text(e.value)),
+                        DropdownMenuItem(value: e.key, child: Tx(e.value)),
                     ],
                     onChanged: (v) => set(() => category = v!),
                   ),
@@ -557,7 +558,7 @@ Future<void> expenseDialog(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Bekor'),
+            child: const Tx('Bekor'),
           ),
           FilledButton(
             onPressed: () {
@@ -565,7 +566,7 @@ Future<void> expenseDialog(
                 Navigator.pop(c, true);
               }
             },
-            child: const Text('Saqlash'),
+            child: const Tx('Saqlash'),
           ),
         ],
       ),
@@ -582,7 +583,7 @@ Future<void> expenseDialog(
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$e'.replaceFirst('Exception: ', ''))),
+          SnackBar(content: Tx('$e'.replaceFirst('Exception: ', ''))),
         );
       }
     }
@@ -652,7 +653,7 @@ class Kpi extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   // Two short lines rather than a cut-off "Faol buyur…".
-                  child: Text(
+                  child: Tx(
                     label,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -668,7 +669,7 @@ class Kpi extends StatelessWidget {
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text(
+              child: Tx(
                 value,
                 style: TextStyle(
                   fontSize: 21,
@@ -678,7 +679,7 @@ class Kpi extends StatelessWidget {
               ),
             ),
             if (hint != null)
-              Text(
+              Tx(
                 hint!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -736,7 +737,7 @@ class _BarChartState extends State<BarChart> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.title, style: theme.textTheme.titleSmall),
+            Tx(widget.title, style: theme.textTheme.titleSmall),
             if (widget.series.length > 1)
               Padding(
                 padding: const EdgeInsets.only(top: 6),
@@ -757,7 +758,7 @@ class _BarChartState extends State<BarChart> {
                           ),
                           const SizedBox(width: 5),
                           Flexible(
-                            child: Text(
+                            child: Tx(
                               s.name,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall,
@@ -795,7 +796,7 @@ class _BarChartState extends State<BarChart> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            Tx(
               '${widget.labels[selected]}: ${[
                 for (final s in widget.series)
                   '${widget.series.length > 1 ? '${s.name} ' : ''}${widget.format(s.values[selected])}'
@@ -906,7 +907,7 @@ class StatusBar extends StatelessWidget {
         children: [
           SizedBox(
             width: 120,
-            child: Text(
+            child: Tx(
               label,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall,
@@ -933,7 +934,7 @@ class StatusBar extends StatelessWidget {
           ),
           SizedBox(
             width: 36,
-            child: Text(
+            child: Tx(
               '$count',
               textAlign: TextAlign.right,
               style: theme.textTheme.bodySmall?.copyWith(

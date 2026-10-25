@@ -4,6 +4,7 @@ import 'adaptive_ui.dart';
 import 'calculator.dart';
 import 'store.dart';
 import 'reminder_service.dart';
+import 'i18n.dart';
 
 String localDate(String raw) {
   final d = DateTime.parse(raw).toLocal();
@@ -26,13 +27,13 @@ class _WorkshopToolsState extends State<WorkshopTools> {
   void error(Object e) => ScaffoldMessenger.of(
         context,
       ).showSnackBar(
-          SnackBar(content: Text('$e'.replaceFirst('Exception: ', ''))));
+          SnackBar(content: Tx('$e'.replaceFirst('Exception: ', ''))));
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: s,
         builder: (context, _) => Scaffold(
           appBar: GlassAppBar(
-            title: Text(page == 0 ? 'Qarz daftari' : 'Eslatmalar'),
+            title: Tx(page == 0 ? 'Qarz daftari' : 'Eslatmalar'),
           ),
           body: readable(
             SafeArea(
@@ -46,12 +47,12 @@ class _WorkshopToolsState extends State<WorkshopTools> {
                       segments: const [
                         ButtonSegment(
                           value: 0,
-                          label: Text('Qarzlar'),
+                          label: Tx('Qarzlar'),
                           icon: Icon(Icons.account_balance_wallet_outlined),
                         ),
                         ButtonSegment(
                           value: 1,
-                          label: Text('Eslatmalar'),
+                          label: Tx('Eslatmalar'),
                           icon: Icon(Icons.notifications_none),
                         ),
                       ],
@@ -69,7 +70,7 @@ class _WorkshopToolsState extends State<WorkshopTools> {
           floatingActionButton: GlassActionButton.extended(
             onPressed: page == 0 ? addDebt : () => editReminder(),
             icon: const Icon(Icons.add),
-            label: Text(page == 0 ? 'Qarz yozish' : 'Eslatma qo‘shish'),
+            label: Tx(page == 0 ? 'Qarz yozish' : 'Eslatma qo‘shish'),
           ),
         ),
       );
@@ -108,7 +109,7 @@ class _WorkshopToolsState extends State<WorkshopTools> {
           }.entries)
             GlassControl(
               child: ChoiceChip(
-                label: Text(e.value),
+                label: Tx(e.value),
                 selected: filter == e.key,
                 onSelected: (_) => setState(() => filter = e.key),
               ),
@@ -119,7 +120,7 @@ class _WorkshopToolsState extends State<WorkshopTools> {
       if (s.debts.isEmpty)
         const Padding(
           padding: EdgeInsets.all(24),
-          child: Text(
+          child: Tx(
             'Qarz yozish orqali shaxs, summa va qaytarish muddatini kiriting.',
           ),
         ),
@@ -137,11 +138,11 @@ class _WorkshopToolsState extends State<WorkshopTools> {
                   ? Colors.grey
                   : Theme.of(context).colorScheme.primary,
             ),
-            title: Text(
+            title: Tx(
               d['person'],
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
-            subtitle: Text(
+            subtitle: Tx(
               '${d['direction'] == 'receivable' ? 'Menga qarz' : 'Men qarzman'} • ${Store.debtBalance(d) == 0 ? 'Yopilgan' : 'Qoldiq: ${money(Store.debtBalance(d))}'}${d['due'] == null ? '' : '\nMuddat: ${localDate(d['due'])}'}',
             ),
             trailing: const Icon(Icons.chevron_right),
@@ -149,11 +150,11 @@ class _WorkshopToolsState extends State<WorkshopTools> {
           )),
         ),
       const SizedBox(height: 18),
-      const Text(
+      const Tx(
         'Buyurtmalar bo‘yicha qoldiqlar',
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
-      const Text(
+      const Tx(
         'Smetadagi to‘lovlardan olinadi. Yuqoridagi qo‘lda yozilgan qarzlar jamiga qo‘shilmagan.',
         style: TextStyle(fontSize: 12),
       ),
@@ -162,9 +163,9 @@ class _WorkshopToolsState extends State<WorkshopTools> {
       ))
         GlassControl(
             child: ListTile(
-          title: Text(q['customer']),
-          subtitle: Text(q['title']),
-          trailing: Text(money(q['balance'])),
+          title: Tx(q['customer']),
+          subtitle: Tx(q['title']),
+          trailing: Tx(money(q['balance'])),
         )),
     ];
   }
@@ -175,9 +176,9 @@ class _WorkshopToolsState extends State<WorkshopTools> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title),
+              Tx(title),
               const SizedBox(height: 8),
-              Text(
+              Tx(
                 sum,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -195,19 +196,19 @@ class _WorkshopToolsState extends State<WorkshopTools> {
         return a['due'].compareTo(b['due']);
       });
     return [
-      const Text(
+      const Tx(
         'Muddatli ishlar, o‘lchov, montaj va qarz qaytarish uchun.',
         style: TextStyle(fontSize: 15),
       ),
       const SizedBox(height: 8),
-      const Text(
+      const Tx(
         'Bildirishnoma uchun tizim ruxsati kerak. Android quvvat tejash rejimida xabar kechikishi mumkin.',
         style: TextStyle(fontSize: 12, color: Colors.blueGrey),
       ),
       if (rows.isEmpty)
         const Padding(
           padding: EdgeInsets.all(24),
-          child: Text('Hozircha eslatma yo‘q.'),
+          child: Tx('Hozircha eslatma yo‘q.'),
         ),
       for (final r in rows)
         GlassCard(
@@ -230,14 +231,14 @@ class _WorkshopToolsState extends State<WorkshopTools> {
                 },
               ),
             ),
-            title: Text(
+            title: Tx(
               r['title'],
               style: TextStyle(
                 decoration:
                     r['done'] == true ? TextDecoration.lineThrough : null,
               ),
             ),
-            subtitle: Text(
+            subtitle: Tx(
               '${localDate(r['due'])}${r['note'] == '' ? '' : '\n${r['note']}'}',
               style: TextStyle(
                 color: r['done'] != true &&
@@ -248,22 +249,22 @@ class _WorkshopToolsState extends State<WorkshopTools> {
             ),
             onTap: () => editReminder(r),
             trailing: IconButton(
-              tooltip: 'Eslatmani o‘chirish',
+              tooltip: tr('Eslatmani o‘chirish'),
               icon: const Icon(Icons.delete_outline),
               onPressed: () async {
                 final yes = await showDialog<bool>(
                   context: context,
                   builder: (c) => GlassAlertDialog(
-                    title: const Text('Eslatma o‘chirilsinmi?'),
-                    content: Text(r['title']),
+                    title: const Tx('Eslatma o‘chirilsinmi?'),
+                    content: Tx(r['title']),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(c, false),
-                        child: const Text('Bekor'),
+                        child: const Tx('Bekor'),
                       ),
                       FilledButton(
                         onPressed: () => Navigator.pop(c, true),
-                        child: const Text('O‘chirish'),
+                        child: const Tx('O‘chirish'),
                       ),
                     ],
                   ),
@@ -318,7 +319,7 @@ class _WorkshopToolsState extends State<WorkshopTools> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
+            content: Tx(
               scheduled
                   ? 'Eslatma va mahalliy bildirishnoma saqlandi.'
                   : 'Eslatma saqlandi. Tizim bildirishnomasi yoqilmadi; ruxsat va muddatni tekshiring.',
@@ -356,7 +357,7 @@ class _DebtFormState extends State<DebtForm> {
 
   @override
   Widget build(BuildContext c) => Scaffold(
-        appBar: GlassAppBar(title: const Text('Qarz yozish')),
+        appBar: GlassAppBar(title: const Tx('Qarz yozish')),
         body: readable(
           SafeArea(
             child: Form(
@@ -369,17 +370,17 @@ class _DebtFormState extends State<DebtForm> {
                   GlassControl(
                     child: DropdownButtonFormField<String>(
                       initialValue: direction,
-                      decoration: const InputDecoration(
-                        labelText: 'Qarz yo‘nalishi',
+                      decoration: InputDecoration(
+                        labelText: tr('Qarz yo‘nalishi'),
                       ),
                       items: const [
                         DropdownMenuItem(
                           value: 'receivable',
-                          child: Text('Menga qarz'),
+                          child: Tx('Menga qarz'),
                         ),
                         DropdownMenuItem(
                           value: 'payable',
-                          child: Text('Men qarzman'),
+                          child: Tx('Men qarzman'),
                         ),
                       ],
                       onChanged: (v) => direction = v!,
@@ -392,8 +393,8 @@ class _DebtFormState extends State<DebtForm> {
                   input(note, 'Izoh'),
                   GlassControl(
                       child: ListTile(
-                    title: const Text('Qaytarish muddati'),
-                    subtitle: Text(
+                    title: const Tx('Qaytarish muddati'),
+                    subtitle: Tx(
                       due == null
                           ? 'Belgilanmagan'
                           : localDate(due!.toIso8601String()),
@@ -425,7 +426,7 @@ class _DebtFormState extends State<DebtForm> {
                         });
                       }
                     },
-                    child: const Text('Qarzni saqlash'),
+                    child: const Tx('Qarzni saqlash'),
                   ),
                 ],
               ),
@@ -475,7 +476,7 @@ class DebtDetail extends StatelessWidget {
           final d = store.debts.firstWhere((d) => d['id'] == id),
               balance = Store.debtBalance(d);
           return Scaffold(
-            appBar: GlassAppBar(title: Text(d['person'])),
+            appBar: GlassAppBar(title: Tx(d['person'])),
             body: readable(
               SafeArea(
                 child: ListView(
@@ -483,25 +484,25 @@ class DebtDetail extends StatelessWidget {
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: const EdgeInsets.all(20),
                   children: [
-                    Text(
+                    Tx(
                       money(balance),
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
+                    Tx(
                       '${d['direction'] == 'receivable' ? 'Menga qarz' : 'Men qarzman'} • qoldiq',
                     ),
                     const SizedBox(height: 18),
-                    Text(
+                    Tx(
                       'Boshlang‘ich: ${money(d['amount'])}\nTo‘langan: ${money(Store.debtPaid(d))}\n${d['phone']}\n${d['note']}${d['due'] == null ? '' : '\nMuddat: ${localDate(d['due'])}'}',
                     ),
                     const SizedBox(height: 20),
                     if (balance > 0)
                       FilledButton.icon(
                         icon: const Icon(Icons.payments_outlined),
-                        label: const Text('To‘lov yozish'),
+                        label: const Tx('To‘lov yozish'),
                         onPressed: () async {
                           final result =
                               await Navigator.push<Map<String, dynamic>>(
@@ -521,14 +522,14 @@ class DebtDetail extends StatelessWidget {
                               if (c.mounted) {
                                 ScaffoldMessenger.of(
                                   c,
-                                ).showSnackBar(SnackBar(content: Text('$e')));
+                                ).showSnackBar(SnackBar(content: Tx('$e')));
                               }
                             }
                           }
                         },
                       ),
                     const SizedBox(height: 20),
-                    const Text(
+                    const Tx(
                       'To‘lovlar tarixi',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -536,9 +537,9 @@ class DebtDetail extends StatelessWidget {
                     for (final p in (d['payments'] as List).reversed)
                       GlassControl(
                           child: ListTile(
-                        title: Text(money(p['amount'])),
+                        title: Tx(money(p['amount'])),
                         subtitle:
-                            Text('${localDate(p['created'])}\n${p['note']}'),
+                            Tx('${localDate(p['created'])}\n${p['note']}'),
                       )),
                   ],
                 ),
@@ -570,7 +571,7 @@ class _PaymentFormState extends State<PaymentForm> {
 
   @override
   Widget build(BuildContext c) => Scaffold(
-        appBar: GlassAppBar(title: const Text('Qarz to‘lovi')),
+        appBar: GlassAppBar(title: const Tx('Qarz to‘lovi')),
         body: readable(
           Form(
             key: form,
@@ -578,12 +579,12 @@ class _PaymentFormState extends State<PaymentForm> {
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.all(16),
               children: [
-                Text('Qoldiq: ${money(widget.maximum)}'),
+                Tx('Qoldiq: ${money(widget.maximum)}'),
                 const SizedBox(height: 16),
                 input(amount, 'To‘lov (so‘m)', number: true, required: true),
                 input(note, 'To‘lov izohi'),
                 if (error != null)
-                  Text(error!, style: const TextStyle(color: Colors.red)),
+                  Tx(error!, style: const TextStyle(color: Colors.red)),
                 FilledButton(
                   onPressed: () {
                     if (!form.currentState!.validate()) return;
@@ -594,7 +595,7 @@ class _PaymentFormState extends State<PaymentForm> {
                     }
                     Navigator.pop(c, {'amount': n, 'note': note.text.trim()});
                   },
-                  child: const Text('To‘lovni saqlash'),
+                  child: const Tx('To‘lovni saqlash'),
                 ),
               ],
             ),
@@ -633,7 +634,7 @@ class _ReminderFormState extends State<ReminderForm> {
 
   @override
   Widget build(BuildContext c) => Scaffold(
-        appBar: GlassAppBar(title: const Text('Eslatma')),
+        appBar: GlassAppBar(title: const Tx('Eslatma')),
         body: readable(
           SafeArea(
             child: Form(
@@ -647,7 +648,7 @@ class _ReminderFormState extends State<ReminderForm> {
                   input(note, 'Izoh'),
                   GlassControl(
                       child: ListTile(
-                    title: Text(localDate(due.toIso8601String())),
+                    title: Tx(localDate(due.toIso8601String())),
                     trailing: const Icon(Icons.calendar_month),
                     onTap: () async {
                       final d = await showDatePicker(
@@ -687,7 +688,7 @@ class _ReminderFormState extends State<ReminderForm> {
                         });
                       }
                     },
-                    child: const Text('Eslatmani saqlash'),
+                    child: const Tx('Eslatmani saqlash'),
                   ),
                 ],
               ),

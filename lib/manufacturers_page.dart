@@ -7,6 +7,7 @@ import 'manufacturers.dart';
 import 'price_sources.dart' show openPriceSources;
 import 'store.dart';
 import 'adaptive_ui.dart';
+import 'i18n.dart';
 
 String _clean(Object e) => '$e'.replaceFirst(RegExp(r'^\w*Exception: '), '');
 
@@ -40,7 +41,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
 
   void say(Object text) => ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(_clean(text))));
+      ).showSnackBar(SnackBar(content: Tx(_clean(text))));
 
   /// The profile a system is priced with: the workshop's own, if it has one.
   Json profileOf(ManufacturerCatalog c, ProfileSystem system) {
@@ -102,7 +103,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
         final c = s.catalog;
         return Scaffold(
           appBar: GlassAppBar(
-            title: const Text('Ishlab chiqaruvchilar'),
+            title: const Tx('Ishlab chiqaruvchilar'),
             actions: [
               busy
                   ? const Padding(
@@ -115,14 +116,14 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                     )
                   : IconButton(
                       key: const ValueKey('catalog-refresh'),
-                      tooltip: 'Katalogni yangilash',
+                      tooltip: tr('Katalogni yangilash'),
                       onPressed: refresh,
                       icon: const Icon(Icons.sync),
                     ),
             ],
           ),
           body: c == null
-              ? const Center(child: Text('Katalog yuklanmadi'))
+              ? const Center(child: Tx('Katalog yuklanmadi'))
               : Align(
                   alignment: Alignment.topCenter,
                   child: ConstrainedBox(
@@ -160,7 +161,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            Tx(
               'O‘zbekiston zavodlari narxi',
               style: text.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
@@ -168,19 +169,19 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
+            Tx(
               '${c.manufacturers.length} ta ishlab chiqaruvchi • ${c.systems.length} ta profil tizimi',
               style: text.bodyMedium?.copyWith(
                 color: scheme.onPrimaryContainer,
               ),
             ),
             const SizedBox(height: 2),
-            Text(
+            Tx(
               'Katalog ${_date(c.date)} • 1 \$ = ${money(rate)}${s.usdRate > 0 ? '' : ' (taxminiy kurs)'}',
               style: text.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
             ),
             const SizedBox(height: 8),
-            Text(
+            Tx(
               '1 m² narxi — 1400 × 1400 mm, 2 bo‘limli, bitta ochiladigan rom; sizning ustamangiz bilan. Narxlar ochiq bozor e’lonlaridan olingan taxminiy narx: diler narxini kiritsangiz, sizniki ishlatiladi.',
               style: text.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
             ),
@@ -206,7 +207,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                 child: GlassControl(
                   child: ChoiceChip(
                     key: ValueKey('mf-filter-$id'),
-                    label: Text(name),
+                    label: Tx(name),
                     selected: filter == id,
                     onSelected: (_) => setState(() => filter = id),
                   ),
@@ -237,7 +238,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                 CircleAvatar(
                   radius: 18,
                   backgroundColor: scheme.secondaryContainer,
-                  child: Text(
+                  child: Tx(
                     m.name.characters.first,
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
@@ -250,13 +251,13 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      Tx(
                         m.name,
                         style: text.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      Text(
+                      Tx(
                         _makerLine(m),
                         style: text.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
@@ -267,7 +268,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                 ),
                 if (m.website.isNotEmpty)
                   IconButton(
-                    tooltip: 'Sayt havolasini nusxalash',
+                    tooltip: tr('Sayt havolasini nusxalash'),
                     onPressed: () => copy(m.website),
                     icon: const Icon(Icons.link),
                   ),
@@ -276,7 +277,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
             if (m.about.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 8, 8, 0),
-                child: Text(m.about, style: text.bodySmall),
+                child: Tx(m.about, style: text.bodySmall),
               ),
             if (systems.isEmpty)
               Padding(
@@ -284,7 +285,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                 child: TextButton.icon(
                   onPressed: () => openPriceSources(context, s),
                   icon: const Icon(Icons.cloud_sync_outlined),
-                  label: const Text('Diler narxini kiritish'),
+                  label: const Tx('Diler narxini kiritish'),
                 ),
               ),
             for (final system in systems) systemRow(c, system),
@@ -318,21 +319,21 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    Tx(
                       system.name,
                       style: text.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    Tx(
                       system.specs,
                       style: text.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
+                    Tx(
                       m2 == null
                           ? 'Hisoblanmadi'
                           : '≈ ${money((m2 / 1000).round() * 1000)}/m²',
@@ -343,7 +344,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                       ),
                     ),
                     for (final market in system.market)
-                      Text(
+                      Tx(
                         'Bozor: ${_marketText(market)} — ${market.source}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -365,7 +366,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                     )
                   : IconButton.filledTonal(
                       key: ValueKey('mf-add-${system.id}'),
-                      tooltip: 'Profillar ro‘yxatiga qo‘shish',
+                      tooltip: tr('Profillar ro‘yxatiga qo‘shish'),
                       onPressed: () => add(system),
                       icon: const Icon(Icons.add),
                     ),
@@ -393,15 +394,15 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
-              Text(system.name, style: text.titleLarge),
-              Text(
+              Tx(system.name, style: text.titleLarge),
+              Tx(
                 '${c.maker(system.manufacturer).name} • ${system.specs}',
                 style: text.bodySmall,
               ),
               if (system.note.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Text(system.note, style: text.bodySmall),
+                  child: Tx(system.note, style: text.bodySmall),
                 ),
               const SizedBox(height: 12),
               for (final k in const [
@@ -415,8 +416,8 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                     child: ListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
-                  title: Text(materialNames[k] ?? k),
-                  trailing: Text(
+                  title: Tx(materialNames[k] ?? k),
+                  trailing: Tx(
                     '${money(prices[k])}${k == 'glass' ? '/m²' : '/m'}${usd[k] is num ? '  (${usd[k]} \$)' : ''}',
                   ),
                 )),
@@ -427,12 +428,12 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.storefront_outlined),
-                  title: Text('${market.what}: ${_marketText(market)}'),
-                  subtitle: Text('${market.source} • ${_date(market.seen)}'),
+                  title: Tx('${market.what}: ${_marketText(market)}'),
+                  subtitle: Tx('${market.source} • ${_date(market.seen)}'),
                   trailing: market.url.isEmpty
                       ? null
                       : IconButton(
-                          tooltip: 'Havolani nusxalash',
+                          tooltip: tr('Havolani nusxalash'),
                           onPressed: () => copy(market.url),
                           icon: const Icon(Icons.copy, size: 20),
                         ),
@@ -441,10 +442,10 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                 TextButton.icon(
                   onPressed: () => copy(system.catalogUrl),
                   icon: const Icon(Icons.link),
-                  label: const Text('Zavod sahifasi havolasi'),
+                  label: const Tx('Zavod sahifasi havolasi'),
                 ),
               const SizedBox(height: 8),
-              Text(
+              Tx(
                 'Narxni o‘zgartirish: Profillar → “Narxlarni tahrirlash” yoki diler jadvalidan yuklang. Siz kiritgan narx katalog yangilanganda ham saqlanadi.',
                 style: text.bodySmall,
               ),
@@ -465,17 +466,17 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Materiallar bozori', style: text.titleMedium),
+            Tx('Materiallar bozori', style: text.titleMedium),
             for (final m in c.materialsMarket)
               Padding(
                 padding: const EdgeInsets.only(top: 6),
-                child: Text(
+                child: Tx(
                   '${m.what}: ${_marketText(m)} — ${m.source}',
                   style: text.bodySmall,
                 ),
               ),
             const SizedBox(height: 8),
-            Text(c.note, style: text.bodySmall),
+            Tx(c.note, style: text.bodySmall),
           ],
         ),
       ),
@@ -574,8 +575,8 @@ class _ComparisonSheetState extends State<_ComparisonSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Zavodlar narxi', style: text.titleLarge),
-                  Text(
+                  Tx('Zavodlar narxi', style: text.titleLarge),
+                  Tx(
                     '${widget.drawing['widthMm']} × ${widget.drawing['heightMm']} mm × ${widget.quantity} dona • ${widget.quotes.length} ta tizim • arzonidan',
                     style: text.bodySmall,
                   ),
@@ -584,7 +585,7 @@ class _ComparisonSheetState extends State<_ComparisonSheet> {
                       widget.currentTotal != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
-                      child: Text(
+                      child: Tx(
                         'Hozirgi: ${widget.currentName} — ${money(widget.currentTotal)}',
                         key: const ValueKey('compare-current'),
                         maxLines: 1,
@@ -606,7 +607,7 @@ class _ComparisonSheetState extends State<_ComparisonSheet> {
                         GlassControl(
                           child: ChoiceChip(
                             key: ValueKey('compare-filter-$id'),
-                            label: Text(name),
+                            label: Tx(name),
                             selected: filter == id,
                             onSelected: (_) => setState(() => filter = id),
                           ),
@@ -641,7 +642,7 @@ class _ComparisonSheetState extends State<_ComparisonSheet> {
                         backgroundColor: i == 0 && q.total != null
                             ? Colors.green.shade600
                             : scheme.surfaceContainerHighest,
-                        child: Text(
+                        child: Tx(
                           '${i + 1}',
                           style: TextStyle(
                             fontSize: 13,
@@ -652,11 +653,11 @@ class _ComparisonSheetState extends State<_ComparisonSheet> {
                           ),
                         ),
                       ),
-                      title: Text(
+                      title: Tx(
                         q.system.name,
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      subtitle: Text(
+                      subtitle: Tx(
                         q.error ??
                             '${widget.catalog.maker(q.system.manufacturer).name} • ${q.system.specs}${isCurrent ? ' • hozirgi' : ''}',
                         maxLines: 2,
@@ -668,7 +669,7 @@ class _ComparisonSheetState extends State<_ComparisonSheet> {
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text(
+                                Tx(
                                   money(q.total),
                                   style: const TextStyle(
                                     fontSize: 14,
@@ -676,7 +677,7 @@ class _ComparisonSheetState extends State<_ComparisonSheet> {
                                   ),
                                 ),
                                 if (extra != null && extra > 0)
-                                  Text(
+                                  Tx(
                                     '+$extra%',
                                     style: text.bodySmall?.copyWith(
                                       color: scheme.onSurfaceVariant,

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart'
     show LicenseEntryWithLineBreaks, LicenseRegistry;
 import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:pdf/widgets.dart' as pw;
@@ -34,6 +35,8 @@ import 'measurements.dart';
 import 'installments.dart';
 import 'reminder_service.dart';
 import 'demo_overlay.dart';
+import 'i18n.dart';
+import 'app_setup.dart';
 
 const appVersion = '1.0.0';
 
@@ -101,7 +104,7 @@ class _StartAppState extends State<StartApp> {
                 children: [
                   const BrandLogo(size: 68),
                   const SizedBox(height: 18),
-                  const Text(
+                  const Tx(
                     'RomFlow',
                     style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                   ),
@@ -109,9 +112,9 @@ class _StartAppState extends State<StartApp> {
                   if (loading) ...[
                     const CircularProgressIndicator(),
                     const SizedBox(height: 12),
-                    const Text('Mahalliy ma’lumotlar ochilmoqda…'),
+                    const Tx('Mahalliy ma’lumotlar ochilmoqda…'),
                   ] else ...[
-                    const Text(
+                    const Tx(
                       'Ilovani ochishda xato yuz berdi. Ma’lumotlar o‘chirilgani yo‘q.',
                       textAlign: TextAlign.center,
                     ),
@@ -120,12 +123,12 @@ class _StartAppState extends State<StartApp> {
                     const SizedBox(height: 12),
                     FilledButton(
                       onPressed: load,
-                      child: const Text('Qayta urinish'),
+                      child: const Tx('Qayta urinish'),
                     ),
                     TextButton(
                       onPressed: () =>
                           Clipboard.setData(ClipboardData(text: '$failure')),
-                      child: const Text('Xatoni nusxalash'),
+                      child: const Tx('Xatoni nusxalash'),
                     ),
                   ],
                 ],
@@ -145,7 +148,10 @@ class RomFlow extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: store,
         builder: (context, _) => MaterialApp(
-          key: ValueKey(_designKey(store.designPreference)),
+          // A new design or language rebuilds every page.
+          key: ValueKey(
+            '${_designKey(store.designPreference)}-${_languageKey(store.language)}',
+          ),
           title: 'RomFlow',
           // Very large Dynamic Type would push controls over each other on
           // a small phone: text grows at most 1.15×.
@@ -170,7 +176,7 @@ class RomFlow extends StatelessWidget {
 
 void message(BuildContext c, Object e) {
   ScaffoldMessenger.of(c).showSnackBar(
-    SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+    SnackBar(content: Tx(e.toString().replaceFirst('Exception: ', ''))),
   );
 }
 
@@ -185,7 +191,7 @@ Future<void> guarded(BuildContext c, Future<void> Function() fn) async {
 Widget heading(String text) => Builder(
       builder: (context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Text(
+        child: Tx(
           text,
           style: TextStyle(
             fontSize: 19,
@@ -213,7 +219,7 @@ Widget notice(String text) => Builder(
                   size: 18, color: scheme.onSurfaceVariant),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(text, style: Theme.of(context).textTheme.bodySmall),
+                child: Tx(text, style: Theme.of(context).textTheme.bodySmall),
               ),
             ],
           ),
@@ -263,7 +269,26 @@ class _HomeState extends State<Home> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (s.startupMessage != null) message(context, s.startupMessage!);
       dailyPrices();
+      unawaited(firstRun());
     });
+  }
+
+  /// On the first start and after each update: the language; then, once a
+  /// day at most per release, whether a newer RomFlow is out.
+  Future<void> firstRun() async {
+    if (Platform.environment.containsKey('FLUTTER_TEST') ||
+        const bool.fromEnvironment('ROMFLOW_DEMO')) {
+      return;
+    }
+    if (s.languageBuild != appBuild) {
+      await chooseLanguage(context, s, required: true);
+      // A new language rebuilt the app; the new page carries on.
+      if (!mounted) return;
+    }
+    final update = await findUpdate(version: appVersion);
+    if (!mounted || update == null) return;
+    if (update.build > 0 && update.build <= s.updateDismissedBuild) return;
+    await offerUpdate(context, s, update);
   }
 
   /// Once the app is open: the Central Bank's dollar rate and the price
@@ -401,7 +426,7 @@ class _HomeState extends State<Home> {
                   const BrandLogo(size: 38),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text(
+                    child: Tx(
                       wide ? 'RomFlow • ${_destinations[page].$3}' : 'RomFlow',
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -431,14 +456,14 @@ class _HomeState extends State<Home> {
                     : usesIOSGlass
                         ? GlassIconButton(
                             key: const ValueKey('tariff'),
-                            tooltip: 'Tarif va to‘lov',
+                            tooltip: tr('Tarif va to‘lov'),
                             onPressed: () => open(TariffPage(store: s)),
                             icon: Icons.workspace_premium_outlined,
                             size: 40,
                           )
                         : IconButton(
                             key: const ValueKey('tariff'),
-                            tooltip: 'Tarif va to‘lov',
+                            tooltip: tr('Tarif va to‘lov'),
                             onPressed: () => open(TariffPage(store: s)),
                             icon: const Icon(Icons.workspace_premium_outlined),
                           ),
@@ -462,8 +487,8 @@ class _HomeState extends State<Home> {
                             ? Padding(
                                 padding: const EdgeInsets.only(bottom: 8),
                                 child: FloatingActionButton(
-                                  tooltip:
-                                      showCustomers ? 'Mijoz' : 'Yangi smeta',
+                                  tooltip: tr(
+                                      showCustomers ? 'Mijoz' : 'Yangi smeta'),
                                   elevation: 0,
                                   onPressed: showCustomers
                                       ? () => addCustomer(context, s)
@@ -481,7 +506,7 @@ class _HomeState extends State<Home> {
                             NavigationRailDestination(
                               icon: Icon(icon),
                               selectedIcon: Icon(selected),
-                              label: Text(label),
+                              label: Tx(label),
                             ),
                         ],
                       )),
@@ -515,7 +540,7 @@ class _HomeState extends State<Home> {
                             : newQuote,
                         icon: Icon(
                             showCustomers ? Icons.person_add_alt : Icons.add),
-                        label: Text(showCustomers ? 'Mijoz' : 'Yangi smeta'),
+                        label: Tx(showCustomers ? 'Mijoz' : 'Yangi smeta'),
                       )
                     : null,
             bottomNavigationBar: wide
@@ -738,8 +763,8 @@ class _HomeState extends State<Home> {
                     ? Theme.of(context).colorScheme.error
                     : Theme.of(context).colorScheme.primary,
               ),
-              title: Text(title, overflow: TextOverflow.ellipsis),
-              subtitle: Text(
+              title: Tx(title, overflow: TextOverflow.ellipsis),
+              subtitle: Tx(
                 '${localDate(at.toIso8601String())}${note.trim().isEmpty ? '' : ' • $note'}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -768,9 +793,9 @@ class _HomeState extends State<Home> {
             children: [
               const Icon(Icons.window_outlined, size: 52, color: muted),
               const SizedBox(height: 12),
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+              Tx(title, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
-              Text(
+              Tx(
                 subtitle,
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: muted),
@@ -806,12 +831,12 @@ class _HomeState extends State<Home> {
                     );
             }(),
           ),
-          title: Text(
+          title: Tx(
             q['title'],
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          subtitle: Text(
+          subtitle: Tx(
             '${q['customer']}\n${money(q['total'])} · ${statuses[q['status']]}${(q['balance'] as num) > 0 && q['status'] != 'cancelled' ? ' · qoldiq ${money(q['balance'])}' : ''}',
           ),
           isThreeLine: true,
@@ -851,7 +876,7 @@ class _HomeState extends State<Home> {
               value: false,
               label: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('Buyurtmalar ${s.quotes.length}', maxLines: 1),
+                child: Tx('Buyurtmalar ${s.quotes.length}', maxLines: 1),
               ),
               icon: const Icon(Icons.receipt_long_outlined),
             ),
@@ -859,7 +884,7 @@ class _HomeState extends State<Home> {
               value: true,
               label: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('Mijozlar ${s.customers.length}', maxLines: 1),
+                child: Tx('Mijozlar ${s.customers.length}', maxLines: 1),
               ),
               icon: const Icon(Icons.people_outline),
             ),
@@ -874,13 +899,13 @@ class _HomeState extends State<Home> {
           controller: search,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.search),
-            hintText: showCustomers
+            hintText: tr(showCustomers
                 ? 'Ism, telefon yoki manzil'
-                : 'Buyurtma, mijoz yoki telefon',
+                : 'Buyurtma, mijoz yoki telefon'),
             suffixIcon: search.text.isEmpty
                 ? null
                 : IconButton(
-                    tooltip: 'Tozalash',
+                    tooltip: tr('Tozalash'),
                     onPressed: search.clear,
                     icon: const Icon(Icons.close),
                   ),
@@ -898,7 +923,7 @@ class _HomeState extends State<Home> {
                   padding: const EdgeInsets.only(right: 6),
                   child: GlassControl(
                     child: ChoiceChip(
-                      label: Text(
+                      label: Tx(
                         e.key == 'all'
                             ? e.value
                             : '${e.value} ${s.quotes.where((q) => q['status'] == e.key).length}',
@@ -931,17 +956,17 @@ class _HomeState extends State<Home> {
             child: GlassControl(
                 child: ListTile(
               leading: CircleAvatar(
-                child: Text(
+                child: Tx(
                   (c['name'] as String).isEmpty
                       ? '?'
                       : (c['name'] as String)[0].toUpperCase(),
                 ),
               ),
-              title: Text(c['name']),
-              subtitle: Text(
+              title: Tx(c['name']),
+              subtitle: Tx(
                 '${c['phone'] ?? ''}${(c['address'] ?? '').toString().isEmpty ? '' : '\n${c['address']}'}',
               ),
-              trailing: Text(
+              trailing: Tx(
                 '${s.quotes.where((q) => q['customerId'] == c['id']).length} ta',
               ),
               onTap: () => open(CustomerPage(store: s, customerId: c['id'])),
@@ -957,7 +982,7 @@ class _HomeState extends State<Home> {
           key: const ValueKey('open-manufacturers'),
           onPressed: () => open(ManufacturersPage(store: s)),
           icon: const Icon(Icons.factory_outlined),
-          label: const Text(
+          label: const Tx(
             'Zavodlar narxi',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -967,13 +992,13 @@ class _HomeState extends State<Home> {
         OutlinedButton.icon(
           onPressed: () => editProfile(context, s),
           icon: const Icon(Icons.add),
-          label: const Text('Yangi profil qo‘shish'),
+          label: const Tx('Yangi profil qo‘shish'),
         ),
         const SizedBox(height: 8),
         FilledButton.tonalIcon(
           onPressed: () => openPriceSources(context, s),
           icon: const Icon(Icons.cloud_sync_outlined),
-          label: const Text(
+          label: const Tx(
             'Narxlarni yangilash',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -990,7 +1015,7 @@ class _HomeState extends State<Home> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  Tx(
                     '${p['brand']} / ${p['material']}',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
@@ -999,7 +1024,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  Tx(
                     p['name'],
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
@@ -1007,27 +1032,27 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  Text('Rama: ${money(p['framePrice'])}/m'),
-                  Text('Shisha/panel: ${money(p['glassPrice'])}/m²'),
-                  Text('Tannarxga ustama: ${p['markupPct']}%'),
+                  Tx('Rama: ${money(p['framePrice'])}/m'),
+                  Tx('Shisha/panel: ${money(p['glassPrice'])}/m²'),
+                  Tx('Tannarxga ustama: ${p['markupPct']}%'),
                   Wrap(
                     spacing: 4,
                     children: [
                       TextButton.icon(
                         onPressed: () => editProfile(context, s, p),
                         icon: const Icon(Icons.edit_outlined),
-                        label: const Text('Narxlarni tahrirlash'),
+                        label: const Tx('Narxlarni tahrirlash'),
                       ),
                       if (s.profiles.length > 1)
                         TextButton.icon(
                           onPressed: () => deleteProfile(p),
                           icon: const Icon(Icons.delete_outline),
-                          label: const Text('O‘chirish'),
+                          label: const Tx('O‘chirish'),
                         ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  Tx(
                     p['demo'] == true
                         ? 'NAMUNA QIYMATLAR'
                         : p['reference'] == true
@@ -1064,13 +1089,12 @@ class _HomeState extends State<Home> {
           child: GlassControl(
               child: ListTile(
             leading: const Icon(Icons.workspace_premium_outlined),
-            title: Text(
+            title: Tx(
               BillingConfig.paymentsEnabled
                   ? s.activePlan.name
                   : '${s.activePlan.name} • hozircha bepul',
             ),
-            subtitle:
-                const Text('Tariflar, to‘lov usullari va to‘lovlar tarixi'),
+            subtitle: const Tx('Tariflar, to‘lov usullari va to‘lovlar tarixi'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => open(TariffPage(store: s)),
           )),
@@ -1080,8 +1104,8 @@ class _HomeState extends State<Home> {
           child: GlassControl(
               child: ListTile(
             leading: const Icon(Icons.storefront_outlined),
-            title: Text(s.workshopName),
-            subtitle: Text(
+            title: Tx(s.workshopName),
+            subtitle: Tx(
               [
                 if (s.workshopPhone.isNotEmpty) s.workshopPhone,
                 if (s.workshopAddress.isNotEmpty) s.workshopAddress,
@@ -1099,8 +1123,8 @@ class _HomeState extends State<Home> {
               child: ListTile(
             key: const ValueKey('settings-manufacturers'),
             leading: const Icon(Icons.factory_outlined),
-            title: const Text('Ishlab chiqaruvchilar narxi'),
-            subtitle: Text(
+            title: const Tx('Ishlab chiqaruvchilar narxi'),
+            subtitle: Tx(
               s.catalog == null
                   ? 'Katalog yuklanmadi'
                   : '${s.catalog!.manufacturers.length} ta zavod • ${s.catalog!.systems.length} ta tizim • ${s.catalog!.date.split('-').reversed.join('.')}. Har kuni internetdan yangilanadi',
@@ -1113,8 +1137,8 @@ class _HomeState extends State<Home> {
           child: GlassControl(
               child: ListTile(
             leading: const Icon(Icons.cloud_sync_outlined),
-            title: const Text('Narxlarni internetdan yangilash'),
-            subtitle: Text(
+            title: const Tx('Narxlarni internetdan yangilash'),
+            subtitle: Tx(
               s.priceSources.isEmpty
                   ? 'Diler havolasi, Google Sheets jadvali yoki fayl'
                   : '${s.priceSources.length} ta manba',
@@ -1128,12 +1152,12 @@ class _HomeState extends State<Home> {
               child: ListTile(
             key: const ValueKey('usd-rate'),
             leading: const Icon(Icons.currency_exchange),
-            title: Text(
+            title: Tx(
               s.usdRate > 0
                   ? 'Dollar kursi: 1 \$ = ${money(s.usdRate)}'
                   : 'Dollar kursi kiritilmagan',
             ),
-            subtitle: Text(
+            subtitle: Tx(
               [
                 if (s.usdRateSource == 'cbu' || s.usdRateSource == 'open')
                   '${Store.rateSourceName(s.usdRateSource)}${s.usdRateDate.isEmpty ? '' : ', ${s.usdRateDate}'}',
@@ -1152,10 +1176,10 @@ class _HomeState extends State<Home> {
               child: ListTile(
             key: const ValueKey('ai-key'),
             leading: const Icon(Icons.auto_awesome),
-            title: Text(
+            title: Tx(
               s.aiKey.isEmpty ? 'Claude AI ulanmagan' : 'Claude AI ulangan',
             ),
-            subtitle: const Text(
+            subtitle: const Tx(
               'Kalitsiz ham ishlaydi: impostlar telefonda aniqlanadi. Kalit bilan ochilish turlari ham aniqlanadi.',
             ),
             trailing: const Icon(Icons.edit_outlined),
@@ -1163,19 +1187,30 @@ class _HomeState extends State<Home> {
           )),
         ),
         heading('Ko‘rinish'),
+        GlassCard(
+          child: ListTile(
+            key: const ValueKey('language'),
+            leading: const Icon(Icons.translate),
+            title: const Tx('Til • Язык • Language'),
+            subtitle: Text(languageNames[appLanguage]!),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => chooseLanguage(context, s),
+          ),
+        ),
+        const SizedBox(height: 12),
         GlassControl(
           child: DropdownButtonFormField<String>(
             key: ValueKey('design-${s.designPreference}'),
             isExpanded: true,
             initialValue: s.designPreference,
-            decoration: const InputDecoration(labelText: 'Dizayn'),
+            decoration: InputDecoration(labelText: tr('Dizayn')),
             items: const [
               DropdownMenuItem(
                 value: 'auto',
-                child: Text('Avto • iPhone’da Liquid Glass'),
+                child: Tx('Avto • iPhone’da Liquid Glass'),
               ),
-              DropdownMenuItem(value: 'glass', child: Text('Liquid Glass')),
-              DropdownMenuItem(value: 'material', child: Text('Oddiy')),
+              DropdownMenuItem(value: 'glass', child: Tx('Liquid Glass')),
+              DropdownMenuItem(value: 'material', child: Tx('Oddiy')),
             ],
             onChanged: (v) => guarded(context, () => s.setDesign(v!)),
           ),
@@ -1186,13 +1221,12 @@ class _HomeState extends State<Home> {
             key: ValueKey(s.themePreference),
             isExpanded: true,
             initialValue: s.themePreference,
-            decoration: const InputDecoration(labelText: 'Ilova temasi'),
+            decoration: InputDecoration(labelText: tr('Ilova temasi')),
             items: const [
-              DropdownMenuItem(value: 'system', child: Text('Tizimga mos')),
+              DropdownMenuItem(value: 'system', child: Tx('Tizimga mos')),
+              DropdownMenuItem(value: 'light', child: Tx('Och tema • oq logo')),
               DropdownMenuItem(
-                  value: 'light', child: Text('Och tema • oq logo')),
-              DropdownMenuItem(
-                  value: 'dark', child: Text('To‘q tema • qora logo')),
+                  value: 'dark', child: Tx('To‘q tema • qora logo')),
             ],
             onChanged: (v) => guarded(context, () => s.setTheme(v!)),
           ),
@@ -1236,14 +1270,14 @@ class _HomeState extends State<Home> {
             child: GlassControl(
                 child: ListTile(
               leading: Icon(icon),
-              title: Text(title),
-              subtitle: Text(subtitle),
+              title: Tx(title),
+              subtitle: Tx(subtitle),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => open(page()),
             )),
           ),
         heading('Zaxira nusxalar'),
-        const Text(
+        const Tx(
           'Telefon almashtirishdan yoki ilovani o‘chirishdan oldin JSON zaxirasini saqlang. Tiklash joriy ma’lumotlarni almashtiradi.',
         ),
         const SizedBox(height: 8),
@@ -1260,7 +1294,7 @@ class _HomeState extends State<Home> {
             }
           }),
           icon: const Icon(Icons.save_alt),
-          label: const Text('Zaxirani faylga saqlash'),
+          label: const Tx('Zaxirani faylga saqlash'),
         ),
         OutlinedButton.icon(
           onPressed: () => guarded(context, () async {
@@ -1278,20 +1312,20 @@ class _HomeState extends State<Home> {
             }
           }),
           icon: const Icon(Icons.restore),
-          label: const Text('Zaxira faylidan tiklash'),
+          label: const Tx('Zaxira faylidan tiklash'),
         ),
         heading('Maxfiylik'),
-        const Text(
+        const Tx(
           'Mijozlar, narxlar, smetalar va to‘lov qaydlari faqat shu qurilmada, ilovaga ajratilgan joyda saqlanadi; serverga yuborilmaydi. Internet faqat: dollar kursi (Markaziy bank), zavodlar narx katalogi (GitHub), siz qo‘shgan narx havolalari va AI kamera (faqat o‘z Claude kalitingiz bilan, rasm Anthropic’ga yuboriladi). JSON/PDFni qayerga ulashishni o‘zingiz tanlaysiz.',
         ),
         heading('Ma’lumotlarni o‘chirish'),
         OutlinedButton.icon(
           onPressed: delete,
           icon: const Icon(Icons.delete_outline),
-          label: const Text('Mahalliy ma’lumotlarni tozalash'),
+          label: const Tx('Mahalliy ma’lumotlarni tozalash'),
         ),
         const SizedBox(height: 24),
-        const Text(
+        const Tx(
           'RomFlow $appVersion\nSmeta taxminiy. Texnik katalog bilan tekshiring.',
           style: TextStyle(color: muted),
         ),
@@ -1304,7 +1338,7 @@ class _HomeState extends State<Home> {
               applicationName: 'RomFlow',
               applicationVersion: appVersion,
             ),
-            child: const Text('Litsenziyalar'),
+            child: const Tx('Litsenziyalar'),
           ),
         ),
       ];
@@ -1314,12 +1348,12 @@ class _HomeState extends State<Home> {
     final ok = await showSettledDialog<bool>(
       context: context,
       builder: (c) => GlassAlertDialog(
-        title: const Text('Claude AI kaliti'),
+        title: const Tx('Claude AI kaliti'),
         scrollable: true,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            const Tx(
               'console.anthropic.com saytida olingan API kaliti (sk-ant-…). Rasm Anthropic serveriga yuboriladi va to‘lov shu kalit hisobidan bo‘ladi. Kalit faqat shu qurilmada saqlanadi, zaxira faylga yozilmaydi.',
             ),
             const SizedBox(height: 12),
@@ -1329,7 +1363,7 @@ class _HomeState extends State<Home> {
                 obscureText: true,
                 autocorrect: false,
                 enableSuggestions: false,
-                decoration: const InputDecoration(labelText: 'API kaliti'),
+                decoration: InputDecoration(labelText: tr('API kaliti')),
               ),
             ),
           ],
@@ -1341,15 +1375,15 @@ class _HomeState extends State<Home> {
                 key.clear();
                 Navigator.pop(c, true);
               },
-              child: const Text('O‘chirish'),
+              child: const Tx('O‘chirish'),
             ),
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Bekor qilish'),
+            child: const Tx('Bekor qilish'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(c, true),
-            child: const Text('Saqlash'),
+            child: const Tx('Saqlash'),
           ),
         ],
       ),
@@ -1371,7 +1405,7 @@ class _HomeState extends State<Home> {
       context: context,
       builder: (c) => StatefulBuilder(
         builder: (c, setDialog) => GlassAlertDialog(
-          title: const Text('Dollar kursi'),
+          title: const Tx('Dollar kursi'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1381,9 +1415,9 @@ class _HomeState extends State<Home> {
                     controller: rate,
                     autofocus: !auto,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: '1 \$ necha so‘m',
-                      hintText: 'masalan 12650',
+                    decoration: InputDecoration(
+                      labelText: tr('1 \$ necha so‘m'),
+                      hintText: tr('masalan 12650'),
                     ),
                   ),
                 ),
@@ -1422,13 +1456,13 @@ class _HomeState extends State<Home> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.account_balance_outlined),
-                    label: const Text('Markaziy bankdan olish'),
+                    label: const Tx('Markaziy bankdan olish'),
                   ),
                 ),
                 if (note != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text(note!, style: Theme.of(c).textTheme.bodySmall),
+                    child: Tx(note!, style: Theme.of(c).textTheme.bodySmall),
                   ),
                 GlassControl(
                   child: SwitchListTile(
@@ -1436,8 +1470,8 @@ class _HomeState extends State<Home> {
                     contentPadding: EdgeInsets.zero,
                     value: auto,
                     onChanged: (v) => setDialog(() => auto = v),
-                    title: const Text('Har kuni o‘zi yangilansin'),
-                    subtitle: const Text(
+                    title: const Tx('Har kuni o‘zi yangilansin'),
+                    subtitle: const Tx(
                       'Ilova ochilganda Markaziy bankning rasmiy kursi olinadi (cbu.uz ochiq API); bank javob bermasa — xalqaro kurs (ExchangeRate-API)',
                     ),
                   ),
@@ -1448,11 +1482,11 @@ class _HomeState extends State<Home> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(c, false),
-              child: const Text('Bekor qilish'),
+              child: const Tx('Bekor qilish'),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(c, true),
-              child: const Text('Saqlash'),
+              child: const Tx('Saqlash'),
             ),
           ],
         ),
@@ -1486,7 +1520,7 @@ class _HomeState extends State<Home> {
     final ok = await showSettledDialog<bool>(
       context: context,
       builder: (c) => GlassAlertDialog(
-        title: const Text('Ustaxona ma’lumotlari'),
+        title: const Tx('Ustaxona ma’lumotlari'),
         content: SingleChildScrollView(
           child: Form(
             key: form,
@@ -1503,13 +1537,13 @@ class _HomeState extends State<Home> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Bekor qilish'),
+            child: const Tx('Bekor qilish'),
           ),
           FilledButton(
             onPressed: () {
               if (form.currentState!.validate()) Navigator.pop(c, true);
             },
-            child: const Text('Saqlash'),
+            child: const Tx('Saqlash'),
           ),
         ],
       ),
@@ -1531,12 +1565,12 @@ class _HomeState extends State<Home> {
     final yes = await showSettledDialog<bool>(
       context: context,
       builder: (c) => GlassAlertDialog(
-        title: const Text('Butunlay o‘chirish'),
+        title: const Tx('Butunlay o‘chirish'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Davom etish uchun DELETE yozing.'),
+              const Tx('Davom etish uchun DELETE yozing.'),
               field(confirmText, 'DELETE'),
             ],
           ),
@@ -1544,11 +1578,11 @@ class _HomeState extends State<Home> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Bekor qilish'),
+            child: const Tx('Bekor qilish'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(c, confirmText.text == 'DELETE'),
-            child: const Text('O‘chirish'),
+            child: const Tx('O‘chirish'),
           ),
         ],
       ),
@@ -1572,7 +1606,7 @@ class _Stepper extends StatelessWidget {
           width: 34,
           height: 34,
           child: IconButton(
-            tooltip: tip,
+            tooltip: tr(tip),
             padding: EdgeInsets.zero,
             iconSize: 18,
             onPressed: onChanged == null || next < 1 || next > 100
@@ -1592,7 +1626,7 @@ class _Stepper extends StatelessWidget {
           button(Icons.remove, value - 1, 'Kamaytirish'),
           SizedBox(
             width: 34,
-            child: Text(
+            child: Tx(
               '$value',
               textAlign: TextAlign.center,
               style: const TextStyle(fontWeight: FontWeight.w700),
@@ -1637,7 +1671,7 @@ class QuickAction extends StatelessWidget {
           children: [
             Badge(
               isLabelVisible: badge > 0,
-              label: Text('$badge'),
+              label: Tx('$badge'),
               child: Container(
                 padding: const EdgeInsets.all(9),
                 decoration: BoxDecoration(
@@ -1653,7 +1687,7 @@ class QuickAction extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 6),
               child: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text(
+                child: Tx(
                   label,
                   style: TextStyle(
                     color: scheme.onSurface,
@@ -1702,9 +1736,39 @@ const _months = [
   'dekabr',
 ];
 
-/// "Payshanba, 22-oktabr"
-String uzbekDay(DateTime d) =>
-    '${_weekdays[d.weekday - 1]}, ${d.day}-${_months[d.month - 1]}';
+/// "Payshanba, 22-oktabr" — "Четверг, 22 октября" — "Thursday, 22 October".
+String uzbekDay(DateTime d) => switch (appLanguage) {
+      AppLanguage.uz =>
+        '${_weekdays[d.weekday - 1]}, ${d.day}-${_months[d.month - 1]}',
+      AppLanguage.ru => '${tr(_weekdays[d.weekday - 1])}, ${d.day} ${const [
+          'января',
+          'февраля',
+          'марта',
+          'апреля',
+          'мая',
+          'июня',
+          'июля',
+          'августа',
+          'сентября',
+          'октября',
+          'ноября',
+          'декабря'
+        ][d.month - 1]}',
+      AppLanguage.en => '${tr(_weekdays[d.weekday - 1])}, ${d.day} ${const [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December'
+        ][d.month - 1]}',
+    };
 
 /// Top of the dashboard: the workshop, today and the two main actions.
 class DashboardHero extends StatelessWidget {
@@ -1750,7 +1814,7 @@ class DashboardHero extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    const Tx(
                       'ISH MAYDONI',
                       style: TextStyle(
                         color: Colors.white70,
@@ -1760,7 +1824,7 @@ class DashboardHero extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
+                    Tx(
                       workshop,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -1772,7 +1836,7 @@ class DashboardHero extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
+                    Tx(
                       uzbekDay(DateTime.now()),
                       style: const TextStyle(
                         color: Colors.white70,
@@ -1803,7 +1867,7 @@ class DashboardHero extends StatelessWidget {
                           size: 16,
                         ),
                         const SizedBox(width: 4),
-                        Text(
+                        Tx(
                           plan,
                           style: const TextStyle(
                             color: Colors.white,
@@ -1866,7 +1930,7 @@ class DashboardHero extends StatelessWidget {
                       ),
                       label: const FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text('Yangi smeta'),
+                        child: Tx('Yangi smeta'),
                       ),
                     ),
                   ),
@@ -1889,7 +1953,7 @@ class DashboardHero extends StatelessWidget {
                         icon: const Icon(Icons.straighten, size: 20),
                         label: const FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: Text('Razmer yozish'),
+                          child: Tx('Razmer yozish'),
                         ),
                       ),
                     ),
@@ -1906,6 +1970,12 @@ class DashboardHero extends StatelessWidget {
 
 /// The design chosen in Settings, applied before the app is built; a new
 /// key rebuilds every page when it changes.
+/// The language chosen in Settings, applied before the app is built.
+String _languageKey(String code) {
+  appLanguage = languageFromCode(code);
+  return appLanguage.name;
+}
+
 String _designKey(String preference) {
   applyDesign(preference);
   return usesIOSGlass ? 'glass' : 'material';
@@ -1932,16 +2002,16 @@ Future<bool> confirm(
   final yes = await showSettledDialog<bool>(
     context: context,
     builder: (c) => GlassAlertDialog(
-      title: Text(title),
-      content: Text(text),
+      title: Tx(title),
+      content: Tx(text),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(c, false),
-          child: const Text('Bekor qilish'),
+          child: const Tx('Bekor qilish'),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(c, true),
-          child: Text(action),
+          child: Tx(action),
         ),
       ],
     ),
@@ -1982,7 +2052,7 @@ class CustomerPage extends StatelessWidget {
           if (found.isEmpty) {
             return Scaffold(
               appBar: GlassAppBar(),
-              body: const Center(child: Text('Mijoz topilmadi')),
+              body: const Center(child: Tx('Mijoz topilmadi')),
             );
           }
           final c = found.first;
@@ -1996,15 +2066,15 @@ class CustomerPage extends StatelessWidget {
               .fold<num>(0, (a, q) => a + (q['balance'] as num));
           return Scaffold(
             appBar: GlassAppBar(
-              title: Text(c['name']),
+              title: Tx(c['name']),
               actions: [
                 IconButton(
-                  tooltip: 'Tahrirlash',
+                  tooltip: tr('Tahrirlash'),
                   onPressed: () => addCustomer(context, store, c),
                   icon: const Icon(Icons.edit_outlined),
                 ),
                 IconButton(
-                  tooltip: 'O‘chirish',
+                  tooltip: tr('O‘chirish'),
                   onPressed: () async {
                     if (await confirm(
                           context,
@@ -2032,7 +2102,7 @@ class CustomerPage extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.add),
-              label: const Text('Smeta'),
+              label: const Tx('Smeta'),
             ),
             body: readable(
               ListView(
@@ -2042,18 +2112,18 @@ class CustomerPage extends StatelessWidget {
                     child: GlassControl(
                         child: ListTile(
                       leading: const Icon(Icons.phone_outlined),
-                      title: Text(
+                      title: Tx(
                         (c['phone'] ?? '').toString().isEmpty
                             ? 'Telefon kiritilmagan'
                             : c['phone'],
                       ),
                       subtitle: (c['address'] ?? '').toString().isEmpty
                           ? null
-                          : Text(c['address']),
+                          : Tx(c['address']),
                       trailing: FilledButton.tonalIcon(
                         onPressed: () => callNumber(context, c['phone'] ?? ''),
                         icon: const Icon(Icons.call),
-                        label: const Text('Qo‘ng‘iroq'),
+                        label: const Tx('Qo‘ng‘iroq'),
                       ),
                     )),
                   ),
@@ -2080,13 +2150,13 @@ class CustomerPage extends StatelessWidget {
                     ],
                   ),
                   heading('Buyurtmalar'),
-                  if (orders.isEmpty) const Text('Hali smeta yo‘q.'),
+                  if (orders.isEmpty) const Tx('Hali smeta yo‘q.'),
                   for (final q in orders)
                     GlassCard(
                       child: GlassControl(
                           child: ListTile(
-                        title: Text(q['title']),
-                        subtitle: Text(
+                        title: Tx(q['title']),
+                        subtitle: Tx(
                           '${money(q['total'])} · ${statuses[q['status']]}',
                         ),
                         trailing: const Icon(Icons.chevron_right),
@@ -2117,7 +2187,7 @@ Future<void> addCustomer(BuildContext context, Store s, [Json? initial]) async {
     context: context,
     builder: (c) => StatefulBuilder(
       builder: (c, set) => GlassAlertDialog(
-        title: const Text('Yangi mijoz'),
+        title: const Tx('Yangi mijoz'),
         content: SingleChildScrollView(
           child: Form(
             key: key,
@@ -2134,7 +2204,7 @@ Future<void> addCustomer(BuildContext context, Store s, [Json? initial]) async {
         actions: [
           TextButton(
             onPressed: saving ? null : () => Navigator.pop(c),
-            child: const Text('Bekor qilish'),
+            child: const Tx('Bekor qilish'),
           ),
           FilledButton(
             onPressed: saving
@@ -2157,7 +2227,7 @@ Future<void> addCustomer(BuildContext context, Store s, [Json? initial]) async {
                       }
                     }
                   },
-            child: Text(saving ? 'Saqlanmoqda…' : 'Saqlash'),
+            child: Tx(saving ? 'Saqlanmoqda…' : 'Saqlash'),
           ),
         ],
       ),
@@ -2291,7 +2361,7 @@ class _BuilderPageState extends State<BuilderPage> {
     final ok = await showSettledDialog<bool>(
       context: context,
       builder: (c) => GlassAlertDialog(
-        title: Text(name0),
+        title: Tx(name0),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -2300,7 +2370,7 @@ class _BuilderPageState extends State<BuilderPage> {
                 GlassControl(
                   child: TextField(
                     controller: name,
-                    decoration: const InputDecoration(labelText: 'Nomi'),
+                    decoration: InputDecoration(labelText: tr('Nomi')),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -2312,7 +2382,7 @@ class _BuilderPageState extends State<BuilderPage> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: InputDecoration(labelText: 'Miqdori ($unit)'),
+                  decoration: InputDecoration(labelText: tr('Miqdori ($unit)')),
                 ),
               ),
               const SizedBox(height: 12),
@@ -2321,7 +2391,8 @@ class _BuilderPageState extends State<BuilderPage> {
                   key: const ValueKey('extra-price'),
                   controller: price,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(labelText: 'Narxi, so‘m / $unit'),
+                  decoration:
+                      InputDecoration(labelText: tr('Narxi, so‘m / $unit')),
                 ),
               ),
             ],
@@ -2330,11 +2401,11 @@ class _BuilderPageState extends State<BuilderPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Bekor qilish'),
+            child: const Tx('Bekor qilish'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(c, true),
-            child: const Text('Qo‘shish'),
+            child: const Tx('Qo‘shish'),
           ),
         ],
       ),
@@ -2365,20 +2436,20 @@ class _BuilderPageState extends State<BuilderPage> {
           GlassCard(
             child: GlassControl(
                 child: ListTile(
-              title: Text(extras[i]['name']),
-              subtitle: Text(
+              title: Tx(extras[i]['name']),
+              subtitle: Tx(
                 '${extras[i]['qty']} ${extras[i]['unit']} × ${money(extras[i]['price'])}',
               ),
               onTap: () => editExtra(extras[i]['key'] ?? 'other', i),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  Tx(
                     money(extraLine(extras[i])),
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   IconButton(
-                    tooltip: 'Olib tashlash',
+                    tooltip: tr('Olib tashlash'),
                     onPressed: () => setState(() {
                       extras.removeAt(i);
                       result = null;
@@ -2398,7 +2469,7 @@ class _BuilderPageState extends State<BuilderPage> {
                 child: ActionChip(
                   key: ValueKey('extra-${e.key}'),
                   avatar: const Icon(Icons.add, size: 18),
-                  label: Text(e.value.$1),
+                  label: Tx(e.value.$1),
                   onPressed: () => editExtra(e.key),
                 ),
               ),
@@ -2418,7 +2489,7 @@ class _BuilderPageState extends State<BuilderPage> {
           child: DropdownButtonFormField<String>(
             initialValue: value,
             isExpanded: true,
-            decoration: InputDecoration(labelText: label),
+            decoration: InputDecoration(labelText: tr(label)),
             items: options,
             onChanged: changed,
           ),
@@ -2527,7 +2598,7 @@ class _BuilderPageState extends State<BuilderPage> {
           ..hideCurrentSnackBar()
           ..showSnackBar(
             SnackBar(
-              content: const Text('Rom olib tashlandi'),
+              content: const Tx('Rom olib tashlandi'),
               action: SnackBarAction(
                 label: 'Qaytarish',
                 onPressed: () {
@@ -2601,7 +2672,7 @@ class _BuilderPageState extends State<BuilderPage> {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
+                          child: Tx(
                             item['label'] ?? '${index + 1}-rom',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -2612,7 +2683,7 @@ class _BuilderPageState extends State<BuilderPage> {
                         ),
                       ],
                     ),
-                    Text(
+                    Tx(
                       '${item['widthMm']} × ${item['heightMm']} mm • $profileName',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -2633,7 +2704,7 @@ class _BuilderPageState extends State<BuilderPage> {
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             alignment: Alignment.centerRight,
-                            child: Text(
+                            child: Tx(
                               price == null ? '—' : money(price),
                               style: text.titleSmall?.copyWith(
                                 color: scheme.primary,
@@ -2649,7 +2720,7 @@ class _BuilderPageState extends State<BuilderPage> {
               ),
               PopupMenuButton<String>(
                 key: ValueKey('window-menu-$index'),
-                tooltip: 'Amallar',
+                tooltip: tr('Amallar'),
                 enabled: !busy,
                 onSelected: (v) => windowMenu(index, v),
                 itemBuilder: (_) => [
@@ -2659,7 +2730,7 @@ class _BuilderPageState extends State<BuilderPage> {
                       child: GlassControl(
                           child: ListTile(
                         leading: Icon(Icons.edit_outlined),
-                        title: Text('Chizmani tahrirlash'),
+                        title: Tx('Chizmani tahrirlash'),
                       )),
                     ),
                   const PopupMenuItem(
@@ -2667,7 +2738,7 @@ class _BuilderPageState extends State<BuilderPage> {
                     child: GlassControl(
                         child: ListTile(
                       leading: Icon(Icons.place_outlined),
-                      title: Text('Joyini yozish'),
+                      title: Tx('Joyini yozish'),
                     )),
                   ),
                   const PopupMenuItem(
@@ -2675,7 +2746,7 @@ class _BuilderPageState extends State<BuilderPage> {
                     child: GlassControl(
                         child: ListTile(
                       leading: Icon(Icons.copy_outlined),
-                      title: Text('Nusxa olish'),
+                      title: Tx('Nusxa olish'),
                     )),
                   ),
                   const PopupMenuItem(
@@ -2683,7 +2754,7 @@ class _BuilderPageState extends State<BuilderPage> {
                     child: GlassControl(
                         child: ListTile(
                       leading: Icon(Icons.delete_outline),
-                      title: Text('Olib tashlash'),
+                      title: Tx('Olib tashlash'),
                     )),
                   ),
                 ],
@@ -2703,8 +2774,8 @@ class _BuilderPageState extends State<BuilderPage> {
           child: ExpansionTile(
         key: const ValueKey('quick-form'),
         leading: const Icon(Icons.bolt_outlined),
-        title: const Text('Tezkor hisob (chizmasiz)'),
-        subtitle: const Text('Tayyor sxema + eni va bo‘yi'),
+        title: const Tx('Tezkor hisob (chizmasiz)'),
+        subtitle: const Tx('Tayyor sxema + eni va bo‘yi'),
         shape: const Border(),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         children: [
@@ -2732,7 +2803,7 @@ class _BuilderPageState extends State<BuilderPage> {
                 .map(
                   (p) => DropdownMenuItem<String>(
                     value: p['id'],
-                    child: Text(p['name'], overflow: TextOverflow.ellipsis),
+                    child: Tx(p['name'], overflow: TextOverflow.ellipsis),
                   ),
                 )
                 .toList(),
@@ -2748,7 +2819,7 @@ class _BuilderPageState extends State<BuilderPage> {
                 .map(
                   (t) => DropdownMenuItem<String>(
                     value: t['id'],
-                    child: Text(t['name']),
+                    child: Tx(t['name']),
                   ),
                 )
                 .toList(),
@@ -2777,9 +2848,9 @@ class _BuilderPageState extends State<BuilderPage> {
             'Rang',
             color,
             const [
-              DropdownMenuItem(value: 'white', child: Text('Oq')),
-              DropdownMenuItem(value: 'anthracite', child: Text('Antratsit')),
-              DropdownMenuItem(value: 'oak', child: Text('Yog‘och rang')),
+              DropdownMenuItem(value: 'white', child: Tx('Oq')),
+              DropdownMenuItem(value: 'anthracite', child: Tx('Antratsit')),
+              DropdownMenuItem(value: 'oak', child: Tx('Yog‘och rang')),
             ],
             (v) => setState(() {
               color = v!;
@@ -2800,8 +2871,8 @@ class _BuilderPageState extends State<BuilderPage> {
               contentPadding: EdgeInsets.zero,
               value: mosquito,
               onChanged: (v) => setState(() => mosquito = v!),
-              title: const Text('Setka qo‘shish'),
-              subtitle: Text(
+              title: const Tx('Setka qo‘shish'),
+              subtitle: Tx(
                 '${money(s.profiles.firstWhere((p) => p['id'] == profile)['meshPrice'] ?? 75000)}/m²',
               ),
             ),
@@ -2809,10 +2880,10 @@ class _BuilderPageState extends State<BuilderPage> {
           OutlinedButton.icon(
             onPressed: busy ? null : addItem,
             icon: const Icon(Icons.add),
-            label: const Text('Smetaga qo‘shish'),
+            label: const Tx('Smetaga qo‘shish'),
           ),
           const SizedBox(height: 8),
-          Text(
+          Tx(
             'Hisob taxminiy, chizma sxematik. To‘liq material, rezina va chiqindi uchun romni chizing.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
@@ -2850,7 +2921,7 @@ class _BuilderPageState extends State<BuilderPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    Tx(
                       items.isEmpty
                           ? 'Hali rom yo‘q'
                           : '${items.length} xil rom • $count dona',
@@ -2859,7 +2930,7 @@ class _BuilderPageState extends State<BuilderPage> {
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text(
+                      child: Tx(
                         total == null ? '—' : money(total),
                         key: const ValueKey('smeta-total'),
                         style: TextStyle(
@@ -2870,7 +2941,7 @@ class _BuilderPageState extends State<BuilderPage> {
                       ),
                     ),
                     if (total != null && s.usdRate > 0)
-                      Text(
+                      Tx(
                         dollars(total, s.usdRate),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
@@ -2888,7 +2959,7 @@ class _BuilderPageState extends State<BuilderPage> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.check),
-                label: Text(widget.editing == null ? 'Saqlash' : 'Yangilash'),
+                label: Tx(widget.editing == null ? 'Saqlash' : 'Yangilash'),
               ),
             ],
           ),
@@ -2903,7 +2974,7 @@ class _BuilderPageState extends State<BuilderPage> {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: GlassAppBar(
-        title: Text(widget.editing == null ? 'Smeta' : 'Smetani tahrirlash'),
+        title: Tx(widget.editing == null ? 'Smeta' : 'Smetani tahrirlash'),
       ),
       bottomNavigationBar: totalBar(total),
       body: readable(
@@ -2929,7 +3000,7 @@ class _BuilderPageState extends State<BuilderPage> {
                                 .map(
                                   (c) => DropdownMenuItem<String>(
                                     value: c['id'],
-                                    child: Text(c['name']),
+                                    child: Tx(c['name']),
                                   ),
                                 )
                                 .toList(),
@@ -2954,7 +3025,7 @@ class _BuilderPageState extends State<BuilderPage> {
                                     }
                                   },
                             icon: const Icon(Icons.person_add_alt),
-                            label: Text(
+                            label: Tx(
                               s.customers.isEmpty
                                   ? 'Mijoz qo‘shish'
                                   : 'Yangi mijoz',
@@ -2969,7 +3040,7 @@ class _BuilderPageState extends State<BuilderPage> {
                   children: [
                     Expanded(child: heading('Romlar')),
                     if (items.isNotEmpty)
-                      Text(
+                      Tx(
                         '${items.fold<int>(0, (n, i) => n + (i['quantity'] as num).toInt())} dona',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
@@ -2992,7 +3063,7 @@ class _BuilderPageState extends State<BuilderPage> {
                         children: [
                           Icon(Icons.add_circle_outline, color: scheme.primary),
                           const SizedBox(width: 8),
-                          Text(
+                          Tx(
                             items.isEmpty
                                 ? 'Rom chizib qo‘shish'
                                 : 'Yana rom qo‘shish',
@@ -3049,7 +3120,7 @@ class _BuilderPageState extends State<BuilderPage> {
                   OutlinedButton.icon(
                     onPressed: busy ? null : () => run(false),
                     icon: const Icon(Icons.fact_check_outlined),
-                    label: const Text('Tekshirish'),
+                    label: const Tx('Tekshirish'),
                   ),
                 if (result != null)
                   Padding(
@@ -3277,16 +3348,16 @@ class _QuotePageState extends State<QuotePage> {
           if (matches.isEmpty) {
             return Scaffold(
               appBar: GlassAppBar(),
-              body: const Center(child: Text('Smeta topilmadi')),
+              body: const Center(child: Tx('Smeta topilmadi')),
             );
           }
           final q = matches.first;
           return Scaffold(
             appBar: GlassAppBar(
-              title: const Text('Smeta tafsilotlari'),
+              title: const Tx('Smeta tafsilotlari'),
               actions: [
                 IconButton(
-                  tooltip: 'PDF ulashish',
+                  tooltip: tr('PDF ulashish'),
                   onPressed: busy ? null : () => action(() => exportPdf(q)),
                   icon: const Icon(Icons.picture_as_pdf_outlined),
                 ),
@@ -3309,7 +3380,7 @@ class _QuotePageState extends State<QuotePage> {
                           dense: true,
                           contentPadding: EdgeInsets.zero,
                           leading: Icon(icon),
-                          title: Text(label),
+                          title: Tx(label),
                         )),
                       ),
                   ],
@@ -3323,7 +3394,7 @@ class _QuotePageState extends State<QuotePage> {
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: const EdgeInsets.all(20),
                   children: [
-                    Text(
+                    Tx(
                       statuses[q['status']]!,
                       style: const TextStyle(
                         color: blue,
@@ -3343,14 +3414,14 @@ class _QuotePageState extends State<QuotePage> {
                         ),
                       ),
                       icon: const Icon(Icons.inventory_2_outlined),
-                      label: const Text('Ombor / xarid ro‘yxati'),
+                      label: const Tx('Ombor / xarid ro‘yxati'),
                     ),
                     GlassCard(
                       child: GlassControl(
                           child: ListTile(
                         leading: const Icon(Icons.person_outline),
-                        title: Text(q['customer']),
-                        subtitle: Text(
+                        title: Tx(q['customer']),
+                        subtitle: Tx(
                           [
                             if ((q['phone'] ?? '').toString().isNotEmpty)
                               q['phone'],
@@ -3359,7 +3430,7 @@ class _QuotePageState extends State<QuotePage> {
                           ].join('\n'),
                         ),
                         trailing: IconButton(
-                          tooltip: 'Qo‘ng‘iroq',
+                          tooltip: tr('Qo‘ng‘iroq'),
                           onPressed: () =>
                               callNumber(context, q['phone'] ?? ''),
                           icon: const Icon(Icons.call_outlined),
@@ -3370,8 +3441,8 @@ class _QuotePageState extends State<QuotePage> {
                       child: GlassControl(
                           child: ListTile(
                         leading: const Icon(Icons.event_outlined),
-                        title: const Text('Montaj sanasi'),
-                        subtitle: Text(
+                        title: const Tx('Montaj sanasi'),
+                        subtitle: Tx(
                           q['installDate'] == null
                               ? 'Belgilanmagan — bosing'
                               : localDate(q['installDate']),
@@ -3379,7 +3450,7 @@ class _QuotePageState extends State<QuotePage> {
                         trailing: q['installDate'] == null
                             ? const Icon(Icons.chevron_right)
                             : IconButton(
-                                tooltip: 'Olib tashlash',
+                                tooltip: tr('Olib tashlash'),
                                 onPressed: () => action(
                                     () => s.setInstallDate(q['id'], null)),
                                 icon: const Icon(Icons.close),
@@ -3408,12 +3479,12 @@ class _QuotePageState extends State<QuotePage> {
                                         Map<String, dynamic>.from(i['recipe']),
                                   ),
                                 ),
-                          title: Text(
+                          title: Tx(
                             i['label'] == null
                                 ? i['profileName']
                                 : '${i['label']} • ${i['profileName']}',
                           ),
-                          subtitle: Text(
+                          subtitle: Tx(
                             '${i['widthMm']}×${i['heightMm']} mm · ${i['quantity']} dona\n${money(i['total'])}',
                           ),
                           children: [
@@ -3435,7 +3506,7 @@ class _QuotePageState extends State<QuotePage> {
                                   ),
                                 ),
                                 icon: const Icon(Icons.view_in_ar),
-                                label: const Text('3D / animatsiya'),
+                                label: const Tx('3D / animatsiya'),
                               ),
                               SizedBox(
                                 height: 300,
@@ -3457,10 +3528,9 @@ class _QuotePageState extends State<QuotePage> {
                                 (p) => GlassControl(
                                     child: ListTile(
                                   dense: true,
-                                  title: Text(p['name']),
-                                  subtitle:
-                                      Text('${p['quantity']} ${p['unit']}'),
-                                  trailing: Text(money(p['cost'])),
+                                  title: Tx(p['name']),
+                                  subtitle: Tx('${p['quantity']} ${p['unit']}'),
+                                  trailing: Tx(money(p['cost'])),
                                 )),
                               )),
                           ],
@@ -3473,15 +3543,15 @@ class _QuotePageState extends State<QuotePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Oraliq: ${money(q['subtotal'])}'),
+                            Tx('Oraliq: ${money(q['subtotal'])}'),
                             for (final e in q['extras'] as List? ?? const [])
-                              Text(
+                              Tx(
                                 '${e['name']}: ${e['qty']} ${e['unit']} × ${money(e['price'])} = ${money(extraLine(Map<String, dynamic>.from(e)))}',
                               ),
-                            Text('Montaj: ${money(q['installation'])}'),
-                            Text('Chegirma: ${money(q['discount'])}'),
+                            Tx('Montaj: ${money(q['installation'])}'),
+                            Tx('Chegirma: ${money(q['discount'])}'),
                             const Divider(),
-                            Text(
+                            Tx(
                               money(q['total']),
                               style: const TextStyle(
                                 fontSize: 28,
@@ -3490,25 +3560,25 @@ class _QuotePageState extends State<QuotePage> {
                               ),
                             ),
                             if (s.usdRate > 0)
-                              Text(
+                              Tx(
                                 dollars(q['total'], s.usdRate),
                                 style: const TextStyle(color: muted),
                               ),
-                            Text('To‘langan: ${money(q['paid'])}'),
-                            Text('Qoldiq: ${money(q['balance'])}'),
+                            Tx('To‘langan: ${money(q['paid'])}'),
+                            Tx('Qoldiq: ${money(q['balance'])}'),
                           ],
                         ),
                       ),
                     ),
                     if ((q['notes'] ?? '').toString().isNotEmpty)
-                      Text(q['notes']),
+                      Tx(q['notes']),
                     profitCard(q),
                     OutlinedButton.icon(
                       onPressed: busy
                           ? null
                           : () => action(() => exportPdf(q, save: true)),
                       icon: const Icon(Icons.save_alt),
-                      label: const Text('PDFni faylga saqlash'),
+                      label: const Tx('PDFni faylga saqlash'),
                     ),
                     heading('Buyurtma bosqichi'),
                     if (s.staff.isNotEmpty)
@@ -3518,14 +3588,14 @@ class _QuotePageState extends State<QuotePage> {
                               s.staff.any((p) => p['id'] == q['staffId'])
                                   ? q['staffId']
                                   : null,
-                          decoration: const InputDecoration(
-                            labelText: 'Mas’ul xodim',
+                          decoration: InputDecoration(
+                            labelText: tr('Mas’ul xodim'),
                           ),
                           items: [
                             for (final person in s.staff)
                               DropdownMenuItem<String>(
                                 value: person['id'],
-                                child: Text(person['name']),
+                                child: Tx(person['name']),
                               ),
                           ],
                           onChanged: busy
@@ -3549,12 +3619,12 @@ class _QuotePageState extends State<QuotePage> {
                               child: ListTile(
                             contentPadding: EdgeInsets.zero,
                             leading: const Icon(Icons.badge_outlined),
-                            title: Text(
+                            title: Tx(
                               done
                                   ? 'Ish haqi yozilgan'
                                   : 'Ish haqi: ${money(Store.suggestedPay(worker, q))}',
                             ),
-                            subtitle: Text(rateLabel(worker)),
+                            subtitle: Tx(rateLabel(worker)),
                             trailing: done
                                 ? const Icon(Icons.check_circle_outline)
                                 : FilledButton.tonal(
@@ -3566,7 +3636,7 @@ class _QuotePageState extends State<QuotePage> {
                                       quoteId: q['id'],
                                       note: q['title'],
                                     ),
-                                    child: const Text('Yozish'),
+                                    child: const Tx('Yozish'),
                                   ),
                           ));
                         },
@@ -3580,14 +3650,14 @@ class _QuotePageState extends State<QuotePage> {
                         ),
                         icon: const Icon(Icons.person_add_alt),
                         label:
-                            const Text('Xodim qo‘shib, buyurtmani biriktirish'),
+                            const Tx('Xodim qo‘shib, buyurtmani biriktirish'),
                       ),
                     const SizedBox(height: 12),
                     for (final payment in q['payments'] ?? [])
                       GlassControl(
                           child: ListTile(
-                        title: Text(money(payment['amount'])),
-                        subtitle: Text(
+                        title: Tx(money(payment['amount'])),
+                        subtitle: Tx(
                           '${payment['note']} · ${payment['created']}',
                         ),
                       )),
@@ -3600,7 +3670,7 @@ class _QuotePageState extends State<QuotePage> {
                             onPressed: busy
                                 ? null
                                 : () => action(() => s.changeStatus(q, status)),
-                            child: Text(statuses[status]!),
+                            child: Tx(statuses[status]!),
                           ),
                       ],
                     ),
@@ -3612,7 +3682,7 @@ class _QuotePageState extends State<QuotePage> {
                         child: FilledButton.icon(
                           onPressed: busy ? null : () => recordPayment(q),
                           icon: const Icon(Icons.payments_outlined),
-                          label: const Text('To‘lovni qayd etish'),
+                          label: const Tx('To‘lovni qayd etish'),
                         ),
                       ),
                     InstallmentCard(store: s, quote: q),
@@ -3620,7 +3690,7 @@ class _QuotePageState extends State<QuotePage> {
                     OutlinedButton.icon(
                       onPressed: busy ? null : () => action(() => exportPdf(q)),
                       icon: const Icon(Icons.picture_as_pdf_outlined),
-                      label: Text(
+                      label: Tx(
                         busy ? 'Bajarilmoqda…' : 'PDF ulashish / saqlash',
                       ),
                     ),
@@ -3639,7 +3709,7 @@ class _QuotePageState extends State<QuotePage> {
     final yes = await showSettledDialog<bool>(
       context: context,
       builder: (c) => GlassAlertDialog(
-        title: const Text('Qabul qilingan to‘lov'),
+        title: const Tx('Qabul qilingan to‘lov'),
         content: Form(
           key: form,
           child: Column(
@@ -3665,13 +3735,13 @@ class _QuotePageState extends State<QuotePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Bekor qilish'),
+            child: const Tx('Bekor qilish'),
           ),
           FilledButton(
             onPressed: () {
               if (form.currentState!.validate()) Navigator.pop(c, true);
             },
-            child: const Text('Qayd etish'),
+            child: const Tx('Qayd etish'),
           ),
         ],
       ),
@@ -3796,8 +3866,8 @@ class _QuotePageState extends State<QuotePage> {
           padding: const EdgeInsets.symmetric(vertical: 2),
           child: Row(
             children: [
-              Expanded(child: Text(label)),
-              Text(
+              Expanded(child: Tx(label)),
+              Tx(
                 money(value),
                 style: TextStyle(
                   fontWeight: strong ? FontWeight.w800 : FontWeight.w500,
@@ -3815,7 +3885,7 @@ class _QuotePageState extends State<QuotePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            Tx(
               'Foyda hisobi',
               style: Theme.of(context).textTheme.titleMedium,
             ),
@@ -3831,7 +3901,7 @@ class _QuotePageState extends State<QuotePage> {
               child: TextButton.icon(
                 onPressed: () => expenseDialog(context, s, q['id']),
                 icon: const Icon(Icons.add),
-                label: const Text('Shu buyurtmaga xarajat'),
+                label: const Tx('Shu buyurtmaga xarajat'),
               ),
             ),
           ],
@@ -4024,7 +4094,7 @@ Future<void> editProfile(
     context: context,
     builder: (c) => StatefulBuilder(
       builder: (c, set) => GlassAlertDialog(
-        title: Text(
+        title: Tx(
           initial == null ? 'Yangi profil tizimi' : 'Narxlarni tahrirlash',
         ),
         content: SizedBox(
@@ -4054,7 +4124,7 @@ Future<void> editProfile(
         actions: [
           TextButton(
             onPressed: busy ? null : () => Navigator.pop(c),
-            child: const Text('Bekor qilish'),
+            child: const Tx('Bekor qilish'),
           ),
           FilledButton(
             onPressed: busy
@@ -4088,7 +4158,7 @@ Future<void> editProfile(
                       }
                     }
                   },
-            child: const Text('Saqlash'),
+            child: const Tx('Saqlash'),
           ),
         ],
       ),
@@ -4120,7 +4190,7 @@ class _CutsPageState extends State<CutsPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: GlassAppBar(title: const Text('Profil raskroyi')),
+        appBar: GlassAppBar(title: const Tx('Profil raskroyi')),
         body: readable(
           ListView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -4136,8 +4206,8 @@ class _CutsPageState extends State<CutsPage> {
                   controller: pieces,
                   minLines: 6,
                   maxLines: 12,
-                  decoration: const InputDecoration(
-                    labelText: 'Uzunlik × son; har qatorda: 1400 x 4',
+                  decoration: InputDecoration(
+                    labelText: tr('Uzunlik × son; har qatorda: 1400 x 4'),
                   ),
                 ),
               ),
@@ -4170,7 +4240,7 @@ class _CutsPageState extends State<CutsPage> {
                     message(context, e);
                   }
                 },
-                child: const Text('Raskroyni hisoblash'),
+                child: const Tx('Raskroyni hisoblash'),
               ),
               if (result != null) ...[
                 heading('${(result!['bars'] as List).length} dona xom profil'),
@@ -4181,8 +4251,8 @@ class _CutsPageState extends State<CutsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${(bar['pieces'] as List).join(' + ')} mm'),
-                          Text(
+                          Tx('${(bar['pieces'] as List).join(' + ')} mm'),
+                          Tx(
                             'Qoldiq: ${bar['remainingMm']} mm',
                             style: const TextStyle(color: muted),
                           ),
@@ -4202,19 +4272,19 @@ class AuditPage extends StatelessWidget {
   const AuditPage({super.key, required this.store});
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: GlassAppBar(title: const Text('Faoliyat tarixi')),
+        appBar: GlassAppBar(title: const Tx('Faoliyat tarixi')),
         body: readable(
           ListView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.all(20),
             children: [
-              if (store.audit.isEmpty) const Text('Hali amallar yo‘q.'),
+              if (store.audit.isEmpty) const Tx('Hali amallar yo‘q.'),
               for (final entry in store.audit)
                 GlassCard(
                   child: GlassControl(
                       child: ListTile(
-                    title: Text(entry['action']),
-                    subtitle: Text(entry['created']),
+                    title: Tx(entry['action']),
+                    subtitle: Tx(entry['created']),
                   )),
                 ),
             ],
