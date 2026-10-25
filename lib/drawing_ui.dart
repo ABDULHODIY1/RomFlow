@@ -2504,8 +2504,9 @@ class _DrawingEditorState extends State<DrawingEditor> {
   /// The palette of tool groups: a glass capsule when Liquid Glass is on.
   Widget glassBar(ColorScheme scheme, Widget child) => Padding(
         padding: const EdgeInsets.fromLTRB(12, 2, 12, 0),
-        child: child is NativeGlassButtons
-            // UIKit's buttons bring their own glass.
+        child: child is NativeGlassButtons || child is SingleChildScrollView
+            // UIKit's buttons bring their own glass; the Flutter tools are
+            // round buttons of their own, with the paper between them.
             ? Center(child: child)
             : usesIOSGlass
                 // A floating toolbar over the paper: one capsule of Apple's

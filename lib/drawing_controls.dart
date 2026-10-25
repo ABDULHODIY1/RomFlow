@@ -38,9 +38,77 @@ class DraftTool extends StatelessWidget {
     this.onDragFinished,
     this.compact = false,
   });
+  Widget _glyph(Color color, double side) => preview != null
+      ? SizedBox(width: side + 3, height: side + 1, child: preview)
+      : opening != null
+          ? CustomPaint(
+              size: Size.square(side),
+              painter: OpeningSymbol(opening!, color),
+            )
+          : Icon(icon, size: side - 2, color: color);
+
+  /// A round button of its own, as on the iPhone's glass toolbar: icon
+  /// only, the chosen one filled. Held, it drags the part as an icon.
+  Widget _compact(BuildContext context, ColorScheme colors) {
+    final color = selected ? colors.onPrimary : colors.onSurface;
+    final tile = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 3),
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: tr(label),
+        child: Tooltip(
+          message: tr(label),
+          child: Material(
+            color: selected ? colors.primary : colors.surfaceContainerHighest,
+            shape: CircleBorder(
+              side: BorderSide(
+                color: colors.outlineVariant.withValues(alpha: .5),
+                width: .6,
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onTap,
+              child: SizedBox.square(
+                dimension: 44,
+                child: Center(child: _glyph(color, 23)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    if (dragData == null) return tile;
+    return Draggable<DraftPayload>(
+      data: dragData,
+      affinity: Axis.vertical,
+      maxSimultaneousDrags: 1,
+      dragAnchorStrategy: pointerDragAnchorStrategy,
+      onDragStarted: onDragStarted,
+      onDragEnd: (_) => onDragFinished?.call(),
+      childWhenDragging: Opacity(opacity: .3, child: tile),
+      // Above the finger, so the drawing under it stays in view.
+      feedback: Transform.translate(
+        offset: const Offset(-28, -84),
+        child: Material(
+          color: colors.primary,
+          shape: const CircleBorder(),
+          elevation: 6,
+          child: SizedBox.square(
+            dimension: 56,
+            child: Center(child: _glyph(colors.onPrimary, 28)),
+          ),
+        ),
+      ),
+      child: tile,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    if (compact) return _compact(context, colors);
     final color = selected ? colors.primary : colors.onSurfaceVariant;
     final tile = Padding(
       padding: EdgeInsets.symmetric(horizontal: compact ? 2 : 3),

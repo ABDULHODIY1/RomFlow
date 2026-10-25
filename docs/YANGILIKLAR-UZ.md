@@ -3,6 +3,8 @@
 ## 1.0.0 — Liquid Glass to‘liq tuzatildi, tezroq va silliqroq
 
 - Chizmadagi ochilish belgisi: chiziqlar tutqichda tutashadi, ochiq tomoni petlyalarga qaraydi — 3D bilan bir xil.
+- iPhone (Liquid Glass): asbob tugmasini bosib turib chizmaga sudrash endi ishlaydi — Flutter bosishni UIKit’ga darhol beradi.
+- Oddiy rejimda ham chizish asboblari alohida dumaloq, faqat ikonli tugmalar; sudralayotgan qism ham faqat ikon.
 - Chizish stolining yuqori tugmalari (iPhone) endi Apple strelkalari emas, chizmadagi belgining o‘zini ko‘rsatadi: chiziqlar tutqichda tutashadi.
 - Status bar (soat, batareya) och sahifalarda yana ko‘rinadi.
 - Shisha endi faqat suzuvchi panellarda (yuqori panel, pastki menyu, asboblar) xiralashtiradi; kartochka, tugma va chiplar xiralashtirishsiz chiziladi. Ro‘yxatlar qotmasdan aylanadi, telefon kamroq qiziydi.

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'i18n.dart';
@@ -953,6 +954,15 @@ class _NativeGlassButtonsState extends State<NativeGlassButtons> {
           : (widget.width! < 48 ? 48 : widget.width),
       child: UiKitView(
         viewType: 'romflow/glass-buttons',
+        // Flutter otherwise holds the touches back from UIKit until the
+        // finger lifts, and a press-and-hold to drag never starts.
+        gestureRecognizers: widget.items.any((b) => b.draggable)
+            ? {
+                Factory<OneSequenceGestureRecognizer>(
+                  EagerGestureRecognizer.new,
+                ),
+              }
+            : const {},
         creationParams: configuration,
         creationParamsCodec: const StandardMessageCodec(),
         onPlatformViewCreated: (id) {
