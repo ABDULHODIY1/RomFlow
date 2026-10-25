@@ -176,6 +176,10 @@ class _GlassPainter extends CustomPainter {
                     : (dark ? .42 : .34),
           );
     canvas.drawRSuperellipse(shape, Paint()..color = body);
+    // Painted (frosted) glass is a plain soft fill: the glare and the light
+    // rim belong to real glass floating over content. On every button they
+    // drew a second outline around the control's own.
+    if (frosted) return;
     // Glare from the top.
     canvas.drawRSuperellipse(
       shape,
@@ -262,11 +266,6 @@ class GlassControl extends StatelessWidget {
         c is InputChip ||
         c is SegmentedButton;
     final radius = BorderRadius.circular(capsule ? 100 : 12);
-    final dark =
-        (brightness ?? Theme.of(context).brightness) == Brightness.dark;
-    final highlight = MediaQuery.highContrastOf(context)
-        ? null
-        : _GlassControlHighlight(dark, radius);
     // A field's floating label sits on its top edge: the glass goes behind
     // the field and never clips the label.
     if (c is TextField || c is FormField) {
@@ -292,48 +291,9 @@ class GlassControl extends StatelessWidget {
       tint: soft,
       shadow: false,
       brightness: brightness,
-      child: CustomPaint(foregroundPainter: highlight, child: child),
+      child: child,
     );
   }
-}
-
-/// Keep the rim visible on controls that paint their own opaque backgrounds.
-class _GlassControlHighlight extends CustomPainter {
-  final bool dark;
-  final BorderRadius radius;
-  const _GlassControlHighlight(this.dark, this.radius);
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final shape = radius.toRSuperellipse(rect.deflate(.5));
-    canvas.drawRSuperellipse(
-        shape,
-        Paint()
-          ..shader = LinearGradient(
-              begin: Alignment.topCenter,
-              end: const Alignment(0, -.2),
-              colors: [
-                Colors.white.withValues(alpha: dark ? .05 : .10),
-                Colors.transparent,
-              ]).createShader(rect));
-    canvas.drawRSuperellipse(
-        shape,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1
-          ..shader = LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: dark ? .45 : .75),
-                Colors.white.withValues(alpha: .03),
-                Colors.white.withValues(alpha: dark ? .18 : .35),
-              ]).createShader(rect));
-  }
-
-  @override
-  bool shouldRepaint(_GlassControlHighlight old) =>
-      old.dark != dark || old.radius != radius;
 }
 
 /// All ordinary Material buttons get glass from their theme, including custom
@@ -560,10 +520,13 @@ Future<T?> showGlassSheet<T>({
     barrierColor: Colors.black.withValues(alpha: .18),
     builder: (context) => Padding(
       padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+      // Sheets float over the page: real glass, so the page behind is
+      // blurred away instead of reading through as ghost buttons.
       child: GlassSurface(
         radius: top,
         tint: backgroundColor,
         opaque: true,
+        blur: true,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -753,7 +716,11 @@ class _NativeGlassButtonsState extends State<NativeGlassButtons> {
   }
 }
 
-class IOSGlassNavigation extends StatefulWidget {
+/// The floating Liquid Glass tab bar: one blurred capsule over the page,
+/// the chosen tab on a tinted pill inside it. Drawn by Flutter so its
+/// height and labels are the same on every iPhone; the system bar in a
+/// platform view came out thin with its labels cut.
+class IOSGlassNavigation extends StatelessWidget {
   final int selected;
   final ValueChanged<int> onChanged;
   const IOSGlassNavigation({
@@ -761,90 +728,51 @@ class IOSGlassNavigation extends StatefulWidget {
     required this.selected,
     required this.onChanged,
   });
-  @override
-  State<IOSGlassNavigation> createState() => _IOSGlassNavigationState();
-}
 
-class _IOSGlassNavigationState extends State<IOSGlassNavigation> {
-  MethodChannel? channel;
-  bool available = true;
-  String? lastConfiguration;
-  Future<void> sync() async {
-    final current = channel;
-    if (current == null) return;
-    try {
-      final next = {
-        'selected': widget.selected,
-        'dark': Theme.brightnessOf(context) == Brightness.dark,
-      };
-      final signature = jsonEncode(next);
-      if (signature == lastConfiguration) return;
-      lastConfiguration = signature;
-      await current.invokeMethod<void>('configure', next);
-    } on PlatformException {
-      if (mounted) setState(() => available = false);
-    } on MissingPluginException {
-      if (mounted) setState(() => available = false);
-    }
-  }
+  static const _icons = [
+    Icons.dashboard_outlined,
+    Icons.receipt_long_outlined,
+    Icons.grid_view_outlined,
+    Icons.tune,
+  ];
+  static const _labels = ['Asosiy', 'Buyurtmalar', 'Katalog', 'Sozlamalar'];
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    unawaited(sync());
-  }
-
-  @override
-  void didUpdateWidget(covariant IOSGlassNavigation old) {
-    super.didUpdateWidget(old);
-    if (old.selected != widget.selected) {
-      unawaited(sync());
-    }
-  }
-
-  @override
-  void dispose() {
-    channel?.setMethodCallHandler(null);
-    super.dispose();
-  }
-
-  Widget previewItem(BuildContext context, int i) => Expanded(
-        child: Semantics(
-          selected: i == widget.selected,
-          button: true,
-          child: InkWell(
-            onTap: () => widget.onChanged(i),
-            borderRadius: BorderRadius.circular(24),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
+  Widget item(BuildContext context, int i) {
+    final scheme = Theme.of(context).colorScheme, on = i == selected;
+    final color = on ? scheme.primary : scheme.onSurface.withValues(alpha: .72);
+    return Expanded(
+      child: Semantics(
+        selected: on,
+        button: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => onChanged(i),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            margin: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: on
+                  ? scheme.primary.withValues(alpha: .16)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(26),
+            ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      const [
-                        Icons.dashboard_outlined,
-                        Icons.receipt_long_outlined,
-                        Icons.grid_view_outlined,
-                        Icons.tune,
-                      ][i],
-                      color: i == widget.selected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                    Icon(_icons[i], size: 25, color: color),
+                    const SizedBox(height: 3),
                     Text(
-                      const [
-                        'Asosiy',
-                        'Buyurtmalar',
-                        'Katalog',
-                        'Sozlamalar'
-                      ][i],
+                      _labels[i],
+                      maxLines: 1,
                       style: TextStyle(
-                        fontSize: 10,
-                        color: i == widget.selected
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                        fontWeight: on ? FontWeight.w700 : FontWeight.w500,
+                        color: color,
                       ),
                     ),
                   ],
@@ -853,7 +781,10 @@ class _IOSGlassNavigationState extends State<IOSGlassNavigation> {
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => Stack(
         fit: StackFit.passthrough,
@@ -881,48 +812,22 @@ class _IOSGlassNavigationState extends State<IOSGlassNavigation> {
               ),
             ),
           ),
-          bar(context),
-        ],
-      );
-
-  Widget bar(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-        child: SafeArea(
-          top: false,
-          child: SizedBox(
-            height: nativeGlass && available ? 62 : 72,
-            child: nativeGlass && available
-                ? UiKitView(
-                    viewType: 'romflow/liquid-navigation',
-                    creationParams: {
-                      'selected': widget.selected,
-                      'dark': Theme.brightnessOf(context) == Brightness.dark,
-                    },
-                    creationParamsCodec: const StandardMessageCodec(),
-                    onPlatformViewCreated: (id) {
-                      channel?.setMethodCallHandler(null);
-                      channel = MethodChannel('romflow/liquid-navigation/$id');
-                      lastConfiguration = null;
-                      channel!.setMethodCallHandler((call) async {
-                        if (call.method == 'onTab' && mounted) {
-                          final index = call.arguments;
-                          if (index is int && index >= 0 && index < 4) {
-                            widget.onChanged(index);
-                          }
-                        }
-                      });
-                      unawaited(sync());
-                    },
-                  )
-                : GlassSurface(
-                    child: Row(
-                      children: [
-                        for (var i = 0; i < 4; i++) previewItem(context, i),
-                      ],
-                    ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+            child: SafeArea(
+              top: false,
+              child: SizedBox(
+                height: 68,
+                child: GlassSurface(
+                  radius: BorderRadius.circular(34),
+                  child: Row(
+                    children: [for (var i = 0; i < 4; i++) item(context, i)],
                   ),
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       );
 }
 
@@ -1046,6 +951,7 @@ class GlassAlertDialog extends AlertDialog {
         tint: backgroundColor,
         opaque: true,
         shadow: false,
+        blur: true,
         child: original.child ?? const SizedBox.shrink(),
       ),
     );

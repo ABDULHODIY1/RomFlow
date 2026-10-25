@@ -135,31 +135,30 @@ ThemeData romFlowTheme(Brightness brightness) {
           foregroundColor: accent,
           minimumSize: const Size(48, 48),
           shape: buttonShape,
-          side: BorderSide(color: border),
+          // Under glass the soft fill is the button; a line around it
+          // doubled the outline.
+          side: usesIOSGlass ? BorderSide.none : BorderSide(color: border),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           textStyle: typography.labelLarge,
         ),
         tint: accent,
       ),
     ),
+    // Text and icon buttons stay plain, as in Apple's own bars: the glass
+    // is the bar they sit on, not a box around every icon. Round glass
+    // buttons over content use GlassIconButton.
     textButtonTheme: TextButtonThemeData(
-      style: glassButtonStyle(
-        TextButton.styleFrom(
-          foregroundColor: accent,
-          minimumSize: const Size(48, 48),
-          shape: buttonShape,
-          textStyle: typography.labelLarge,
-        ),
-        tint: accent,
+      style: TextButton.styleFrom(
+        foregroundColor: accent,
+        minimumSize: const Size(48, 48),
+        shape: buttonShape,
+        textStyle: typography.labelLarge,
       ),
     ),
     iconButtonTheme: IconButtonThemeData(
-      style: glassButtonStyle(
-        IconButton.styleFrom(
-          foregroundColor: accent,
-          minimumSize: const Size(48, 48),
-        ),
-        tint: accent,
+      style: IconButton.styleFrom(
+        foregroundColor: accent,
+        minimumSize: const Size(48, 48),
       ),
     ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -169,10 +168,12 @@ ThemeData romFlowTheme(Brightness brightness) {
       shape: buttonShape,
     ),
     chipTheme: ChipThemeData(
-      backgroundColor: usesIOSGlass ? surface.withValues(alpha: .82) : surface,
+      // Under glass the chip is the glass capsule itself, not a second
+      // darker pill inside it.
+      backgroundColor: usesIOSGlass ? Colors.transparent : surface,
       selectedColor: selected,
       disabledColor: field,
-      side: BorderSide(color: border),
+      side: usesIOSGlass ? BorderSide.none : BorderSide(color: border),
       labelStyle: TextStyle(color: text, fontSize: 13),
       secondaryLabelStyle: TextStyle(color: accent),
       checkmarkColor: accent,
@@ -263,6 +264,8 @@ ThemeData romFlowTheme(Brightness brightness) {
               : Colors.transparent,
         ),
         foregroundColor: WidgetStatePropertyAll(accent),
+        side:
+            usesIOSGlass ? const WidgetStatePropertyAll(BorderSide.none) : null,
       ),
     ),
     sliderTheme: SliderThemeData(

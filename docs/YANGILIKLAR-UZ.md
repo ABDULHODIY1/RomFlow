@@ -10,6 +10,9 @@
 - Katalog: o‘lcham maydonlari klaviatura ustiga chiqadi; bo‘limlar ko‘k fonda to‘q shishada; “AI kamera” kartasi o‘z rangida.
 - Chizma ekrani, buyurtmalar va bosh sahifada matnlar kesilmaydi; katta shriftda matn ko‘pi bilan 1.15× kattalashadi.
 - Klaviatura ustidagi “Keyingisi / Tayyor” paneli shisha ko‘rinishida.
+- Liquid Glass faqat kerakli joyda: yuqori panel, pastki menyu, suzuvchi tugmalar va pastdan chiquvchi oynalar. Boshqa tugma, chip va plitkalar chegarasiz, yumshoq xira fonli — ikki qavat chiziqlar yo‘q.
+- Pastki menyu yangilandi: balandroq shisha kapsula, tanlangan bo‘lim ajralib turadi, yozuvlar kesilmaydi.
+- Paneldagi ikonka tugmalar (orqaga, bekor qilish, sozlash) qutisiz, Apple uslubida.
 
 ## 1.0.1 — rangli Liquid Glass va 3D tuzatishlari
 

@@ -652,7 +652,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
               color: on ? scheme.onPrimary : scheme.onSurface,
             ),
             selectedColor: scheme.primary,
-            backgroundColor: scheme.surface,
+            backgroundColor: usesIOSGlass ? Colors.transparent : scheme.surface,
             side: BorderSide(
               color: on ? scheme.primary : scheme.outlineVariant,
             ),

@@ -7,7 +7,7 @@ import 'package:romflow/app_theme.dart';
 void main() {
   tearDown(() => applyDesign('auto'));
   testWidgets(
-      'all standard button families get glass and keep taps/disabled state',
+      'filled and outlined buttons get glass, text and icon buttons stay plain, all keep taps/disabled state',
       (tester) async {
     applyDesign('glass');
     var clicks = 0;
@@ -24,11 +24,18 @@ void main() {
               tooltip: 'Add'),
           FilledButton(onPressed: null, child: const Text('Disabled')),
         ]))));
-    for (final type in [FilledButton, OutlinedButton, TextButton, IconButton]) {
+    for (final type in [FilledButton, OutlinedButton]) {
       expect(
           find.descendant(
               of: find.byType(type).first, matching: find.byType(GlassSurface)),
           findsWidgets);
+    }
+    // As in Apple's bars: no glass box around text and icon buttons.
+    for (final type in [TextButton, IconButton]) {
+      expect(
+          find.descendant(
+              of: find.byType(type).first, matching: find.byType(GlassSurface)),
+          findsNothing);
     }
     await tester.tap(find.text('Save'));
     await tester.tap(find.text('Open'));
