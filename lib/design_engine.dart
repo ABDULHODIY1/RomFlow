@@ -183,8 +183,8 @@ const colouredMaterials = {
   'threshold',
 };
 
-/// Edge of the sash that carries the hinges. The opening symbol's apex
-/// points at this edge (GOST 23166 convention); the handle sits opposite.
+/// Edge of the sash that carries the hinges; the handle sits opposite. The
+/// opening symbol's lines meet at the handle and open toward the hinges.
 String? hingeSide(String opening) => switch (opening) {
       'fixed' || 'slideLeft' || 'slideRight' => null,
       'right' || 'doorRight' => 'right',
@@ -230,7 +230,16 @@ List<List<V>> openingSymbolLines(String opening, List<double> b) {
   }
   final side = hingeSide(opening);
   if (side == null) return [];
-  return [apex(side), if (opening == 'tiltTurn') apex('bottom')];
+  const handleSide = {
+    'left': 'right',
+    'right': 'left',
+    'top': 'bottom',
+    'bottom': 'top',
+  };
+  return [
+    apex(handleSide[side]!),
+    if (opening == 'tiltTurn') apex('top'),
+  ];
 }
 
 /// Where the handle sits on a sash box: opposite the hinges.

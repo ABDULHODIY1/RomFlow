@@ -59,17 +59,17 @@ void main() {
       }
     });
 
-    test('opening symbol apex points at the hinge side, handle opposite', () {
+    test('opening symbol lines meet at the handle, open toward the hinges', () {
       const box = [0.0, 0.0, 100.0, 200.0];
-      expect(openingSymbolLines('left', box).single[1].x, 0);
+      expect(openingSymbolLines('left', box).single[1].x, 100);
       expect(handlePoint('left', box)!.x, 100);
-      expect(openingSymbolLines('right', box).single[1].x, 100);
-      expect(openingSymbolLines('top', box).single[1].y, 0);
+      expect(openingSymbolLines('right', box).single[1].x, 0);
+      expect(openingSymbolLines('top', box).single[1].y, 200);
       expect(handlePoint('top', box)!.y, 200);
-      expect(openingSymbolLines('bottom', box).single[1].y, 200);
+      expect(openingSymbolLines('bottom', box).single[1].y, 0);
       final tilt = openingSymbolLines('tiltTurn', box);
       expect(tilt.length, 2);
-      expect(tilt[1][1].y, 200); // tilts on bottom hinges
+      expect(tilt[1][1].y, 0); // tilts on bottom hinges
       expect(openingSymbolLines('fixed', box), isEmpty);
       expect(snapRatio(.49, 1500), .5);
       expect(snapRatio(.42, 1500), isNull);

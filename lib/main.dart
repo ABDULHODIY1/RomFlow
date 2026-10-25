@@ -3288,14 +3288,15 @@ class WindowPainter extends CustomPainter {
       canvas.drawLine(Offset(rect.left, y), Offset(rect.right, y), frame);
     }
     if ((t['opening'] as int) > 0) {
-      // Same rule as the drawing editor: the apex marks the hinge side.
+      // Same rule as the drawing editor: the lines meet at the handle and
+      // open toward the hinges.
       final p = Path()
-        ..moveTo(rect.left + rect.width / cols - 5, rect.top + 5)
-        ..lineTo(rect.left + 5, rect.top + rect.height / rows / 2)
+        ..moveTo(rect.left + 5, rect.top + 5)
         ..lineTo(
           rect.left + rect.width / cols - 5,
-          rect.top + rect.height / rows - 5,
-        );
+          rect.top + rect.height / rows / 2,
+        )
+        ..lineTo(rect.left + 5, rect.top + rect.height / rows - 5);
       canvas.drawPath(
         p,
         Paint()

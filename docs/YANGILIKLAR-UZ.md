@@ -2,6 +2,7 @@
 
 ## 1.0.0 — Liquid Glass to‘liq tuzatildi, tezroq va silliqroq
 
+- Chizmadagi ochilish belgisi: chiziqlar tutqichda tutashadi, ochiq tomoni petlyalarga qaraydi — 3D bilan bir xil.
 - Status bar (soat, batareya) och sahifalarda yana ko‘rinadi.
 - Shisha endi faqat suzuvchi panellarda (yuqori panel, pastki menyu, asboblar) xiralashtiradi; kartochka, tugma va chiplar xiralashtirishsiz chiziladi. Ro‘yxatlar qotmasdan aylanadi, telefon kamroq qiziydi.
 - 3D ko‘rinishda model ustidagi panellar har kadrda xiralashtirilmaydi — aylantirish silliqroq.

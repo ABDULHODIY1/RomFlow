@@ -9,7 +9,7 @@ import 'platform_files.dart';
 import 'store.dart';
 
 /// The app's build number; it must match pubspec.yaml (a test checks it).
-const appBuild = 41;
+const appBuild = 42;
 const _repo = 'ABDULHODIY1/RomFlow';
 const _bundleId = 'uz.romflow.workshop';
 
