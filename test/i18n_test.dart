@@ -22,6 +22,9 @@ void main() {
     expect(tr('1 500 so‘m'), '1 500 сум');
     // A value inside a template is translated too.
     expect(tr('Hammasi 27'), 'Все 27');
+    // A name with its count, as on the catalog's tabs and chips.
+    expect(tr('Derazalar 27'), 'Окна 27');
+    expect(tr('Fortochkali 5'), 'С форточкой 5');
     expect(tr('Aziz Karimov'), 'Aziz Karimov');
     appLanguage = AppLanguage.en;
     expect(tr('Smetaga qo‘shish'), 'Add to estimate');

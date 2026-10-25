@@ -558,7 +558,7 @@ class _HomeState extends State<Home> {
                             NavigationDestination(
                               icon: Icon(icon),
                               selectedIcon: Icon(selected),
-                              label: label,
+                              label: tr(label),
                             ),
                         ],
                       ),
@@ -1016,7 +1016,13 @@ class _HomeState extends State<Home> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Tx(
-                    '${p['brand']} / ${p['material']}',
+                    '${p['brand']} / ${const {
+                          'aluminium': 'Alyuminiy',
+                          'pvc': 'PVX',
+                          'wood': 'Yog‘och',
+                          'steel': 'Metall',
+                          'mdf': 'MDF'
+                        }[p['material']] ?? p['material']}',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
                       fontSize: 12,

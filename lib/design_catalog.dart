@@ -1016,15 +1016,18 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
                                   : Icons.draw_outlined,
                               size: 20,
                             ),
-                            label: Tx(
-                              widget.replacing
-                                  ? 'Qo‘llash'
-                                  : preset == null
-                                      ? 'Bo‘sh romni chizish'
-                                      : preset.name,
-                              key: const ValueKey('catalog-choice'),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            // Shrinks to fit in every language, never cut.
+                            label: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Tx(
+                                widget.replacing
+                                    ? 'Qo‘llash'
+                                    : preset == null
+                                        ? 'Bo‘sh romni chizish'
+                                        : preset.name,
+                                key: const ValueKey('catalog-choice'),
+                                maxLines: 1,
+                              ),
                             ),
                           ),
                         ),

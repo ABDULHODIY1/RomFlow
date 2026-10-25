@@ -268,7 +268,7 @@ const i18nPlain = <String, List<String>>{
   'Ko‘paytirish': ['Увеличить', 'Increase'],
   'Joyi (xona)': ['Место (комната)', 'Location (room)'],
   'Qo‘llash': ['Применить', 'Apply'],
-  'Bo‘sh romni chizish': ['Начертить пустую раму', 'Draw an empty frame'],
+  'Bo‘sh romni chizish': ['Начертить пустую раму', 'Draw empty frame'],
   'Fortochkali': ['С форточкой', 'With a vent'],
   'Panelli': ['С панелью', 'With a panel'],
   'Surilma': ['Раздвижные', 'Sliding'],
@@ -2660,6 +2660,25 @@ const i18nPlain = <String, List<String>>{
   'To‘lovni saqlash': ['Сохранить платёж', 'Save payment'],
   'Eslatma nomi': ['Название напоминания', 'Reminder title'],
   'Eslatmani saqlash': ['Сохранить напоминание', 'Save reminder'],
+  'Mokri': ['Мокрый асфальт', 'Wet asphalt'],
+  'shisha': ['стекло', 'glass'],
+  'panel': ['панель', 'panel'],
+  'lambir': ['вагонка', 'lining'],
+  'ISH MAYDONI': ['РАБОЧАЯ ОБЛАСТЬ', 'WORKSPACE'],
+  'burchak ulash profili': [
+    'угловой соединительный профиль',
+    'corner connector profile'
+  ],
+  'Tanish material topilmadi. Birinchi ustun — material (masalan frame yoki “Tashqi rama”), ikkinchisi — narx.':
+      [
+    'Знакомый материал не найден. Первый столбец — материал (например frame или «Наружная рама»), второй — цена.',
+    'No known material found. The first column is the material (such as frame or “Outer frame”), the second the price.'
+  ],
+  '2 qavat shisha': ['2 слоя стекла', '2 layers of glass'],
+  '1 qavat shisha': ['1 слой стекла', '1 layer of glass'],
+  '2 tabaqali eshik': ['Двустворчатая дверь', 'Double door'],
+  'NAMUNA QIYMATLAR': ['ОБРАЗЦОВЫЕ ЗНАЧЕНИЯ', 'SAMPLE VALUES'],
+  'PVX': ['ПВХ', 'PVC'],
 };
 
 /// Text with values in it: {} marks a value in the Uzbek, {0}, {1}... the
@@ -3075,4 +3094,5 @@ const i18nTemplates = <String, List<String>>{
     'Начально: {0}\nОплачено: {1}\n{2}\n{3}{4}',
     'Initial: {0}\nPaid: {1}\n{2}\n{3}{4}'
   ],
+  '{} / {}': ['{0} / {1}', '{0} / {1}'],
 };

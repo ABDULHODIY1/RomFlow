@@ -72,8 +72,16 @@ String _translate(String uz, AppLanguage lang, int depth) {
     }
     return out;
   }
+  // A name and its count, as on filter chips: "Derazalar 27".
+  final counted = _counted.firstMatch(uz);
+  if (counted != null) {
+    final head = _translate(counted[1]!, lang, depth + 1);
+    if (head != counted[1]) return '$head${counted[2]}';
+  }
   return uz;
 }
+
+final _counted = RegExp(r'^(.*\S)(\s+\d+)$');
 
 /// [Text] that shows its text in the chosen language.
 class Tx extends Text {
