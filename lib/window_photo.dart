@@ -17,21 +17,24 @@ class WindowGrid {
   List<List<String>> openings, fills;
   String shape;
 
-  WindowGrid(this.layout, List<double> cuts, List<List<double>> inner,
-      {List<List<String>>? openings,
-      List<List<String>>? fills,
-      this.shape = 'rect'})
-      : cuts = List.of(cuts),
+  WindowGrid(
+    this.layout,
+    List<double> cuts,
+    List<List<double>> inner, {
+    List<List<String>>? openings,
+    List<List<String>>? fills,
+    this.shape = 'rect',
+  })  : cuts = List.of(cuts),
         inner = [for (final p in inner) List.of(p)],
         openings = openings ??
             [
               for (final p in inner)
-                List.filled(p.length + 1, 'fixed', growable: true)
+                List.filled(p.length + 1, 'fixed', growable: true),
             ],
         fills = fills ??
             [
               for (final p in inner)
-                List.filled(p.length + 1, 'glass', growable: true)
+                List.filled(p.length + 1, 'glass', growable: true),
             ] {
     // Lists from the AI are fixed; edits need growable ones.
     this.openings = [for (final o in this.openings) List.of(o)];
@@ -101,8 +104,13 @@ class WindowGrid {
   /// The section tree of the drawing engine.
   DMap tree() {
     var serial = 0;
-    DMap chain(String axis, List<double> stops, DMap Function(int) leaf,
-        [int from = 0, double start = 0]) {
+    DMap chain(
+      String axis,
+      List<double> stops,
+      DMap Function(int) leaf, [
+      int from = 0,
+      double start = 0,
+    ]) {
       if (from == stops.length) return leaf(from);
       final end = 1.0;
       return {
@@ -116,16 +124,18 @@ class WindowGrid {
 
     final mainAxis = columns ? 'v' : 'h', otherAxis = columns ? 'h' : 'v';
     return chain(
-        mainAxis,
-        cuts,
-        (i) => chain(
-            otherAxis,
-            inner[i],
-            (j) => {
-                  ...newLeaf('ph${serial++}'),
-                  'opening': openings[i][j],
-                  'fill': fills[i][j],
-                }));
+      mainAxis,
+      cuts,
+      (i) => chain(
+        otherAxis,
+        inner[i],
+        (j) => {
+          ...newLeaf('ph${serial++}'),
+          'opening': openings[i][j],
+          'fill': fills[i][j],
+        },
+      ),
+    );
   }
 
   /// A drawing of [width] × [height] mm. An arch takes its curve from the
@@ -154,13 +164,13 @@ class WindowGrid {
       var at = 0.0;
       return [
         for (final v in shares.sublist(0, shares.length - 1))
-          at += (v as num).toDouble() / total
+          at += (v as num).toDouble() / total,
       ];
     }
 
     final parts = [
       for (final p in json['parts'] as List? ?? const [])
-        if (p is Map && (p['cells'] as List?)?.isNotEmpty == true) p
+        if (p is Map && (p['cells'] as List?)?.isNotEmpty == true) p,
     ];
     if (parts.isEmpty) throw const FormatException('Rasmda rom topilmadi');
     const openings = {
@@ -174,28 +184,30 @@ class WindowGrid {
       'slideRight',
       'doorLeft',
       'doorRight',
-      'passive'
+      'passive',
     };
     return WindowGrid(
       layout,
       stops([for (final p in parts) p['share'] ?? 1]),
       [
         for (final p in parts)
-          stops([for (final c in p['cells'] as List) c['share'] ?? 1])
+          stops([for (final c in p['cells'] as List) c['share'] ?? 1]),
       ],
       openings: [
         for (final p in parts)
           [
             for (final c in p['cells'] as List)
-              openings.contains(c['opening']) ? c['opening'] as String : 'fixed'
-          ]
+              openings.contains(c['opening'])
+                  ? c['opening'] as String
+                  : 'fixed',
+          ],
       ],
       fills: [
         for (final p in parts)
           [
             for (final c in p['cells'] as List)
-              c['fill'] == 'panel' ? 'panel' : 'glass'
-          ]
+              c['fill'] == 'panel' ? 'panel' : 'glass',
+          ],
       ],
       shape: json['shape'] == 'arch' ? 'arch' : 'rect',
     );
@@ -211,11 +223,11 @@ const windowGridSchema = {
     'isWindow': {'type': 'boolean'},
     'shape': {
       'type': 'string',
-      'enum': ['rect', 'arch']
+      'enum': ['rect', 'arch'],
     },
     'layout': {
       'type': 'string',
-      'enum': ['columns', 'rows']
+      'enum': ['columns', 'rows'],
     },
     'parts': {
       'type': 'array',
@@ -246,12 +258,12 @@ const windowGridSchema = {
                     'slideRight',
                     'doorLeft',
                     'doorRight',
-                    'passive'
-                  ]
+                    'passive',
+                  ],
                 },
                 'fill': {
                   'type': 'string',
-                  'enum': ['glass', 'panel']
+                  'enum': ['glass', 'panel'],
                 },
               },
             },
@@ -355,8 +367,14 @@ class Gray {
 
 /// The colour photo [rgba] ([width] × [height]) straightened like
 /// [Gray.rectify], for showing it.
-Uint8List rectifyRgba(Uint8List rgba, int width, int height,
-    List<(double, double)> quad, int outWidth, int outHeight) {
+Uint8List rectifyRgba(
+  Uint8List rgba,
+  int width,
+  int height,
+  List<(double, double)> quad,
+  int outWidth,
+  int outHeight,
+) {
   final m = Homography(quad), out = Uint8List(outWidth * outHeight * 4);
   for (var y = 0; y < outHeight; y++) {
     for (var x = 0; x < outWidth; x++) {
@@ -394,15 +412,23 @@ WindowGrid detectGrid(Gray img, {Uint8List? colour}) {
   // Edge threshold from the picture itself: strong but not only the
   // strongest edges.
   final sample = <double>[
-    for (var i = 0; i < gx.length; i += 7) math.max(gx[i], gy[i])
+    for (var i = 0; i < gx.length; i += 7) math.max(gx[i], gy[i]),
   ]..sort();
   final threshold = math.max(
-      12.0, sample[(sample.length * .85).floor().clamp(0, sample.length - 1)]);
+    12.0,
+    sample[(sample.length * .85).floor().clamp(0, sample.length - 1)],
+  );
 
   /// Positions (0–1 within [from, to)) of bars across a band, scanning
   /// along x when [vertical].
-  List<double> bars(bool vertical, int from, int to, int crossFrom, int crossTo,
-      double minRun) {
+  List<double> bars(
+    bool vertical,
+    int from,
+    int to,
+    int crossFrom,
+    int crossTo,
+    double minRun,
+  ) {
     final length = to - from;
     if (length < 20 || crossTo - crossFrom < 10) return const [];
     final score = List<double>.filled(length, 0);
@@ -421,14 +447,14 @@ WindowGrid detectGrid(Gray img, {Uint8List? colour}) {
           for (var j = math.max(0, k - 1);
               j <= math.min(length - 1, k + 1);
               j++)
-            score[j]
-        ].reduce(math.max)
+            score[j],
+        ].reduce(math.max),
     ];
     // Strong positions, away from the outer frame.
     final margin = (length * .09).ceil();
     final strong = [
       for (var k = margin; k < length - margin; k++)
-        if (smooth[k] >= minRun) k
+        if (smooth[k] >= minRun) k,
     ];
     // Neighbouring strong positions are one bar (edges of the impost and
     // of the sashes beside it).
@@ -459,7 +485,7 @@ WindowGrid detectGrid(Gray img, {Uint8List? colour}) {
           return columns
               ? bars(false, 0, h, px(a + pad, w), px(b - pad, w), .5)
               : bars(true, 0, w, px(a + pad, h), px(b - pad, h), .5);
-        }()
+        }(),
     ];
   }
 
@@ -533,7 +559,7 @@ List<(double, double)> guessOpening(Gray g) {
                   v[i] +
                   v[math.min(v.length - 1, i + 1)] +
                   v[math.min(v.length - 1, i + 2)]) /
-              5
+              5,
       ];
   final c = smooth(cols), r = smooth(rows);
   // The outermost edge at least 60 % as strong as the strongest one
@@ -562,8 +588,14 @@ List<(double, double)> guessOpening(Gray g) {
 /// ([luma], [rowStride] bytes a row): every [step]-th pixel, turned by
 /// [rotation] degrees clockwise (the camera's sensor orientation) so it
 /// stands the way the phone is held.
-Gray grayFromLuma(Uint8List luma, int width, int height, int rowStride,
-    {int step = 1, int rotation = 0}) {
+Gray grayFromLuma(
+  Uint8List luma,
+  int width,
+  int height,
+  int rowStride, {
+  int step = 1,
+  int rotation = 0,
+}) {
   final sw = width ~/ step, sh = height ~/ step;
   final turned = rotation % 180 != 0;
   final w = turned ? sh : sw, h = turned ? sw : sh, out = Uint8List(w * h);

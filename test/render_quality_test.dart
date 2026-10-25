@@ -14,7 +14,7 @@ void main() {
     recorder.endRecording().dispose();
   }
 
-  test('turning the model reuses the scene and leaves out tiny details', () {
+  test('turning the model reuses the scene and preserves tiny details', () {
     final model = WindowModel(drawing, recipe);
     final still = ModelPainter(model, -.35, .15, 1, 0, 'all', false);
     paintOnce(still);
@@ -23,14 +23,15 @@ void main() {
     // Another angle: the same opened, placed scene is reused.
     paintOnce(ModelPainter(model, .2, .3, 1, 0, 'all', false));
     expect(identical(model.world, scene), isTrue);
-    // While a finger turns it, screws and caps are left out.
+    // Finger rotation keeps screws and caps, with no detail popping.
     String? key(ModelFace f) => model.parts[f.partId]?.materialKey;
     final moving =
         ModelPainter(model, .2, .3, 1, 0, 'all', false, moving: true);
     paintOnce(moving);
     expect(still.transformed.any((f) => key(f.$1) == 'screw'), isTrue);
-    expect(moving.transformed.any((f) => key(f.$1) == 'screw'), isFalse);
-    expect(moving.transformed.length, lessThan(still.transformed.length));
+    expect(moving.transformed.any((f) => key(f.$1) == 'screw'), isTrue);
+    expect(moving.transformed.length, still.transformed.length);
+    expect(identical(model.world, scene), isTrue);
     // Opening a sash places the scene again.
     paintOnce(ModelPainter(model, .2, .3, 1, .5, 'all', false));
     expect(identical(model.world, scene), isFalse);

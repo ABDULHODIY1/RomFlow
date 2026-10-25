@@ -1,3 +1,4 @@
+import 'adaptive_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -69,8 +70,9 @@ class WorkshopNumberFormatter extends TextInputFormatter {
     String clean(String s) =>
         s.replaceAll(RegExp(r'[\s\u00a0\u202f]'), '').replaceAll(',', '.');
     final text = clean(newValue.text);
-    if (!(decimal ? RegExp(r'^\d*(\.\d*)?$') : RegExp(r'^\d*$'))
-        .hasMatch(text)) {
+    if (!(decimal ? RegExp(r'^\d*(\.\d*)?$') : RegExp(r'^\d*$')).hasMatch(
+      text,
+    )) {
       return oldValue;
     }
     int offset(int n) => n < 0
@@ -136,68 +138,70 @@ class _WorkshopFieldState extends State<WorkshopField> {
   }
 
   @override
-  Widget build(BuildContext context) => TextFormField(
-        controller: widget.controller,
-        focusNode: focus,
-        obscureText: widget.obscure,
-        keyboardType: widget.keyboardType ??
-            (widget.number
-                ? TextInputType.numberWithOptions(decimal: widget.decimal)
-                : TextInputType.text),
-        textInputAction: widget.action,
-        textCapitalization: widget.number
-            ? TextCapitalization.none
-            : TextCapitalization.sentences,
-        inputFormatters: widget.number
-            ? [WorkshopNumberFormatter(decimal: widget.decimal)]
-            : null,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        scrollPadding: const EdgeInsets.all(32),
-        onTapOutside: (_) => focus.unfocus(),
-        onTap: () {
-          if (firstTap && widget.number && widget.selectOnFocus) {
-            widget.controller.selection = TextSelection(
-              baseOffset: 0,
-              extentOffset: widget.controller.text.length,
-            );
-          }
-          firstTap = false;
-        },
-        onChanged: widget.onChanged,
-        onFieldSubmitted: (value) {
-          if (widget.action == TextInputAction.done) focus.unfocus();
-          widget.onSubmitted?.call(value);
-        },
-        validator: (value) {
-          final custom = widget.validator?.call(value);
-          if (custom != null) return custom;
-          if (widget.number) {
-            final n = num.tryParse(value ?? '');
-            if (n == null || !n.isFinite || n < 0) {
-              return '0 yoki musbat son kiriting';
+  Widget build(BuildContext context) => GlassControl(
+        child: TextFormField(
+          controller: widget.controller,
+          focusNode: focus,
+          obscureText: widget.obscure,
+          keyboardType: widget.keyboardType ??
+              (widget.number
+                  ? TextInputType.numberWithOptions(decimal: widget.decimal)
+                  : TextInputType.text),
+          textInputAction: widget.action,
+          textCapitalization: widget.number
+              ? TextCapitalization.none
+              : TextCapitalization.sentences,
+          inputFormatters: widget.number
+              ? [WorkshopNumberFormatter(decimal: widget.decimal)]
+              : null,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          scrollPadding: const EdgeInsets.all(32),
+          onTapOutside: (_) => focus.unfocus(),
+          onTap: () {
+            if (firstTap && widget.number && widget.selectOnFocus) {
+              widget.controller.selection = TextSelection(
+                baseOffset: 0,
+                extentOffset: widget.controller.text.length,
+              );
             }
-          }
-          return null;
-        },
-        decoration: InputDecoration(
-          label: Text(widget.label, maxLines: 2),
-          helperText: widget.helperText,
-          helperMaxLines: 3,
-          errorMaxLines: 3,
-          suffixText: widget.suffixText,
-          suffixIcon: ValueListenableBuilder<TextEditingValue>(
-            valueListenable: widget.controller,
-            builder: (context, value, _) => value.text.isEmpty
-                ? const SizedBox(width: 48, height: 48)
-                : IconButton(
-                    tooltip: 'Tozalash',
-                    icon: const Icon(Icons.close, size: 20),
-                    onPressed: () {
-                      widget.controller.clear();
-                      focus.requestFocus();
-                      widget.onChanged?.call('');
-                    },
-                  ),
+            firstTap = false;
+          },
+          onChanged: widget.onChanged,
+          onFieldSubmitted: (value) {
+            if (widget.action == TextInputAction.done) focus.unfocus();
+            widget.onSubmitted?.call(value);
+          },
+          validator: (value) {
+            final custom = widget.validator?.call(value);
+            if (custom != null) return custom;
+            if (widget.number) {
+              final n = num.tryParse(value ?? '');
+              if (n == null || !n.isFinite || n < 0) {
+                return '0 yoki musbat son kiriting';
+              }
+            }
+            return null;
+          },
+          decoration: InputDecoration(
+            label: Text(widget.label, maxLines: 2),
+            helperText: widget.helperText,
+            helperMaxLines: 3,
+            errorMaxLines: 3,
+            suffixText: widget.suffixText,
+            suffixIcon: ValueListenableBuilder<TextEditingValue>(
+              valueListenable: widget.controller,
+              builder: (context, value, _) => value.text.isEmpty
+                  ? const SizedBox(width: 48, height: 48)
+                  : IconButton(
+                      tooltip: 'Tozalash',
+                      icon: const Icon(Icons.close, size: 20),
+                      onPressed: () {
+                        widget.controller.clear();
+                        focus.requestFocus();
+                        widget.onChanged?.call('');
+                      },
+                    ),
+            ),
           ),
         ),
       );

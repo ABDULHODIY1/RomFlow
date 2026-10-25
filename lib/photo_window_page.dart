@@ -17,14 +17,20 @@ import 'adaptive_ui.dart';
 /// are found on the phone itself, or by Claude when the workshop has added
 /// its own AI key. Every bar can be removed or added before drawing.
 Future<CatalogChoice?> openPhotoWindow(
-        BuildContext context, Store store, DMap recipe) =>
+  BuildContext context,
+  Store store,
+  DMap recipe,
+) =>
     Navigator.push<CatalogChoice>(
-        context,
-        MaterialPageRoute(
-            builder: (_) => PhotoWindowPage(store: store, recipe: recipe)));
+      context,
+      MaterialPageRoute(
+        builder: (_) => PhotoWindowPage(store: store, recipe: recipe),
+      ),
+    );
 
 (Uint8List, WindowGrid) _straightenAndDetect(
-    (Gray, Uint8List, List<(double, double)>, int, int) job) {
+  (Gray, Uint8List, List<(double, double)>, int, int) job,
+) {
   final (source, colour, quad, w, h) = job;
   final straight = source.rectify(quad, w, h),
       pixels = rectifyRgba(colour, source.width, source.height, quad, w, h);
@@ -65,8 +71,11 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
 
   Future<void> pick(ImageSource source) async {
     try {
-      final file = await ImagePicker()
-          .pickImage(source: source, maxWidth: 2000, imageQuality: 92);
+      final file = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 2000,
+        imageQuality: 92,
+      );
       if (file == null || !mounted) return;
       setState(() => busy = 'Rasm ochilmoqda…');
       await load(await file.readAsBytes());
@@ -84,8 +93,9 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
     final descriptor = await ui.ImageDescriptor.encoded(buffer);
     final scale = 1100 / math.max(descriptor.width, descriptor.height);
     final codec = await descriptor.instantiateCodec(
-        targetWidth: scale < 1 ? (descriptor.width * scale).round() : null,
-        targetHeight: scale < 1 ? (descriptor.height * scale).round() : null);
+      targetWidth: scale < 1 ? (descriptor.width * scale).round() : null,
+      targetHeight: scale < 1 ? (descriptor.height * scale).round() : null,
+    );
     final image = (await codec.getNextFrame()).image;
     final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
     final w = image.width.toDouble(), h = image.height.toDouble();
@@ -126,8 +136,13 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
     const outWidth = 360;
     final outHeight = (outWidth * a).round();
     // Off the UI thread; only plain data crosses to the worker.
-    final result = await compute(
-        _straightenAndDetect, (source, colour!, quad, outWidth, outHeight));
+    final result = await compute(_straightenAndDetect, (
+      source,
+      colour!,
+      quad,
+      outWidth,
+      outHeight,
+    ));
     final (pixels, found) = result;
     final view = await rgbaImage(pixels, outWidth, outHeight);
     if (!mounted) return;
@@ -141,7 +156,12 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
   Future<ui.Image> rgbaImage(Uint8List rgba, int w, int h) {
     final done = Completer<ui.Image>();
     ui.decodeImageFromPixels(
-        rgba, w, h, ui.PixelFormat.rgba8888, done.complete);
+      rgba,
+      w,
+      h,
+      ui.PixelFormat.rgba8888,
+      done.complete,
+    );
     return done.future;
   }
 
@@ -157,8 +177,10 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
     try {
       if (ai) {
         final png = await photo!.toByteData(format: ui.ImageByteFormat.png);
-        final found = await AiVision.read(png!.buffer.asUint8List(),
-            apiKey: widget.store.aiKey);
+        final found = await AiVision.read(
+          png!.buffer.asUint8List(),
+          apiKey: widget.store.aiKey,
+        );
         grid = found;
         note = 'AI aniqladi. Chiziqlarni tekshiring.';
       }
@@ -215,7 +237,7 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
             'left',
             'right',
             'bottom',
-            'doorLeft'
+            'doorLeft',
           ];
           final now = cycle.indexOf(g.openings[i][j]);
           g.openings[i][j] = cycle[(now + 1) % cycle.length];
@@ -244,153 +266,195 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
     final text = Theme.of(context).textTheme,
         scheme = Theme.of(context).colorScheme,
         camera = Platform.isAndroid || Platform.isIOS;
-    return ListView(padding: const EdgeInsets.all(20), children: [
-      Container(
-        height: 170,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
-          gradient: const LinearGradient(
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Container(
+          height: 170,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            gradient: const LinearGradient(
               colors: [Color(0xff07b2f5), Color(0xff13618f)],
               begin: Alignment.topLeft,
-              end: Alignment.bottomRight),
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: const Center(
+            child: Icon(
+              Icons.photo_camera_outlined,
+              size: 76,
+              color: Colors.white,
+            ),
+          ),
         ),
-        child: const Center(
-            child: Icon(Icons.photo_camera_outlined,
-                size: 76, color: Colors.white)),
-      ),
-      const SizedBox(height: 18),
-      Text('Romni rasmga oling', style: text.titleLarge),
-      const SizedBox(height: 6),
-      Text(
+        const SizedBox(height: 18),
+        Text('Romni rasmga oling', style: text.titleLarge),
+        const SizedBox(height: 6),
+        Text(
           'Romni iloji boricha to‘g‘ridan, butunligicha oling: ramaning to‘rt burchagi ko‘rinsin. Keyin burchaklarni belgilaysiz — dastur rasmni to‘g‘rilab, impostlarni topadi.',
-          style: text.bodyMedium),
-      const SizedBox(height: 18),
-      if (camera)
-        FilledButton.icon(
-          key: const ValueKey('photo-camera'),
-          onPressed: busy == null ? () => pick(ImageSource.camera) : null,
-          icon: const Icon(Icons.photo_camera),
-          label: const Text('Kamera'),
+          style: text.bodyMedium,
         ),
-      const SizedBox(height: 10),
-      OutlinedButton.icon(
-        key: const ValueKey('photo-gallery'),
-        onPressed: busy == null ? () => pick(ImageSource.gallery) : null,
-        icon: const Icon(Icons.photo_library_outlined),
-        label: Text(camera ? 'Galereyadan tanlash' : 'Rasm faylini tanlash'),
-      ),
-      const SizedBox(height: 18),
-      Card(
-        child: ListTile(
-          leading: Icon(
+        const SizedBox(height: 18),
+        if (camera)
+          FilledButton.icon(
+            key: const ValueKey('photo-camera'),
+            onPressed: busy == null ? () => pick(ImageSource.camera) : null,
+            icon: const Icon(Icons.photo_camera),
+            label: const Text('Kamera'),
+          ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          key: const ValueKey('photo-gallery'),
+          onPressed: busy == null ? () => pick(ImageSource.gallery) : null,
+          icon: const Icon(Icons.photo_library_outlined),
+          label: Text(camera ? 'Galereyadan tanlash' : 'Rasm faylini tanlash'),
+        ),
+        const SizedBox(height: 18),
+        GlassCard(
+          child: GlassControl(
+              child: ListTile(
+            leading: Icon(
               widget.store.aiKey.isEmpty ? Icons.memory : Icons.auto_awesome,
-              color: scheme.primary),
-          title: Text(widget.store.aiKey.isEmpty
-              ? 'Telefonda aniqlash'
-              : 'Claude AI ulangan'),
-          subtitle: Text(widget.store.aiKey.isEmpty
-              ? 'Internet kerak emas. Ochilish turi va aniqroq natija uchun Sozlamalar → AI kamera’da Claude kalitini kiriting.'
-              : 'Rasm Anthropic’ga yuboriladi; impostlar va ochilish turlari aniqlanadi.'),
+              color: scheme.primary,
+            ),
+            title: Text(
+              widget.store.aiKey.isEmpty
+                  ? 'Telefonda aniqlash'
+                  : 'Claude AI ulangan',
+            ),
+            subtitle: Text(
+              widget.store.aiKey.isEmpty
+                  ? 'Internet kerak emas. Ochilish turi va aniqroq natija uchun Sozlamalar → AI kamera’da Claude kalitini kiriting.'
+                  : 'Rasm Anthropic’ga yuboriladi; impostlar va ochilish turlari aniqlanadi.',
+            ),
+          )),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 
   Widget cornersStep() {
     final image = photo!;
-    return Column(children: [
-      Expanded(
-        child: LayoutBuilder(builder: (context, box) {
-          final s = math.min(
-                  box.maxWidth / image.width, box.maxHeight / image.height),
-              dx = (box.maxWidth - image.width * s) / 2,
-              dy = (box.maxHeight - image.height * s) / 2;
-          Offset toScreen(Offset p) => Offset(dx + p.dx * s, dy + p.dy * s);
-          Offset toPhoto(Offset p) => Offset(
-              ((p.dx - dx) / s).clamp(0, image.width.toDouble()),
-              ((p.dy - dy) / s).clamp(0, image.height.toDouble()));
-          return GestureDetector(
-            key: const ValueKey('photo-corners'),
-            onPanStart: (d) {
-              var best = 48.0;
-              dragCorner = null;
-              for (var i = 0; i < 4; i++) {
-                final dist = (toScreen(corners[i]) - d.localPosition).distance;
-                if (dist < best) {
-                  best = dist;
-                  dragCorner = i;
-                }
-              }
+    return Column(
+      children: [
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final s = math.min(
+                    box.maxWidth / image.width,
+                    box.maxHeight / image.height,
+                  ),
+                  dx = (box.maxWidth - image.width * s) / 2,
+                  dy = (box.maxHeight - image.height * s) / 2;
+              Offset toScreen(Offset p) => Offset(dx + p.dx * s, dy + p.dy * s);
+              Offset toPhoto(Offset p) => Offset(
+                    ((p.dx - dx) / s).clamp(0, image.width.toDouble()),
+                    ((p.dy - dy) / s).clamp(0, image.height.toDouble()),
+                  );
+              return GestureDetector(
+                key: const ValueKey('photo-corners'),
+                onPanStart: (d) {
+                  var best = 48.0;
+                  dragCorner = null;
+                  for (var i = 0; i < 4; i++) {
+                    final dist =
+                        (toScreen(corners[i]) - d.localPosition).distance;
+                    if (dist < best) {
+                      best = dist;
+                      dragCorner = i;
+                    }
+                  }
+                },
+                onPanUpdate: (d) {
+                  final i = dragCorner;
+                  if (i == null) return;
+                  setState(() {
+                    corners = List.of(corners)..[i] = toPhoto(d.localPosition);
+                    grid = null;
+                  });
+                },
+                onPanEnd: (_) => dragCorner = null,
+                child: CustomPaint(
+                  size: Size.infinite,
+                  painter: _QuadPainter(
+                    image,
+                    [for (final c in corners) toScreen(c)],
+                    s,
+                    Offset(dx, dy),
+                  ),
+                ),
+              );
             },
-            onPanUpdate: (d) {
-              final i = dragCorner;
-              if (i == null) return;
-              setState(() {
-                corners = List.of(corners)..[i] = toPhoto(d.localPosition);
-                grid = null;
-              });
-            },
-            onPanEnd: (_) => dragCorner = null,
-            child: CustomPaint(
-              size: Size.infinite,
-              painter: _QuadPainter(image,
-                  [for (final c in corners) toScreen(c)], s, Offset(dx, dy)),
-            ),
-          );
-        }),
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-        child: Text('Ko‘k nuqtalarni ramaning to‘rt tashqi burchagiga suring.',
-            style: Theme.of(context).textTheme.bodySmall),
-      ),
-    ]);
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: Text(
+            'Ko‘k nuqtalarni ramaning to‘rt tashqi burchagiga suring.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget reviewStep() {
     final image = straight!, g = grid!;
-    return Column(children: [
-      Expanded(
-        child: LayoutBuilder(builder: (context, box) {
-          final s = math.min(box.maxWidth / image.width,
-                      box.maxHeight / image.height) *
-                  .94,
-              rect = Rect.fromCenter(
-                  center: Offset(box.maxWidth / 2, box.maxHeight / 2),
-                  width: image.width * s,
-                  height: image.height * s);
-          return GestureDetector(
-            key: const ValueKey('photo-review'),
-            onTapUp: (d) {
-              if (!rect.contains(d.localPosition)) return;
-              editAt((d.localPosition.dx - rect.left) / rect.width,
-                  (d.localPosition.dy - rect.top) / rect.height);
+    return Column(
+      children: [
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final s = math.min(
+                        box.maxWidth / image.width,
+                        box.maxHeight / image.height,
+                      ) *
+                      .94,
+                  rect = Rect.fromCenter(
+                    center: Offset(box.maxWidth / 2, box.maxHeight / 2),
+                    width: image.width * s,
+                    height: image.height * s,
+                  );
+              return GestureDetector(
+                key: const ValueKey('photo-review'),
+                onTapUp: (d) {
+                  if (!rect.contains(d.localPosition)) return;
+                  editAt(
+                    (d.localPosition.dx - rect.left) / rect.width,
+                    (d.localPosition.dy - rect.top) / rect.height,
+                  );
+                },
+                child: CustomPaint(
+                  size: Size.infinite,
+                  painter: _GridPainter(image, rect, g),
+                ),
+              );
             },
-            child: CustomPaint(
-                size: Size.infinite, painter: _GridPainter(image, rect, g)),
-          );
-        }),
-      ),
-      if (note != null)
+          ),
+        ),
+        if (note != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+            child: Text(note!, style: Theme.of(context).textTheme.bodySmall),
+          ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-          child: Text(note!, style: Theme.of(context).textTheme.bodySmall),
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+          child: GlassControl(
+            child: SegmentedButton<String>(
+              showSelectedIcon: false,
+              segments: const [
+                ButtonSegment(value: 'remove', label: Text('O‘chirish')),
+                ButtonSegment(value: 'v', label: Text('+ Tik')),
+                ButtonSegment(value: 'h', label: Text('+ Yotiq')),
+                ButtonSegment(value: 'opening', label: Text('Ochilish')),
+              ],
+              selected: {mode},
+              onSelectionChanged: (v) => setState(() => mode = v.single),
+            ),
+          ),
         ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-        child: SegmentedButton<String>(
-          showSelectedIcon: false,
-          segments: const [
-            ButtonSegment(value: 'remove', label: Text('O‘chirish')),
-            ButtonSegment(value: 'v', label: Text('+ Tik')),
-            ButtonSegment(value: 'h', label: Text('+ Yotiq')),
-            ButtonSegment(value: 'opening', label: Text('Ochilish')),
-          ],
-          selected: {mode},
-          onSelectionChanged: (v) => setState(() => mode = v.single),
-        ),
-      ),
-    ]);
+      ],
+    );
   }
 
   @override
@@ -407,44 +471,52 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
         actions: [
           if (photo != null)
             IconButton(
-                tooltip: 'Boshqa rasm',
-                onPressed: () => setState(() {
-                      photo = null;
-                      grid = null;
-                      straight = null;
-                    }),
-                icon: const Icon(Icons.refresh)),
+              tooltip: 'Boshqa rasm',
+              onPressed: () => setState(() {
+                photo = null;
+                grid = null;
+                straight = null;
+              }),
+              icon: const Icon(Icons.refresh),
+            ),
         ],
       ),
-      body: Stack(children: [
-        Positioned.fill(
+      body: Stack(
+        children: [
+          Positioned.fill(
             child: step == 0
                 ? pickStep()
                 : step == 1
                     ? cornersStep()
-                    : reviewStep()),
-        if (busy != null)
-          Positioned.fill(
-            child: ColoredBox(
-              color: Colors.black38,
-              child: Center(
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2.5)),
-                      const SizedBox(width: 14),
-                      Flexible(child: Text(busy!)),
-                    ]),
+                    : reviewStep(),
+          ),
+          if (busy != null)
+            Positioned.fill(
+              child: ColoredBox(
+                color: Colors.black38,
+                child: Center(
+                  child: GlassCard(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                          ),
+                          const SizedBox(width: 14),
+                          Flexible(child: Text(busy!)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-      ]),
+        ],
+      ),
       bottomNavigationBar: step == 0
           ? null
           : Material(
@@ -454,80 +526,107 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
                 top: false,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Row(children: [
-                      Expanded(
-                          child: TextField(
-                              key: const ValueKey('photo-width'),
-                              controller: width,
-                              keyboardType: TextInputType.number,
-                              onChanged: (_) => setState(() {}),
-                              decoration: const InputDecoration(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GlassControl(
+                              child: TextField(
+                                key: const ValueKey('photo-width'),
+                                controller: width,
+                                keyboardType: TextInputType.number,
+                                onChanged: (_) => setState(() {}),
+                                decoration: const InputDecoration(
                                   labelText: 'Eni',
                                   suffixText: 'mm',
-                                  isDense: true))),
-                      const SizedBox(width: 8),
-                      Expanded(
-                          child: TextField(
-                              key: const ValueKey('photo-height'),
-                              controller: height,
-                              keyboardType: TextInputType.number,
-                              onChanged: (_) => setState(() {}),
-                              decoration: const InputDecoration(
-                                  labelText: 'Bo‘yi',
-                                  suffixText: 'mm',
-                                  isDense: true))),
-                    ]),
-                    if (field(width) == null || field(height) == null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6),
-                        child: Text(
-                            'Eni va bo‘yini razmerdan yozing: rasmdan o‘lcham taxminiy chiqadi.',
-                            style: Theme.of(context).textTheme.bodySmall),
-                      ),
-                    const SizedBox(height: 10),
-                    if (step == 1)
-                      Row(children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            key: const ValueKey('photo-detect'),
-                            onPressed:
-                                busy == null ? () => detect(ai: false) : null,
-                            icon: const Icon(Icons.memory),
-                            label: const FittedBox(
-                                child: Text('Telefonda aniqlash')),
+                                  isDense: true,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        if (widget.store.aiKey.isNotEmpty) ...[
                           const SizedBox(width: 8),
                           Expanded(
-                            child: FilledButton.icon(
-                              key: const ValueKey('photo-ai'),
-                              onPressed:
-                                  busy == null ? () => detect(ai: true) : null,
-                              icon: const Icon(Icons.auto_awesome),
-                              label: const FittedBox(child: Text('AI bilan')),
+                            child: GlassControl(
+                              child: TextField(
+                                key: const ValueKey('photo-height'),
+                                controller: height,
+                                keyboardType: TextInputType.number,
+                                onChanged: (_) => setState(() {}),
+                                decoration: const InputDecoration(
+                                  labelText: 'Bo‘yi',
+                                  suffixText: 'mm',
+                                  isDense: true,
+                                ),
+                              ),
                             ),
                           ),
                         ],
-                      ])
-                    else
-                      Row(children: [
-                        OutlinedButton(
-                            onPressed: () => setState(() => grid = null),
-                            child: const Text('Burchaklar')),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: FilledButton.icon(
-                            key: const ValueKey('photo-finish'),
-                            onPressed: finish,
-                            icon: const Icon(Icons.draw_outlined),
-                            label: const FittedBox(
-                                child: Text('Chizmaga o‘tkazish')),
+                      ),
+                      if (field(width) == null || field(height) == null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            'Eni va bo‘yini razmerdan yozing: rasmdan o‘lcham taxminiy chiqadi.',
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ),
-                      ]),
-                  ]),
+                      const SizedBox(height: 10),
+                      if (step == 1)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                key: const ValueKey('photo-detect'),
+                                onPressed: busy == null
+                                    ? () => detect(ai: false)
+                                    : null,
+                                icon: const Icon(Icons.memory),
+                                label: const FittedBox(
+                                  child: Text('Telefonda aniqlash'),
+                                ),
+                              ),
+                            ),
+                            if (widget.store.aiKey.isNotEmpty) ...[
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: FilledButton.icon(
+                                  key: const ValueKey('photo-ai'),
+                                  onPressed: busy == null
+                                      ? () => detect(ai: true)
+                                      : null,
+                                  icon: const Icon(Icons.auto_awesome),
+                                  label: const FittedBox(
+                                    child: Text('AI bilan'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            OutlinedButton(
+                              onPressed: () => setState(() => grid = null),
+                              child: const Text('Burchaklar'),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: FilledButton.icon(
+                                key: const ValueKey('photo-finish'),
+                                onPressed: finish,
+                                icon: const Icon(Icons.draw_outlined),
+                                label: const FittedBox(
+                                  child: Text('Chizmaga o‘tkazish'),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -545,31 +644,41 @@ class _QuadPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     paintImage(
-        canvas: canvas,
-        rect: origin & Size(image.width * scale, image.height * scale),
-        image: image,
-        filterQuality: FilterQuality.medium);
+      canvas: canvas,
+      rect: origin & Size(image.width * scale, image.height * scale),
+      image: image,
+      filterQuality: FilterQuality.medium,
+    );
     final outline = Path()..addPolygon(corners, true);
     canvas.drawPath(
-        Path.combine(PathOperation.difference,
-            Path()..addRect(Offset.zero & size), outline),
-        Paint()..color = Colors.black.withValues(alpha: .35));
-    canvas.drawPath(
+      Path.combine(
+        PathOperation.difference,
+        Path()..addRect(Offset.zero & size),
         outline,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.5
-          ..color = const Color(0xff3a8dff));
+      ),
+      Paint()..color = Colors.black.withValues(alpha: .35),
+    );
+    canvas.drawPath(
+      outline,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5
+        ..color = const Color(0xff3a8dff),
+    );
     for (final c in corners) {
       canvas.drawCircle(
-          c, 15, Paint()..color = Colors.white.withValues(alpha: .9));
+        c,
+        15,
+        Paint()..color = Colors.white.withValues(alpha: .9),
+      );
       canvas.drawCircle(
-          c,
-          15,
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 3
-            ..color = const Color(0xff3a8dff));
+        c,
+        15,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3
+          ..color = const Color(0xff3a8dff),
+      );
       canvas.drawCircle(c, 3, Paint()..color = const Color(0xff3a8dff));
     }
   }
@@ -588,16 +697,18 @@ class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     paintImage(
-        canvas: canvas,
-        rect: rect,
-        image: image,
-        filterQuality: FilterQuality.medium);
+      canvas: canvas,
+      rect: rect,
+      image: image,
+      filterQuality: FilterQuality.medium,
+    );
     canvas.drawRect(
-        rect,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 4
-          ..color = const Color(0xffff9f1a));
+      rect,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4
+        ..color = const Color(0xffff9f1a),
+    );
     final bar = Paint()
       ..strokeWidth = 4
       ..strokeCap = StrokeCap.round
@@ -619,7 +730,9 @@ class _GridPainter extends CustomPainter {
         final cell = Rect.fromPoints(p0, p1).deflate(6);
         if (grid.fills[i][j] == 'panel') {
           canvas.drawRect(
-              cell, Paint()..color = Colors.white.withValues(alpha: .45));
+            cell,
+            Paint()..color = Colors.white.withValues(alpha: .45),
+          );
         }
         final opening = grid.openings[i][j];
         if (opening == 'fixed') continue;
@@ -627,12 +740,16 @@ class _GridPainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2
           ..color = Colors.white;
-        for (final line in openingSymbolLines(
-            opening, [cell.left, cell.top, cell.right, cell.bottom])) {
+        for (final line in openingSymbolLines(opening, [
+          cell.left,
+          cell.top,
+          cell.right,
+          cell.bottom,
+        ])) {
           canvas.drawPath(
-              Path()
-                ..addPolygon([for (final v in line) Offset(v.x, v.y)], false),
-              mark);
+            Path()..addPolygon([for (final v in line) Offset(v.x, v.y)], false),
+            mark,
+          );
         }
       }
     }

@@ -70,146 +70,153 @@ class WarehousePage extends StatelessWidget {
                   ),
               ],
             ),
-            body: readable(SafeArea(
-              child: ListView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-                children: [
-                  const Text(
-                    'Profil tizimi va material turi bo‘yicha alohida qoldiq. Miqdorlar metr, m², kg yoki dona bilan kiritiladi. Tayoq uzunligi va list joylashuvini raskroyda tekshiring.',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  const SizedBox(height: 16),
-                  if (warning != null)
-                    Text(warning,
-                        style: const TextStyle(color: Colors.deepOrange)),
-                  if (items != null) ...[
-                    Text(
-                      'Yetishmayotgan material xaridi: ${money(needs.fold<num>(0, (a, r) => a + (r['purchaseCost'] as num)))}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+            body: readable(
+              SafeArea(
+                child: ListView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                  children: [
                     const Text(
-                      'Narxi 0 bo‘lgan materiallar summaga qo‘shilmaydi. Smeta summasi ombor narxi bilan almashtirilmaydi.',
+                      'Profil tizimi va material turi bo‘yicha alohida qoldiq. Miqdorlar metr, m², kg yoki dona bilan kiritiladi. Tayoq uzunligi va list joylashuvini raskroyda tekshiring.',
                       style: TextStyle(fontSize: 12),
                     ),
-                    for (final n in needs)
-                      Card(
-                        child: ListTile(
-                          title: Text(n['name']),
-                          subtitle: Text(
-                            '${n['profileName']}\nKerak: ${(n['required'] as num).toStringAsFixed(3)} ${n['unit']} • Bor: ${(n['available'] as num).toStringAsFixed(3)}',
-                          ),
-                          trailing: SizedBox(
-                            width: 94,
-                            child: Text(
-                              (n['missing'] as num) > .000001
-                                  ? 'Kam: ${(n['missing'] as num).toStringAsFixed(3)} ${n['unit']}'
-                                  : 'Yetarli',
-                              textAlign: TextAlign.end,
-                              style: TextStyle(
-                                color: (n['missing'] as num) > .000001
-                                    ? Colors.deepOrange
-                                    : Colors.teal,
-                              ),
-                            ),
-                          ),
-                          onTap: () => editStock(context, n),
+                    const SizedBox(height: 16),
+                    if (warning != null)
+                      Text(
+                        warning,
+                        style: const TextStyle(color: Colors.deepOrange),
+                      ),
+                    if (items != null) ...[
+                      Text(
+                        'Yetishmayotgan material xaridi: ${money(needs.fold<num>(0, (a, r) => a + (r['purchaseCost'] as num)))}',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    if (quoteId != null)
-                      FilledButton.icon(
-                        onPressed: () async {
-                          final q = store.quotes.firstWhere(
-                                (q) => q['id'] == quoteId,
-                              ),
-                              consume = q['stockConsumed'] != true;
-                          final yes = await showDialog<bool>(
-                            context: context,
-                            builder: (c) => AlertDialog(
-                              title: Text(
-                                consume
-                                    ? 'Ombordan chiqarish'
-                                    : 'Materialni qaytarish',
-                              ),
-                              content: Text(
-                                consume
-                                    ? 'Smetadagi xarid miqdorlari ombor qoldig‘idan ayriladi. Bu amalni keyin qaytarish mumkin.'
-                                    : 'Aynan shu buyurtmaga chiqarilgan miqdorlar omborga qaytariladi.',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(c, false),
-                                  child: const Text('Bekor'),
-                                ),
-                                FilledButton(
-                                  onPressed: () => Navigator.pop(c, true),
-                                  child: const Text('Tasdiqlash'),
-                                ),
-                              ],
+                      const Text(
+                        'Narxi 0 bo‘lgan materiallar summaga qo‘shilmaydi. Smeta summasi ombor narxi bilan almashtirilmaydi.',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      for (final n in needs)
+                        GlassCard(
+                          child: GlassControl(
+                              child: ListTile(
+                            title: Text(n['name']),
+                            subtitle: Text(
+                              '${n['profileName']}\nKerak: ${(n['required'] as num).toStringAsFixed(3)} ${n['unit']} • Bor: ${(n['available'] as num).toStringAsFixed(3)}',
                             ),
-                          );
-                          if (yes == true) {
-                            try {
-                              await store.applyQuoteStock(quoteId!, consume);
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).showSnackBar(SnackBar(content: Text('$e')));
+                            trailing: SizedBox(
+                              width: 94,
+                              child: Text(
+                                (n['missing'] as num) > .000001
+                                    ? 'Kam: ${(n['missing'] as num).toStringAsFixed(3)} ${n['unit']}'
+                                    : 'Yetarli',
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  color: (n['missing'] as num) > .000001
+                                      ? Colors.deepOrange
+                                      : Colors.teal,
+                                ),
+                              ),
+                            ),
+                            onTap: () => editStock(context, n),
+                          )),
+                        ),
+                      if (quoteId != null)
+                        FilledButton.icon(
+                          onPressed: () async {
+                            final q = store.quotes.firstWhere(
+                                  (q) => q['id'] == quoteId,
+                                ),
+                                consume = q['stockConsumed'] != true;
+                            final yes = await showDialog<bool>(
+                              context: context,
+                              builder: (c) => GlassAlertDialog(
+                                title: Text(
+                                  consume
+                                      ? 'Ombordan chiqarish'
+                                      : 'Materialni qaytarish',
+                                ),
+                                content: Text(
+                                  consume
+                                      ? 'Smetadagi xarid miqdorlari ombor qoldig‘idan ayriladi. Bu amalni keyin qaytarish mumkin.'
+                                      : 'Aynan shu buyurtmaga chiqarilgan miqdorlar omborga qaytariladi.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(c, false),
+                                    child: const Text('Bekor'),
+                                  ),
+                                  FilledButton(
+                                    onPressed: () => Navigator.pop(c, true),
+                                    child: const Text('Tasdiqlash'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (yes == true) {
+                              try {
+                                await store.applyQuoteStock(quoteId!, consume);
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).showSnackBar(SnackBar(content: Text('$e')));
+                                }
                               }
                             }
-                          }
-                        },
-                        icon: const Icon(Icons.inventory),
-                        label: Text(
-                          store.quotes.firstWhere(
-                                    (q) => q['id'] == quoteId,
-                                  )['stockConsumed'] ==
-                                  true
-                              ? 'Omborga qaytarish'
-                              : 'Buyurtmaga ombordan chiqarish',
+                          },
+                          icon: const Icon(Icons.inventory),
+                          label: Text(
+                            store.quotes.firstWhere(
+                                      (q) => q['id'] == quoteId,
+                                    )['stockConsumed'] ==
+                                    true
+                                ? 'Omborga qaytarish'
+                                : 'Buyurtmaga ombordan chiqarish',
+                          ),
                         ),
+                      const Divider(height: 30),
+                    ],
+                    const Text(
+                      'Ombor qoldiqlari',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    if (store.inventory.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Text('Material qo‘shish tugmasidan boshlang.'),
                       ),
-                    const Divider(height: 30),
+                    for (final row in store.inventory)
+                      GlassCard(
+                        child: GlassControl(
+                            child: ListTile(
+                          title: Text(materialNames[row['key']] ?? row['key']),
+                          subtitle: Text(
+                            '${store.profiles.firstWhere((p) => p['id'] == row['profileId'], orElse: () => {
+                                  'name': row['profileId']
+                                })['name']}\n${row['quantity']} ${row['unit']} • ${money(row['price'])} / ${row['unit']}',
+                          ),
+                          trailing: Icon(
+                            (row['quantity'] as num) < (row['minimum'] as num)
+                                ? Icons.warning_amber
+                                : Icons.edit_outlined,
+                            color: (row['quantity'] as num) <
+                                    (row['minimum'] as num)
+                                ? Colors.deepOrange
+                                : null,
+                          ),
+                          onTap: () => editStock(context, row),
+                        )),
+                      ),
                   ],
-                  const Text(
-                    'Ombor qoldiqlari',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  if (store.inventory.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text('Material qo‘shish tugmasidan boshlang.'),
-                    ),
-                  for (final row in store.inventory)
-                    Card(
-                      child: ListTile(
-                        title: Text(materialNames[row['key']] ?? row['key']),
-                        subtitle: Text(
-                          '${store.profiles.firstWhere((p) => p['id'] == row['profileId'], orElse: () => {
-                                'name': row['profileId']
-                              })['name']}\n${row['quantity']} ${row['unit']} • ${money(row['price'])} / ${row['unit']}',
-                        ),
-                        trailing: Icon(
-                          (row['quantity'] as num) < (row['minimum'] as num)
-                              ? Icons.warning_amber
-                              : Icons.edit_outlined,
-                          color:
-                              (row['quantity'] as num) < (row['minimum'] as num)
-                                  ? Colors.deepOrange
-                                  : null,
-                        ),
-                        onTap: () => editStock(context, row),
-                      ),
-                    ),
-                ],
+                ),
               ),
-            )),
-            floatingActionButton: FloatingActionButton.extended(
+            ),
+            floatingActionButton: GlassActionButton.extended(
               onPressed: () => editStock(context),
               icon: const Icon(Icons.add),
               label: const Text('Material qo‘shish'),
@@ -295,58 +302,69 @@ class _StockFormState extends State<StockForm> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: GlassAppBar(title: const Text('Material qoldig‘i')),
-        body: readable(SafeArea(
-          child: Form(
-            key: form,
-            child: ListView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.all(16),
-              children: [
-                DropdownButtonFormField<String>(
-                  initialValue: profile,
-                  isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Profil tizimi'),
-                  items: [
-                    for (final p in widget.store.profiles)
-                      DropdownMenuItem(value: p['id'], child: Text(p['name'])),
-                  ],
-                  onChanged: (v) => setState(() => profile = v!),
-                ),
-                const SizedBox(height: 14),
-                DropdownButtonFormField<String>(
-                  initialValue: key,
-                  isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Material'),
-                  items: [
-                    for (final e in materialNames.entries)
-                      if (!const {'labor', 'bending'}.contains(e.key))
-                        DropdownMenuItem(value: e.key, child: Text(e.value)),
-                  ],
-                  onChanged: (v) => setState(() => key = v!),
-                ),
-                const SizedBox(height: 14),
-                number(qty, 'Qoldiq (${materialUnit(key)})'),
-                number(price, 'Ombor narxi (so‘m / ${materialUnit(key)})'),
-                number(minimum, 'Kam qoldiq chegarasi (${materialUnit(key)})'),
-                FilledButton(
-                  onPressed: () {
-                    if (!form.currentState!.validate()) return;
-                    double n(TextEditingController c) =>
-                        double.parse(c.text.replaceAll(',', '.'));
-                    Navigator.pop(context, {
-                      'profileId': profile,
-                      'key': key,
-                      'unit': materialUnit(key),
-                      'quantity': n(qty),
-                      'price': n(price),
-                      'minimum': n(minimum),
-                    });
-                  },
-                  child: const Text('Qoldiqni saqlash'),
-                ),
-              ],
+        body: readable(
+          SafeArea(
+            child: Form(
+              key: form,
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.all(16),
+                children: [
+                  GlassControl(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: profile,
+                      isExpanded: true,
+                      decoration:
+                          const InputDecoration(labelText: 'Profil tizimi'),
+                      items: [
+                        for (final p in widget.store.profiles)
+                          DropdownMenuItem(
+                              value: p['id'], child: Text(p['name'])),
+                      ],
+                      onChanged: (v) => setState(() => profile = v!),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  GlassControl(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: key,
+                      isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Material'),
+                      items: [
+                        for (final e in materialNames.entries)
+                          if (!const {'labor', 'bending'}.contains(e.key))
+                            DropdownMenuItem(
+                                value: e.key, child: Text(e.value)),
+                      ],
+                      onChanged: (v) => setState(() => key = v!),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  number(qty, 'Qoldiq (${materialUnit(key)})'),
+                  number(price, 'Ombor narxi (so‘m / ${materialUnit(key)})'),
+                  number(
+                      minimum, 'Kam qoldiq chegarasi (${materialUnit(key)})'),
+                  FilledButton(
+                    onPressed: () {
+                      if (!form.currentState!.validate()) return;
+                      double n(TextEditingController c) =>
+                          double.parse(c.text.replaceAll(',', '.'));
+                      Navigator.pop(context, {
+                        'profileId': profile,
+                        'key': key,
+                        'unit': materialUnit(key),
+                        'quantity': n(qty),
+                        'price': n(price),
+                        'minimum': n(minimum),
+                      });
+                    },
+                    child: const Text('Qoldiqni saqlash'),
+                  ),
+                ],
+              ),
             ),
           ),
-        )),
+        ),
       );
 }

@@ -104,8 +104,9 @@ class Store extends ChangeNotifier {
       found = true;
       try {
         _load(jsonDecode(await f.readAsString()));
-        for (final p in sampleProfiles()
-            .where((p) => p['id'].toString().startsWith('series-'))) {
+        for (final p in sampleProfiles().where(
+          (p) => p['id'].toString().startsWith('series-'),
+        )) {
           if (!profiles.any((existing) => existing['id'] == p['id'])) {
             profiles.add(p);
           }
@@ -141,8 +142,9 @@ class Store extends ChangeNotifier {
     }
     try {
       if (await _catalogFile.exists()) {
-        final cached =
-            ManufacturerCatalog.parse(await _catalogFile.readAsString());
+        final cached = ManufacturerCatalog.parse(
+          await _catalogFile.readAsString(),
+        );
         if (best == null || cached.version > best.version) best = cached;
       }
     } catch (_) {
@@ -184,8 +186,10 @@ class Store extends ChangeNotifier {
   /// A newer catalog from the public repository, at most daily unless
   /// [force]d. Dollar prices the workshop left as they came follow it;
   /// prices it typed or imported itself stay. Returns a note on change.
-  Future<String?> refreshCatalog(
-      {bool force = false, Future<String> Function()? fetch}) async {
+  Future<String?> refreshCatalog({
+    bool force = false,
+    Future<String> Function()? fetch,
+  }) async {
     final last = _catalogCheckedAt;
     if (!force &&
         last != null &&
@@ -292,8 +296,10 @@ class Store extends ChangeNotifier {
           row['item'] is! Map) {
         throw const FormatException('Andoza noto‘g‘ri');
       }
-      layoutDrawing(Map<String, dynamic>.from(row['item']['drawing']),
-          Map<String, dynamic>.from(row['item']['recipe']));
+      layoutDrawing(
+        Map<String, dynamic>.from(row['item']['drawing']),
+        Map<String, dynamic>.from(row['item']['recipe']),
+      );
     }
     themePreference = d['themePreference'] ?? 'system';
     designPreference = '${d['designPreference'] ?? 'auto'}';
@@ -321,7 +327,7 @@ class Store extends ChangeNotifier {
     usdRateAuto = d['usdRateAuto'] != false;
     catalogSeeded = [
       for (final id in (d['catalogSeeded'] is List ? d['catalogSeeded'] : []))
-        '$id'
+        '$id',
     ];
     subscription = d['subscription'] is Map
         ? Map<String, dynamic>.from(d['subscription'])
@@ -334,7 +340,7 @@ class Store extends ChangeNotifier {
     measurements = loadedMeasurements;
     extraPrices = {
       for (final e in Map<String, dynamic>.from(d['extraPrices'] ?? {}).entries)
-        if (e.value is num) e.key: e.value as num
+        if (e.value is num) e.key: e.value as num,
     };
   }
 
@@ -535,7 +541,8 @@ class Store extends ChangeNotifier {
   Future<void> deleteStaff(String id) => _change('Xodim ro‘yxatdan olindi', () {
         if (staffBalance(id) != 0) {
           throw Exception(
-              'Avval xodim bilan hisob-kitobni yoping (qoldiq 0 bo‘lsin)');
+            'Avval xodim bilan hisob-kitobni yoping (qoldiq 0 bo‘lsin)',
+          );
         }
         staff.removeWhere((x) => x['id'] == id);
         payroll.removeWhere((p) => p['staffId'] == id);
@@ -554,17 +561,24 @@ class Store extends ChangeNotifier {
         .map(
           (i) => calculate(
             Map<String, dynamic>.from(i),
-            profiles.firstWhere((p) => p['id'] == i['profileId'],
-                orElse: () => throw Exception(
-                    'Pozitsiya profili katalogdan o‘chirilgan. Chizmani ochib boshqa profil tanlang')),
+            profiles.firstWhere(
+              (p) => p['id'] == i['profileId'],
+              orElse: () => throw Exception(
+                'Pozitsiya profili katalogdan o‘chirilgan. Chizmani ochib boshqa profil tanlang',
+              ),
+            ),
           ),
         )
         .toList();
     return {
       ...body,
       'items': items,
-      ...totals(items, body['discount'], body['installation'],
-          body['extras'] as List? ?? const []),
+      ...totals(
+        items,
+        body['discount'],
+        body['installation'],
+        body['extras'] as List? ?? const [],
+      ),
       'estimate': true,
       'calculationVersion': 'offline-estimate-v2',
     };
@@ -616,7 +630,8 @@ class Store extends ChangeNotifier {
       final paid = old['paid'] as num, total = data['total'] as num;
       if (total < paid) {
         throw Exception(
-            'Yangi summa ${money(total)} olingan to‘lovdan (${money(paid)}) kam bo‘lmasin');
+          'Yangi summa ${money(total)} olingan to‘lovdan (${money(paid)}) kam bo‘lmasin',
+        );
       }
       updated = {
         ...old,
@@ -634,7 +649,8 @@ class Store extends ChangeNotifier {
       };
       if (old['stockConsumed'] == true) {
         throw Exception(
-            'Material ombordan chiqarilgan. Avval omborga qaytaring, keyin tahrirlang');
+          'Material ombordan chiqarilgan. Avval omborga qaytaring, keyin tahrirlang',
+        );
       }
       quotes[at] = updated;
       _rememberExtras(updated);
@@ -729,7 +745,9 @@ class Store extends ChangeNotifier {
       });
 
   Future<void> deleteExpense(String id) => _change(
-      'Xarajat o‘chirildi', () => expenses.removeWhere((e) => e['id'] == id));
+        'Xarajat o‘chirildi',
+        () => expenses.removeWhere((e) => e['id'] == id),
+      );
 
   /// How a worker is paid: the rate means so‘m per month, day, m², percent
   /// of the order total or per construction.
@@ -775,8 +793,10 @@ class Store extends ChangeNotifier {
         payroll.insert(0, entry);
       });
 
-  Future<void> deletePayroll(String id) => _change('Ish haqi yozuvi o‘chirildi',
-      () => payroll.removeWhere((e) => e['id'] == id));
+  Future<void> deletePayroll(String id) => _change(
+        'Ish haqi yozuvi o‘chirildi',
+        () => payroll.removeWhere((e) => e['id'] == id),
+      );
 
   /// What the workshop still owes the worker (negative: worker owes).
   int staffBalance(String staffId) =>
@@ -794,16 +814,18 @@ class Store extends ChangeNotifier {
     switch (worker['payType']) {
       case 'perM2':
         final m2 = items.fold<double>(
-            0,
-            (s, i) =>
-                s +
-                ((i['areaM2'] as num?) ?? 0) * ((i['quantity'] as num?) ?? 1));
+          0,
+          (s, i) =>
+              s + ((i['areaM2'] as num?) ?? 0) * ((i['quantity'] as num?) ?? 1),
+        );
         return (m2 * rate).round();
       case 'percent':
         return ((quote['total'] as num) * rate / 100).round();
       case 'piece':
         return (items.fold<num>(
-                    0, (s, i) => s + ((i['quantity'] as num?) ?? 1)) *
+                  0,
+                  (s, i) => s + ((i['quantity'] as num?) ?? 1),
+                ) *
                 rate)
             .round();
     }
@@ -869,7 +891,7 @@ class Store extends ChangeNotifier {
           'price': 0,
           'minimum': 0,
           ...body,
-          'id': stockId(body['profileId'], body['key'], body['unit'])
+          'id': stockId(body['profileId'], body['key'], body['unit']),
         };
         validateStock(row);
         final at = inventory.indexWhere((r) => r['id'] == row['id']);
@@ -891,7 +913,7 @@ class Store extends ChangeNotifier {
           'stockId': id,
           'delta': delta,
           'note': note,
-          'created': DateTime.now().toIso8601String()
+          'created': DateTime.now().toIso8601String(),
         });
       });
   List<Json> stockNeeds(List items) {
@@ -908,17 +930,18 @@ class Store extends ChangeNotifier {
         }
         final id = stockId(item['profileId'], key, part['unit']);
         final row = grouped.putIfAbsent(
-            id,
-            () => {
-                  'id': id,
-                  'profileId': item['profileId'],
-                  'profileName': item['profileName'] ?? item['profileId'],
-                  'key': key,
-                  'name': part['name'],
-                  'unit': part['unit'],
-                  'required': 0.0,
-                  'price': part['price']
-                });
+          id,
+          () => {
+            'id': id,
+            'profileId': item['profileId'],
+            'profileName': item['profileName'] ?? item['profileId'],
+            'key': key,
+            'name': part['name'],
+            'unit': part['unit'],
+            'required': 0.0,
+            'price': part['price'],
+          },
+        );
         row['required'] = (row['required'] as num) + (part['quantity'] as num);
       }
     }
@@ -926,82 +949,94 @@ class Store extends ChangeNotifier {
       final found = inventory.where((r) => r['id'] == need['id']);
       final have =
           found.isEmpty ? 0.0 : (found.first['quantity'] as num).toDouble();
-      final missing =
-          ((need['required'] as num) - have).clamp(0, double.infinity);
+      final missing = ((need['required'] as num) - have).clamp(
+        0,
+        double.infinity,
+      );
       return <String, dynamic>{
         ...need,
         'available': have,
         'missing': missing,
         'purchaseCost':
             (missing * (found.isEmpty ? need['price'] : found.first['price']))
-                .round()
+                .round(),
       };
     }).toList();
   }
 
   Future<void> applyQuoteStock(String quoteId, bool consume) => _change(
-          consume
-              ? 'Buyurtmaga ombordan chiqarildi'
-              : 'Buyurtma materiali omborga qaytarildi', () {
-        final q = quotes.firstWhere((q) => q['id'] == quoteId);
-        if (consume) {
-          if (q['stockConsumed'] == true) {
-            throw Exception('Bu buyurtma materiali allaqachon chiqarilgan');
+        consume
+            ? 'Buyurtmaga ombordan chiqarildi'
+            : 'Buyurtma materiali omborga qaytarildi',
+        () {
+          final q = quotes.firstWhere((q) => q['id'] == quoteId);
+          if (consume) {
+            if (q['stockConsumed'] == true) {
+              throw Exception('Bu buyurtma materiali allaqachon chiqarilgan');
+            }
+            if (q['status'] == 'cancelled') {
+              throw Exception('Bekor qilingan buyurtma');
+            }
+            final needs = stockNeeds(q['items']);
+            if (needs.isEmpty) throw Exception('Material yo‘q');
+            if (needs.any((r) => (r['missing'] as num) > .000001)) {
+              throw Exception('Ombor yetmaydi; yetishmovchilikni to‘ldiring');
+            }
+            q['stockUsage'] = [
+              for (final row in needs)
+                {'id': row['id'], 'quantity': row['required']},
+            ];
+            for (final use in q['stockUsage']) {
+              final stock = inventory.firstWhere((r) => r['id'] == use['id']);
+              stock['quantity'] =
+                  ((stock['quantity'] as num) - (use['quantity'] as num)).clamp(
+                0,
+                double.infinity,
+              );
+            }
+            q['stockConsumed'] = true;
+          } else {
+            if (q['stockConsumed'] != true) {
+              throw Exception('Ombordan chiqarilmagan');
+            }
+            for (final use in q['stockUsage'] as List) {
+              final stock = inventory.firstWhere((r) => r['id'] == use['id']);
+              stock['quantity'] =
+                  (stock['quantity'] as num) + (use['quantity'] as num);
+            }
+            q['stockConsumed'] = false;
           }
-          if (q['status'] == 'cancelled') {
-            throw Exception('Bekor qilingan buyurtma');
-          }
-          final needs = stockNeeds(q['items']);
-          if (needs.isEmpty) throw Exception('Material yo‘q');
-          if (needs.any((r) => (r['missing'] as num) > .000001)) {
-            throw Exception('Ombor yetmaydi; yetishmovchilikni to‘ldiring');
-          }
-          q['stockUsage'] = [
-            for (final row in needs)
-              {'id': row['id'], 'quantity': row['required']}
-          ];
-          for (final use in q['stockUsage']) {
-            final stock = inventory.firstWhere((r) => r['id'] == use['id']);
-            stock['quantity'] =
-                ((stock['quantity'] as num) - (use['quantity'] as num))
-                    .clamp(0, double.infinity);
-          }
-          q['stockConsumed'] = true;
-        } else {
-          if (q['stockConsumed'] != true) {
-            throw Exception('Ombordan chiqarilmagan');
-          }
-          for (final use in q['stockUsage'] as List) {
-            final stock = inventory.firstWhere((r) => r['id'] == use['id']);
-            stock['quantity'] =
-                (stock['quantity'] as num) + (use['quantity'] as num);
-          }
-          q['stockConsumed'] = false;
-        }
-        inventoryMoves.insert(0, {
-          'id': newId(),
-          'quoteId': quoteId,
-          'note': consume ? 'Buyurtmaga sarf' : 'Buyurtmadan qaytdi',
-          'created': DateTime.now().toIso8601String()
-        });
-      });
+          inventoryMoves.insert(0, {
+            'id': newId(),
+            'quoteId': quoteId,
+            'note': consume ? 'Buyurtmaga sarf' : 'Buyurtmadan qaytdi',
+            'created': DateTime.now().toIso8601String(),
+          });
+        },
+      );
   Future<void> saveDrawingTemplate(String name, Json item) =>
       _change('Chizma andozasi saqlandi', () {
         if (name.trim().isEmpty) throw Exception('Andoza nomini kiriting');
-        layoutDrawing(Map<String, dynamic>.from(item['drawing']),
-            Map<String, dynamic>.from(item['recipe']));
+        layoutDrawing(
+          Map<String, dynamic>.from(item['drawing']),
+          Map<String, dynamic>.from(item['recipe']),
+        );
         drawingTemplates.insert(0, {
           'id': newId(),
           'name': name.trim(),
           'item': jsonDecode(jsonEncode(item)),
-          'created': DateTime.now().toIso8601String()
+          'created': DateTime.now().toIso8601String(),
         });
       });
-  Future<void> deleteDrawingTemplate(String id) => _change('Andoza o‘chirildi',
-      () => drawingTemplates.removeWhere((t) => t['id'] == id));
+  Future<void> deleteDrawingTemplate(String id) => _change(
+        'Andoza o‘chirildi',
+        () => drawingTemplates.removeWhere((t) => t['id'] == id),
+      );
 
-  static int debtPaid(Json d) => (d['payments'] as List? ?? [])
-      .fold<int>(0, (sum, p) => sum + (p['amount'] as int));
+  static int debtPaid(Json d) => (d['payments'] as List? ?? []).fold<int>(
+        0,
+        (sum, p) => sum + (p['amount'] as int),
+      );
   static int debtBalance(Json d) => (d['amount'] as int) - debtPaid(d);
   static void validateDebt(Json d) {
     if (d['id'] is! String ||
@@ -1042,7 +1077,7 @@ class Store extends ChangeNotifier {
           ...body,
           'id': newId(),
           'created': DateTime.now().toIso8601String(),
-          'payments': <Json>[]
+          'payments': <Json>[],
         };
         validateDebt(entry);
         debts.insert(0, entry);
@@ -1057,7 +1092,7 @@ class Store extends ChangeNotifier {
           'id': newId(),
           'amount': amount,
           'note': note.trim(),
-          'created': DateTime.now().toIso8601String()
+          'created': DateTime.now().toIso8601String(),
         });
       });
   Future<String> saveReminder(Json body) async {
@@ -1067,7 +1102,7 @@ class Store extends ChangeNotifier {
         'note': '',
         'done': false,
         ...body,
-        'id': id
+        'id': id,
       };
       validateReminder(entry);
       final at = reminders.indexWhere((r) => r['id'] == id);
@@ -1085,7 +1120,9 @@ class Store extends ChangeNotifier {
         reminders.firstWhere((r) => r['id'] == id)['done'] = done;
       });
   Future<void> deleteReminder(String id) => _change(
-      'Eslatma o‘chirildi', () => reminders.removeWhere((r) => r['id'] == id));
+        'Eslatma o‘chirildi',
+        () => reminders.removeWhere((r) => r['id'] == id),
+      );
 
   Future<String> exportBackup() async {
     await _queue;
@@ -1191,8 +1228,11 @@ class Store extends ChangeNotifier {
     return data;
   }
 
-  Future<void> setMeasurementStatus(String id, String status,
-          {String? quoteId}) =>
+  Future<void> setMeasurementStatus(
+    String id,
+    String status, {
+    String? quoteId,
+  }) =>
       _change('Razmer holati: ${measurementStatuses[status]}', () {
         if (!measurementStatuses.containsKey(status)) {
           throw Exception('Holat noma’lum');
@@ -1253,31 +1293,39 @@ class Store extends ChangeNotifier {
       };
 
   /// A new dollar rate; every price that came in dollars follows it.
-  Future<void> setUsdRate(num rate,
-          {String source = 'manual', String date = ''}) =>
+  Future<void> setUsdRate(
+    num rate, {
+    String source = 'manual',
+    String date = '',
+  }) =>
       _change(
-          source == 'manual'
-              ? 'Dollar kursi o‘zgartirildi'
-              : 'Dollar kursi (${rateSourceName(source)}): $rate', () {
-        if (!rate.isFinite || rate < 0 || rate > 1000000) {
-          throw Exception('Dollar kursi 0–1 000 000 so‘m bo‘lsin');
-        }
-        usdRate = rate;
-        usdRateSource = source;
-        usdRateDate = date;
-        _repriceUsd();
-      });
+        source == 'manual'
+            ? 'Dollar kursi o‘zgartirildi'
+            : 'Dollar kursi (${rateSourceName(source)}): $rate',
+        () {
+          if (!rate.isFinite || rate < 0 || rate > 1000000) {
+            throw Exception('Dollar kursi 0–1 000 000 so‘m bo‘lsin');
+          }
+          usdRate = rate;
+          usdRateSource = source;
+          usdRateDate = date;
+          _repriceUsd();
+        },
+      );
 
   Future<void> setUsdRateAuto(bool on) => _change(
-      on
-          ? 'Dollar kursi avtomatik yangilanadi'
-          : 'Dollar kursi qo‘lda kiritiladi',
-      () => usdRateAuto = on);
+        on
+            ? 'Dollar kursi avtomatik yangilanadi'
+            : 'Dollar kursi qo‘lda kiritiladi',
+        () => usdRateAuto = on,
+      );
 
   /// Today's official rate from the Central Bank, at most every six hours
   /// unless [force]d. Returns a note when the rate changed.
-  Future<String?> refreshOfficialRate(
-      {bool force = false, Future<OfficialRate> Function()? fetch}) async {
+  Future<String?> refreshOfficialRate({
+    bool force = false,
+    Future<OfficialRate> Function()? fetch,
+  }) async {
     if (!force && !usdRateAuto) return null;
     final last = _rateCheckedAt;
     if (!force &&
@@ -1316,8 +1364,10 @@ class Store extends ChangeNotifier {
         if (quick != null) p[quick] = value;
       }
       if (p['hardwareFollows'] == true) {
-        p['hardwarePrice'] =
-            quickHardware(prices, sliding: p['sliding'] == true);
+        p['hardwarePrice'] = quickHardware(
+          prices,
+          sliding: p['sliding'] == true,
+        );
       }
       recipe['prices'] = prices;
       recipe['priceDate'] = today;
@@ -1340,28 +1390,35 @@ class Store extends ChangeNotifier {
           ...source,
           'id': source['id'] ?? newId(),
           'name': name,
-          'url': url.toString()
+          'url': url.toString(),
         };
         final i = priceSources.indexWhere((x) => x['id'] == data['id']);
         i < 0 ? priceSources.add(data) : priceSources[i] = data;
       });
 
   Future<void> deletePriceSource(String id) => _change(
-      'Narx manbasi o‘chirildi',
-      () => priceSources.removeWhere((x) => x['id'] == id));
+        'Narx manbasi o‘chirildi',
+        () => priceSources.removeWhere((x) => x['id'] == id),
+      );
 
-  Future<void> notePriceSource(String id, {String? error}) =>
-      _change('Narx manbasi tekshirildi', () {
-        for (final src in priceSources.where((x) => x['id'] == id)) {
-          src['lastError'] =
-              error?.replaceFirst(RegExp(r'^\w*Exception: '), '');
-        }
-      });
+  Future<void> notePriceSource(String id, {String? error}) => _change(
+        'Narx manbasi tekshirildi',
+        () {
+          for (final src in priceSources.where((x) => x['id'] == id)) {
+            src['lastError'] =
+                error?.replaceFirst(RegExp(r'^\w*Exception: '), '');
+          }
+        },
+      );
 
   /// Writes new prices into the profiles' recipes; the quick estimate's
   /// own price fields follow for the same materials.
-  Future<void> applyPriceChanges(List<PriceChange> changes, String source,
-          {String? sourceId, int? count}) =>
+  Future<void> applyPriceChanges(
+    List<PriceChange> changes,
+    String source, {
+    String? sourceId,
+    int? count,
+  }) =>
       _change('Narxlar yangilandi: $source', () {
         final today = DateTime.now().toIso8601String().split('T').first;
         for (final c in changes) {
@@ -1369,7 +1426,7 @@ class Store extends ChangeNotifier {
           final recipe = Map<String, dynamic>.from(p['drawingRecipe'] ?? {});
           recipe['prices'] = {
             ...Map<String, dynamic>.from(recipe['prices'] ?? {}),
-            c.key: c.after
+            c.key: c.after,
           };
           // A dollar price is kept to follow the rate later.
           final usd = Map<String, dynamic>.from(recipe['usdPrices'] ?? {});

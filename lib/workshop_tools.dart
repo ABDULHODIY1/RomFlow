@@ -32,34 +32,41 @@ class _WorkshopToolsState extends State<WorkshopTools> {
         animation: s,
         builder: (context, _) => Scaffold(
           appBar: GlassAppBar(
-              title: Text(page == 0 ? 'Qarz daftari' : 'Eslatmalar')),
-          body: readable(SafeArea(
-            child: ListView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-              children: [
-                SegmentedButton<int>(
-                  segments: const [
-                    ButtonSegment(
-                      value: 0,
-                      label: Text('Qarzlar'),
-                      icon: Icon(Icons.account_balance_wallet_outlined),
+            title: Text(page == 0 ? 'Qarz daftari' : 'Eslatmalar'),
+          ),
+          body: readable(
+            SafeArea(
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                children: [
+                  GlassControl(
+                    child: SegmentedButton<int>(
+                      segments: const [
+                        ButtonSegment(
+                          value: 0,
+                          label: Text('Qarzlar'),
+                          icon: Icon(Icons.account_balance_wallet_outlined),
+                        ),
+                        ButtonSegment(
+                          value: 1,
+                          label: Text('Eslatmalar'),
+                          icon: Icon(Icons.notifications_none),
+                        ),
+                      ],
+                      selected: {page},
+                      onSelectionChanged: (v) =>
+                          setState(() => page = v.single),
                     ),
-                    ButtonSegment(
-                      value: 1,
-                      label: Text('Eslatmalar'),
-                      icon: Icon(Icons.notifications_none),
-                    ),
-                  ],
-                  selected: {page},
-                  onSelectionChanged: (v) => setState(() => page = v.single),
-                ),
-                const SizedBox(height: 20),
-                if (page == 0) ...debts() else ...reminders(),
-              ],
+                  ),
+                  const SizedBox(height: 20),
+                  if (page == 0) ...debts() else ...reminders(),
+                ],
+              ),
             ),
-          )),
-          floatingActionButton: FloatingActionButton.extended(
+          ),
+          floatingActionButton: GlassActionButton.extended(
             onPressed: page == 0 ? addDebt : () => editReminder(),
             icon: const Icon(Icons.add),
             label: Text(page == 0 ? 'Qarz yozish' : 'Eslatma qo‘shish'),
@@ -99,10 +106,12 @@ class _WorkshopToolsState extends State<WorkshopTools> {
             'receivable': 'Menga qarz',
             'payable': 'Men qarzman',
           }.entries)
-            ChoiceChip(
-              label: Text(e.value),
-              selected: filter == e.key,
-              onSelected: (_) => setState(() => filter = e.key),
+            GlassControl(
+              child: ChoiceChip(
+                label: Text(e.value),
+                selected: filter == e.key,
+                onSelected: (_) => setState(() => filter = e.key),
+              ),
             ),
         ],
       ),
@@ -117,8 +126,9 @@ class _WorkshopToolsState extends State<WorkshopTools> {
       for (final d in s.debts.where(
         (d) => filter == 'all' || d['direction'] == filter,
       ))
-        Card(
-          child: ListTile(
+        GlassCard(
+          child: GlassControl(
+              child: ListTile(
             leading: Icon(
               d['direction'] == 'receivable'
                   ? Icons.south_west
@@ -136,7 +146,7 @@ class _WorkshopToolsState extends State<WorkshopTools> {
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => debtDetails(d['id']),
-          ),
+          )),
         ),
       const SizedBox(height: 18),
       const Text(
@@ -150,15 +160,16 @@ class _WorkshopToolsState extends State<WorkshopTools> {
       for (final q in s.quotes.where(
         (q) => q['status'] != 'cancelled' && (q['balance'] as num) > 0,
       ))
-        ListTile(
+        GlassControl(
+            child: ListTile(
           title: Text(q['customer']),
           subtitle: Text(q['title']),
           trailing: Text(money(q['balance'])),
-        ),
+        )),
     ];
   }
 
-  Widget summary(String title, String sum, Color color) => Card(
+  Widget summary(String title, String sum, Color color) => GlassCard(
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(
@@ -199,22 +210,25 @@ class _WorkshopToolsState extends State<WorkshopTools> {
           child: Text('Hozircha eslatma yo‘q.'),
         ),
       for (final r in rows)
-        Card(
-          child: ListTile(
-            leading: Checkbox(
-              value: r['done'],
-              onChanged: (v) async {
-                try {
-                  await s.completeReminder(r['id'], v!);
-                  if (v) {
-                    await ReminderScheduler.cancel(r['id']);
-                  } else {
-                    await ReminderScheduler.schedule(r);
+        GlassCard(
+          child: GlassControl(
+              child: ListTile(
+            leading: GlassControl(
+              child: Checkbox(
+                value: r['done'],
+                onChanged: (v) async {
+                  try {
+                    await s.completeReminder(r['id'], v!);
+                    if (v) {
+                      await ReminderScheduler.cancel(r['id']);
+                    } else {
+                      await ReminderScheduler.schedule(r);
+                    }
+                  } catch (e) {
+                    if (mounted) error(e);
                   }
-                } catch (e) {
-                  if (mounted) error(e);
-                }
-              },
+                },
+              ),
             ),
             title: Text(
               r['title'],
@@ -239,7 +253,7 @@ class _WorkshopToolsState extends State<WorkshopTools> {
               onPressed: () async {
                 final yes = await showDialog<bool>(
                   context: context,
-                  builder: (c) => AlertDialog(
+                  builder: (c) => GlassAlertDialog(
                     title: const Text('Eslatma o‘chirilsinmi?'),
                     content: Text(r['title']),
                     actions: [
@@ -264,7 +278,7 @@ class _WorkshopToolsState extends State<WorkshopTools> {
                 }
               },
             ),
-          ),
+          )),
         ),
     ];
   }
@@ -343,72 +357,81 @@ class _DebtFormState extends State<DebtForm> {
   @override
   Widget build(BuildContext c) => Scaffold(
         appBar: GlassAppBar(title: const Text('Qarz yozish')),
-        body: readable(SafeArea(
-          child: Form(
-            key: form,
-            child: ListView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.all(16),
-              children: [
-                DropdownButtonFormField<String>(
-                  initialValue: direction,
-                  decoration:
-                      const InputDecoration(labelText: 'Qarz yo‘nalishi'),
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'receivable',
-                      child: Text('Menga qarz'),
+        body: readable(
+          SafeArea(
+            child: Form(
+              key: form,
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.all(16),
+                children: [
+                  GlassControl(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: direction,
+                      decoration: const InputDecoration(
+                        labelText: 'Qarz yo‘nalishi',
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'receivable',
+                          child: Text('Menga qarz'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'payable',
+                          child: Text('Men qarzman'),
+                        ),
+                      ],
+                      onChanged: (v) => direction = v!,
                     ),
-                    DropdownMenuItem(
-                        value: 'payable', child: Text('Men qarzman')),
-                  ],
-                  onChanged: (v) => direction = v!,
-                ),
-                const SizedBox(height: 14),
-                input(person, 'Shaxs / tashkilot', required: true),
-                input(phone, 'Telefon'),
-                input(amount, 'Summa (so‘m)', number: true, required: true),
-                input(note, 'Izoh'),
-                ListTile(
-                  title: const Text('Qaytarish muddati'),
-                  subtitle: Text(
-                    due == null
-                        ? 'Belgilanmagan'
-                        : localDate(due!.toIso8601String()),
                   ),
-                  trailing: const Icon(Icons.calendar_month),
-                  onTap: () async {
-                    final d = await showDatePicker(
-                      context: c,
-                      initialDate: due ?? DateTime.now(),
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2100),
-                    );
-                    if (d != null) {
-                      setState(
-                          () => due = DateTime(d.year, d.month, d.day, 18));
-                    }
-                  },
-                ),
-                FilledButton(
-                  onPressed: () {
-                    if (form.currentState!.validate()) {
-                      Navigator.pop(c, {
-                        'person': person.text.trim(),
-                        'phone': phone.text.trim(),
-                        'amount': int.parse(amount.text),
-                        'direction': direction,
-                        'note': note.text.trim(),
-                        'due': due?.toIso8601String(),
-                      });
-                    }
-                  },
-                  child: const Text('Qarzni saqlash'),
-                ),
-              ],
+                  const SizedBox(height: 14),
+                  input(person, 'Shaxs / tashkilot', required: true),
+                  input(phone, 'Telefon'),
+                  input(amount, 'Summa (so‘m)', number: true, required: true),
+                  input(note, 'Izoh'),
+                  GlassControl(
+                      child: ListTile(
+                    title: const Text('Qaytarish muddati'),
+                    subtitle: Text(
+                      due == null
+                          ? 'Belgilanmagan'
+                          : localDate(due!.toIso8601String()),
+                    ),
+                    trailing: const Icon(Icons.calendar_month),
+                    onTap: () async {
+                      final d = await showDatePicker(
+                        context: c,
+                        initialDate: due ?? DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2100),
+                      );
+                      if (d != null) {
+                        setState(
+                            () => due = DateTime(d.year, d.month, d.day, 18));
+                      }
+                    },
+                  )),
+                  FilledButton(
+                    onPressed: () {
+                      if (form.currentState!.validate()) {
+                        Navigator.pop(c, {
+                          'person': person.text.trim(),
+                          'phone': phone.text.trim(),
+                          'amount': int.parse(amount.text),
+                          'direction': direction,
+                          'note': note.text.trim(),
+                          'due': due?.toIso8601String(),
+                        });
+                      }
+                    },
+                    child: const Text('Qarzni saqlash'),
+                  ),
+                ],
+              ),
             ),
           ),
-        )),
+        ),
       );
 }
 
@@ -453,70 +476,74 @@ class DebtDetail extends StatelessWidget {
               balance = Store.debtBalance(d);
           return Scaffold(
             appBar: GlassAppBar(title: Text(d['person'])),
-            body: readable(SafeArea(
-              child: ListView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.all(20),
-                children: [
-                  Text(
-                    money(balance),
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
+            body: readable(
+              SafeArea(
+                child: ListView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.all(20),
+                  children: [
+                    Text(
+                      money(balance),
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Text(
-                    '${d['direction'] == 'receivable' ? 'Menga qarz' : 'Men qarzman'} • qoldiq',
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    'Boshlang‘ich: ${money(d['amount'])}\nTo‘langan: ${money(Store.debtPaid(d))}\n${d['phone']}\n${d['note']}${d['due'] == null ? '' : '\nMuddat: ${localDate(d['due'])}'}',
-                  ),
-                  const SizedBox(height: 20),
-                  if (balance > 0)
-                    FilledButton.icon(
-                      icon: const Icon(Icons.payments_outlined),
-                      label: const Text('To‘lov yozish'),
-                      onPressed: () async {
-                        final result =
-                            await Navigator.push<Map<String, dynamic>>(
-                          c,
-                          MaterialPageRoute(
-                            builder: (_) => PaymentForm(maximum: balance),
-                          ),
-                        );
-                        if (result != null) {
-                          try {
-                            await store.debtPayment(
-                              id,
-                              result['amount'],
-                              result['note'],
-                            );
-                          } catch (e) {
-                            if (c.mounted) {
-                              ScaffoldMessenger.of(
-                                c,
-                              ).showSnackBar(SnackBar(content: Text('$e')));
+                    Text(
+                      '${d['direction'] == 'receivable' ? 'Menga qarz' : 'Men qarzman'} • qoldiq',
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Boshlang‘ich: ${money(d['amount'])}\nTo‘langan: ${money(Store.debtPaid(d))}\n${d['phone']}\n${d['note']}${d['due'] == null ? '' : '\nMuddat: ${localDate(d['due'])}'}',
+                    ),
+                    const SizedBox(height: 20),
+                    if (balance > 0)
+                      FilledButton.icon(
+                        icon: const Icon(Icons.payments_outlined),
+                        label: const Text('To‘lov yozish'),
+                        onPressed: () async {
+                          final result =
+                              await Navigator.push<Map<String, dynamic>>(
+                            c,
+                            MaterialPageRoute(
+                              builder: (_) => PaymentForm(maximum: balance),
+                            ),
+                          );
+                          if (result != null) {
+                            try {
+                              await store.debtPayment(
+                                id,
+                                result['amount'],
+                                result['note'],
+                              );
+                            } catch (e) {
+                              if (c.mounted) {
+                                ScaffoldMessenger.of(
+                                  c,
+                                ).showSnackBar(SnackBar(content: Text('$e')));
+                              }
                             }
                           }
-                        }
-                      },
+                        },
+                      ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'To‘lovlar tarixi',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'To‘lovlar tarixi',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  for (final p in (d['payments'] as List).reversed)
-                    ListTile(
-                      title: Text(money(p['amount'])),
-                      subtitle:
-                          Text('${localDate(p['created'])}\n${p['note']}'),
-                    ),
-                ],
+                    for (final p in (d['payments'] as List).reversed)
+                      GlassControl(
+                          child: ListTile(
+                        title: Text(money(p['amount'])),
+                        subtitle:
+                            Text('${localDate(p['created'])}\n${p['note']}'),
+                      )),
+                  ],
+                ),
               ),
-            )),
+            ),
           );
         },
       );
@@ -544,33 +571,35 @@ class _PaymentFormState extends State<PaymentForm> {
   @override
   Widget build(BuildContext c) => Scaffold(
         appBar: GlassAppBar(title: const Text('Qarz to‘lovi')),
-        body: readable(Form(
-          key: form,
-          child: ListView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.all(16),
-            children: [
-              Text('Qoldiq: ${money(widget.maximum)}'),
-              const SizedBox(height: 16),
-              input(amount, 'To‘lov (so‘m)', number: true, required: true),
-              input(note, 'To‘lov izohi'),
-              if (error != null)
-                Text(error!, style: const TextStyle(color: Colors.red)),
-              FilledButton(
-                onPressed: () {
-                  if (!form.currentState!.validate()) return;
-                  final n = int.parse(amount.text);
-                  if (n > widget.maximum) {
-                    setState(() => error = 'Qoldiqdan oshmasin');
-                    return;
-                  }
-                  Navigator.pop(c, {'amount': n, 'note': note.text.trim()});
-                },
-                child: const Text('To‘lovni saqlash'),
-              ),
-            ],
+        body: readable(
+          Form(
+            key: form,
+            child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.all(16),
+              children: [
+                Text('Qoldiq: ${money(widget.maximum)}'),
+                const SizedBox(height: 16),
+                input(amount, 'To‘lov (so‘m)', number: true, required: true),
+                input(note, 'To‘lov izohi'),
+                if (error != null)
+                  Text(error!, style: const TextStyle(color: Colors.red)),
+                FilledButton(
+                  onPressed: () {
+                    if (!form.currentState!.validate()) return;
+                    final n = int.parse(amount.text);
+                    if (n > widget.maximum) {
+                      setState(() => error = 'Qoldiqdan oshmasin');
+                      return;
+                    }
+                    Navigator.pop(c, {'amount': n, 'note': note.text.trim()});
+                  },
+                  child: const Text('To‘lovni saqlash'),
+                ),
+              ],
+            ),
           ),
-        )),
+        ),
       );
 }
 
@@ -605,61 +634,65 @@ class _ReminderFormState extends State<ReminderForm> {
   @override
   Widget build(BuildContext c) => Scaffold(
         appBar: GlassAppBar(title: const Text('Eslatma')),
-        body: readable(SafeArea(
-          child: Form(
-            key: form,
-            child: ListView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.all(16),
-              children: [
-                input(title, 'Eslatma nomi', required: true),
-                input(note, 'Izoh'),
-                ListTile(
-                  title: Text(localDate(due.toIso8601String())),
-                  trailing: const Icon(Icons.calendar_month),
-                  onTap: () async {
-                    final d = await showDatePicker(
-                      context: c,
-                      initialDate: due,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2100),
-                    );
-                    if (d == null || !c.mounted) return;
-                    final t = await showTimePicker(
-                      context: c,
-                      initialTime: TimeOfDay.fromDateTime(due),
-                    );
-                    if (t != null) {
-                      setState(
-                        () => due = DateTime(
-                          d.year,
-                          d.month,
-                          d.day,
-                          t.hour,
-                          t.minute,
-                        ),
+        body: readable(
+          SafeArea(
+            child: Form(
+              key: form,
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.all(16),
+                children: [
+                  input(title, 'Eslatma nomi', required: true),
+                  input(note, 'Izoh'),
+                  GlassControl(
+                      child: ListTile(
+                    title: Text(localDate(due.toIso8601String())),
+                    trailing: const Icon(Icons.calendar_month),
+                    onTap: () async {
+                      final d = await showDatePicker(
+                        context: c,
+                        initialDate: due,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2100),
                       );
-                    }
-                  },
-                ),
-                const SizedBox(height: 18),
-                FilledButton(
-                  onPressed: () {
-                    if (form.currentState!.validate()) {
-                      Navigator.pop(c, {
-                        'id': widget.initial?['id'],
-                        'title': title.text.trim(),
-                        'note': note.text.trim(),
-                        'due': due.toIso8601String(),
-                        'done': widget.initial?['done'] ?? false,
-                      });
-                    }
-                  },
-                  child: const Text('Eslatmani saqlash'),
-                ),
-              ],
+                      if (d == null || !c.mounted) return;
+                      final t = await showTimePicker(
+                        context: c,
+                        initialTime: TimeOfDay.fromDateTime(due),
+                      );
+                      if (t != null) {
+                        setState(
+                          () => due = DateTime(
+                            d.year,
+                            d.month,
+                            d.day,
+                            t.hour,
+                            t.minute,
+                          ),
+                        );
+                      }
+                    },
+                  )),
+                  const SizedBox(height: 18),
+                  FilledButton(
+                    onPressed: () {
+                      if (form.currentState!.validate()) {
+                        Navigator.pop(c, {
+                          'id': widget.initial?['id'],
+                          'title': title.text.trim(),
+                          'note': note.text.trim(),
+                          'due': due.toIso8601String(),
+                          'done': widget.initial?['done'] ?? false,
+                        });
+                      }
+                    },
+                    child: const Text('Eslatmani saqlash'),
+                  ),
+                ],
+              ),
             ),
           ),
-        )),
+        ),
       );
 }

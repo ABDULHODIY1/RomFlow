@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
@@ -11,6 +13,10 @@ import 'package:flutter/services.dart';
 bool _glass = defaultTargetPlatform == TargetPlatform.iOS ||
     const bool.fromEnvironment('ROMFLOW_GLASS');
 bool get usesIOSGlass => _glass;
+
+/// Apple's own Liquid Glass (system tab bar and glass buttons) is drawn on
+/// iPhone and iPad; Flutter's imitation is not used there.
+bool get nativeGlass => _glass && !kIsWeb && Platform.isIOS;
 
 /// Applies the Settings choice: 'auto', 'glass' or 'material'.
 void applyDesign(String preference) {
@@ -42,46 +48,60 @@ class GlassSurface extends StatelessWidget {
 
   /// Dark glass on a dark page (3D) whatever the app theme.
   final Brightness? brightness;
-  const GlassSurface(
-      {super.key,
-      required this.child,
-      this.radius = const BorderRadius.all(Radius.circular(28)),
-      this.tint,
-      this.opaque = false,
-      this.shadow = true,
-      this.brightness});
+  const GlassSurface({
+    super.key,
+    required this.child,
+    this.radius = const BorderRadius.all(Radius.circular(28)),
+    this.tint,
+    this.opaque = false,
+    this.shadow = true,
+    this.brightness,
+  });
 
   @override
   Widget build(BuildContext context) {
     final dark =
         (brightness ?? Theme.of(context).brightness) == Brightness.dark;
-    // Reduce Transparency and high contrast get a solid surface.
+    // Shared Flutter surfaces stay glass on iOS too. Native navigation and
+    // buttons continue to use UIKit; content keeps the same geometry.
     final solid = MediaQuery.highContrastOf(context);
+    final blur = ImageFilter.blur(
+      sigmaX: opaque ? 30 : 18,
+      sigmaY: opaque ? 30 : 18,
+      tileMode: TileMode.mirror,
+    );
     final glass = ClipRSuperellipse(
       borderRadius: radius,
-      child: BackdropFilter(
-        filter: ImageFilter.compose(
-            outer: ImageFilter.blur(
-                sigmaX: opaque ? 30 : 18,
-                sigmaY: opaque ? 30 : 18,
-                tileMode: TileMode.mirror),
-            inner: _saturate),
-        child: CustomPaint(
-          painter: _GlassPainter(radius, dark, tint, opaque || solid),
-          child: child,
-        ),
-      ),
+      child: solid
+          ? ColoredBox(
+              color: tint?.withValues(alpha: 1) ??
+                  (dark ? const Color(0xff1b2633) : Colors.white),
+              child: child,
+            )
+          : BackdropFilter(
+              // UIKit platform views support a blur backdrop, not a colour
+              // matrix filter composed over the native view.
+              filter: nativeGlass
+                  ? blur
+                  : ImageFilter.compose(outer: blur, inner: _saturate),
+              child: CustomPaint(
+                painter: _GlassPainter(radius, dark, tint, opaque),
+                child: child,
+              ),
+            ),
     );
-    if (!shadow) return glass;
+    if (!shadow || solid) return glass;
     return DecoratedBox(
       decoration: ShapeDecoration(
-          shape: RoundedSuperellipseBorder(borderRadius: radius),
-          shadows: [
-            BoxShadow(
-                color: Colors.black.withValues(alpha: dark ? .30 : .10),
-                blurRadius: 22,
-                offset: const Offset(0, 8)),
-          ]),
+        shape: RoundedSuperellipseBorder(borderRadius: radius),
+        shadows: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: dark ? .30 : .10),
+            blurRadius: 22,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: glass,
     );
   }
@@ -101,20 +121,22 @@ class _GlassPainter extends CustomPainter {
     final body = tint != null
         ? tint!.withValues(alpha: opaque ? .92 : .78)
         : (dark ? const Color(0xff1b2633) : Colors.white).withValues(
-            alpha: opaque ? (dark ? .80 : .74) : (dark ? .42 : .34));
+            alpha: opaque ? (dark ? .94 : .90) : (dark ? .42 : .34),
+          );
     canvas.drawRSuperellipse(shape, Paint()..color = body);
     // Glare from the top.
     canvas.drawRSuperellipse(
-        shape,
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.center,
-            colors: [
-              Colors.white.withValues(alpha: dark ? .10 : .30),
-              Colors.white.withValues(alpha: 0),
-            ],
-          ).createShader(rect));
+      shape,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.center,
+          colors: [
+            Colors.white.withValues(alpha: dark ? .10 : .30),
+            Colors.white.withValues(alpha: 0),
+          ],
+        ).createShader(rect),
+    );
     // The rim: light on the top-left and bottom-right edges, as glass
     // catches light on both sides.
     final rim = Paint()
@@ -141,6 +163,181 @@ class _GlassPainter extends CustomPainter {
       old.radius != radius;
 }
 
+/// Shared decoration preserves the original control, semantics and geometry.
+class GlassControl extends StatelessWidget {
+  final Widget child;
+  final Color? tint;
+  const GlassControl({super.key, required this.child, this.tint});
+  @override
+  Widget build(BuildContext context) {
+    if (!usesIOSGlass) return child;
+    final scheme = Theme.of(context).colorScheme;
+    final c = child;
+    final selected = c is ChoiceChip
+        ? c.selected
+        : c is FilterChip
+            ? c.selected
+            : c is SwitchListTile
+                ? c.value
+                : c is CheckboxListTile
+                    ? c.value == true
+                    : false;
+    final accent = tint ?? scheme.primary;
+    final soft = Color.alphaBlend(
+      accent.withValues(alpha: selected ? .20 : .07),
+      scheme.surface,
+    );
+    return GlassSurface(
+      radius: BorderRadius.circular(12),
+      tint: soft,
+      shadow: false,
+      child: CustomPaint(
+        foregroundPainter: MediaQuery.highContrastOf(context)
+            ? null
+            : _GlassControlHighlight(
+                Theme.of(context).brightness == Brightness.dark),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Keep the rim visible on controls that paint their own opaque backgrounds.
+class _GlassControlHighlight extends CustomPainter {
+  final bool dark;
+  const _GlassControlHighlight(this.dark);
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final shape = BorderRadius.circular(12).toRSuperellipse(rect.deflate(.5));
+    canvas.drawRSuperellipse(
+        shape,
+        Paint()
+          ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: const Alignment(0, -.2),
+              colors: [
+                Colors.white.withValues(alpha: dark ? .05 : .10),
+                Colors.transparent,
+              ]).createShader(rect));
+    canvas.drawRSuperellipse(
+        shape,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1
+          ..shader = LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withValues(alpha: dark ? .45 : .75),
+                Colors.white.withValues(alpha: .03),
+                Colors.white.withValues(alpha: dark ? .18 : .35),
+              ]).createShader(rect));
+  }
+
+  @override
+  bool shouldRepaint(_GlassControlHighlight old) => old.dark != dark;
+}
+
+/// All ordinary Material buttons get glass from their theme, including custom
+/// local foreground/background colours. Flutter retains tap/keyboard handling.
+ButtonStyle glassButtonStyle(
+  ButtonStyle original, {
+  required Color tint,
+  bool prominent = false,
+}) {
+  if (!usesIOSGlass) return original;
+  return original.copyWith(
+    backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
+    elevation: const WidgetStatePropertyAll(0),
+    backgroundBuilder: (context, states, child) {
+      final scheme = Theme.of(context).colorScheme;
+      final widget = context.widget;
+      final local = widget is ButtonStyleButton ? widget.style : null;
+      final disabled = states.contains(WidgetState.disabled);
+      final accent = local?.backgroundColor?.resolve(states) ??
+          (prominent
+              ? original.backgroundColor?.resolve(states)
+              : local?.foregroundColor?.resolve(states)) ??
+          tint;
+      final colour = disabled
+          ? scheme.surfaceContainerHighest
+          : prominent || states.contains(WidgetState.selected)
+              ? accent
+              : Color.alphaBlend(accent.withValues(alpha: .12), scheme.surface);
+      return GlassSurface(
+        radius: BorderRadius.circular(12),
+        tint: colour,
+        shadow: false,
+        child: child ?? const SizedBox.shrink(),
+      );
+    },
+  );
+}
+
+/// A responsive extended action button uses the same themed button pipeline.
+/// Its label wraps at large text sizes rather than escaping a narrow phone.
+class GlassActionButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final Widget label;
+  final Widget? icon;
+  final Object? heroTag;
+  const GlassActionButton.extended({
+    super.key,
+    required this.onPressed,
+    required this.label,
+    this.icon,
+    this.heroTag,
+  });
+  @override
+  Widget build(BuildContext context) {
+    if (!usesIOSGlass) {
+      return FloatingActionButton.extended(
+        onPressed: onPressed,
+        icon: icon,
+        label: label,
+        heroTag: heroTag ?? const _GlassActionHero(),
+      );
+    }
+    final available = MediaQuery.sizeOf(context).width -
+        MediaQuery.paddingOf(context).horizontal -
+        32;
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: available.clamp(48.0, double.infinity),
+      ),
+      child: FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[icon!, const SizedBox(width: 8)],
+            Flexible(child: label),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassActionHero {
+  const _GlassActionHero();
+}
+
+Color glassActionTint(String id) {
+  final key = id.toLowerCase();
+  if (RegExp('delete|remove|trash').hasMatch(key)) {
+    return const Color(0xffc84456);
+  }
+  if (RegExp('add|new|create').hasMatch(key)) return const Color(0xff23845f);
+  if (RegExp('share|export').hasMatch(key)) return const Color(0xff8055c8);
+  if (RegExp('photo|camera|scan').hasMatch(key)) return const Color(0xff178b94);
+  return const Color(0xff206bc4);
+}
+
 /// A round glass button for a toolbar icon.
 class GlassIconButton extends StatelessWidget {
   final IconData icon;
@@ -149,14 +346,15 @@ class GlassIconButton extends StatelessWidget {
   final bool selected;
   final double size;
   final Brightness? brightness;
-  const GlassIconButton(
-      {super.key,
-      required this.icon,
-      required this.tooltip,
-      required this.onPressed,
-      this.selected = false,
-      this.size = 44,
-      this.brightness});
+  const GlassIconButton({
+    super.key,
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    this.selected = false,
+    this.size = 44,
+    this.brightness,
+  });
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -167,24 +365,31 @@ class GlassIconButton extends StatelessWidget {
         : dark
             ? Colors.white.withValues(alpha: onPressed == null ? .35 : .92)
             : scheme.onSurface.withValues(alpha: onPressed == null ? .35 : 1);
+    final target = size < 48 ? 48.0 : size;
     return Tooltip(
       message: tooltip,
       child: Semantics(
         button: true,
+        enabled: onPressed != null,
         selected: selected,
         label: tooltip,
-        child: SizedBox.square(
-          dimension: size,
-          child: GlassSurface(
-            radius: BorderRadius.circular(size / 2),
-            tint: selected ? scheme.primary : null,
-            brightness: brightness,
-            child: Material(
-              type: MaterialType.transparency,
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: onPressed,
-                child: Icon(icon, size: size * .5, color: ink),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onPressed,
+            child: SizedBox.square(
+              dimension: target,
+              child: Center(
+                child: SizedBox.square(
+                  dimension: size,
+                  child: GlassSurface(
+                    radius: BorderRadius.circular(size / 2),
+                    tint: selected ? scheme.primary : null,
+                    brightness: brightness,
+                    child: Icon(icon, size: size * .5, color: ink),
+                  ),
+                ),
               ),
             ),
           ),
@@ -196,31 +401,32 @@ class GlassIconButton extends StatelessWidget {
 
 /// The app bar in glass when Liquid Glass is on, the usual one otherwise.
 class GlassAppBar extends AppBar {
-  GlassAppBar(
-      {super.key,
-      super.leading,
-      super.automaticallyImplyLeading,
-      super.title,
-      super.actions,
-      Widget? flexibleSpace,
-      super.bottom,
-      super.elevation,
-      Color? backgroundColor,
-      super.foregroundColor,
-      super.centerTitle,
-      super.titleSpacing,
-      super.toolbarHeight,
-      super.titleTextStyle,
-      super.systemOverlayStyle,
-      Brightness? glassBrightness})
-      : super(
+  GlassAppBar({
+    super.key,
+    super.leading,
+    super.automaticallyImplyLeading,
+    super.title,
+    super.actions,
+    Widget? flexibleSpace,
+    super.bottom,
+    super.elevation,
+    Color? backgroundColor,
+    super.foregroundColor,
+    super.centerTitle,
+    super.titleSpacing,
+    super.toolbarHeight,
+    super.titleTextStyle,
+    super.systemOverlayStyle,
+    Brightness? glassBrightness,
+  }) : super(
           flexibleSpace: flexibleSpace ??
               (usesIOSGlass
                   ? GlassSurface(
                       radius: BorderRadius.zero,
                       shadow: false,
                       brightness: glassBrightness,
-                      child: const SizedBox.expand())
+                      child: const SizedBox.expand(),
+                    )
                   : null),
           backgroundColor: usesIOSGlass ? Colors.transparent : backgroundColor,
           surfaceTintColor: usesIOSGlass ? Colors.transparent : null,
@@ -238,16 +444,18 @@ Future<T?> showGlassSheet<T>({
 }) {
   if (!usesIOSGlass) {
     return showModalBottomSheet<T>(
-        context: context,
-        builder: builder,
-        isScrollControlled: isScrollControlled,
-        showDragHandle: showDragHandle,
-        backgroundColor: backgroundColor);
+      context: context,
+      builder: builder,
+      isScrollControlled: isScrollControlled,
+      showDragHandle: showDragHandle,
+      backgroundColor: backgroundColor,
+    );
   }
   const top = BorderRadius.vertical(top: Radius.circular(34));
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: isScrollControlled,
+    useSafeArea: true,
     backgroundColor: Colors.transparent,
     elevation: 0,
     // The glass draws its own handle.
@@ -257,45 +465,238 @@ Future<T?> showGlassSheet<T>({
       padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
       child: GlassSurface(
         radius: top,
+        tint: backgroundColor,
         opaque: true,
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          if (showDragHandle)
-            Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 14),
-              child: Container(
-                width: 38,
-                height: 5,
-                decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurfaceVariant
-                        .withValues(alpha: .45),
-                    borderRadius: BorderRadius.circular(3)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showDragHandle)
+              Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 14),
+                child: Container(
+                  width: 38,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withValues(alpha: .45),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
               ),
-            ),
-          Flexible(child: builder(context)),
-        ]),
+            Flexible(child: builder(context)),
+          ],
+        ),
       ),
     ),
   );
 }
 
+/// One system glass button: an SF Symbol and/or a title.
+class GlassButton {
+  final String id;
+  final String? symbol, title, subtitle, label;
+
+  /// 'glass', 'prominent' (tinted) or 'white' (white glass, blue text).
+  final String style;
+  final Color? tint;
+  final bool selected, enabled, expand, light;
+  final double? size;
+  final double height, fontSize, iconSize;
+  const GlassButton(
+    this.id, {
+    this.symbol,
+    this.title,
+    this.subtitle,
+    this.label,
+    this.style = 'glass',
+    this.tint,
+    this.selected = false,
+    this.enabled = true,
+    this.expand = false,
+    this.light = false,
+    this.size,
+    this.height = 48,
+    this.fontSize = 15,
+    this.iconSize = 16,
+  });
+  Map<String, Object?> toMap() => {
+        'id': id,
+        if (symbol != null) 'symbol': symbol,
+        if (title != null) 'title': title,
+        if (subtitle != null) 'subtitle': subtitle,
+        if (label != null) 'label': label,
+        'style': style,
+        'tint': (tint ?? glassActionTint(id)).toARGB32(),
+        'selected': selected,
+        'enabled': enabled,
+        'expand': expand,
+        'light': light,
+        if (size != null) 'size': size,
+        'height': height,
+        'fontSize': fontSize,
+        'iconSize': iconSize,
+      };
+}
+
+/// A row or column of Apple's glass buttons on iPhone and iPad; [fallback]
+/// (the usual Flutter buttons) everywhere else.
+class NativeGlassButtons extends StatefulWidget {
+  final List<GlassButton> items;
+  final ValueChanged<String> onTap;
+  final Widget fallback;
+  final double height;
+  final double? width;
+  final bool vertical, dark, equal;
+  final double spacing;
+  const NativeGlassButtons({
+    super.key,
+    required this.items,
+    required this.onTap,
+    required this.fallback,
+    this.height = 48,
+    this.width,
+    this.vertical = false,
+    this.dark = false,
+    this.equal = false,
+    this.spacing = 8,
+  });
+  @override
+  State<NativeGlassButtons> createState() => _NativeGlassButtonsState();
+}
+
+class _NativeGlassButtonsState extends State<NativeGlassButtons> {
+  MethodChannel? channel;
+  bool available = true;
+  String? lastConfiguration;
+  Map<String, Object?> get configuration => {
+        'items': [
+          for (final b in widget.items)
+            {
+              ...b.toMap(),
+              'fontSize': MediaQuery.textScalerOf(context).scale(b.fontSize),
+              'subtitleFontSize': MediaQuery.textScalerOf(context).scale(11),
+            },
+        ],
+        'vertical': widget.vertical,
+        'dark': widget.dark || Theme.brightnessOf(context) == Brightness.dark,
+        'equal': widget.equal,
+        'spacing': widget.spacing,
+      };
+
+  Future<void> sync() async {
+    final current = channel;
+    if (current == null) return;
+    try {
+      final next = configuration;
+      final signature = jsonEncode(next);
+      if (signature == lastConfiguration) return;
+      lastConfiguration = signature;
+      await current.invokeMethod<void>('configure', next);
+    } on PlatformException {
+      if (mounted) setState(() => available = false);
+    } on MissingPluginException {
+      if (mounted) setState(() => available = false);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    unawaited(sync());
+  }
+
+  @override
+  void didUpdateWidget(covariant NativeGlassButtons old) {
+    super.didUpdateWidget(old);
+    unawaited(sync());
+  }
+
+  @override
+  void dispose() {
+    channel?.setMethodCallHandler(null);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!nativeGlass || !available) return widget.fallback;
+    return SizedBox(
+      height: widget.height < 48 ? 48 : widget.height,
+      width: widget.width == null
+          ? null
+          : (widget.width! < 48 ? 48 : widget.width),
+      child: UiKitView(
+        viewType: 'romflow/glass-buttons',
+        creationParams: configuration,
+        creationParamsCodec: const StandardMessageCodec(),
+        onPlatformViewCreated: (id) {
+          channel?.setMethodCallHandler(null);
+          channel = MethodChannel('romflow/glass-buttons/$id');
+          lastConfiguration = null;
+          channel!.setMethodCallHandler((call) async {
+            if (call.method == 'onTap' && mounted && available) {
+              final id = call.arguments;
+              if (id is String &&
+                  widget.items.any((b) => b.id == id && b.enabled)) {
+                widget.onTap(id);
+              }
+            }
+          });
+          // A rebuild may have happened while UIKit was creating the view.
+          unawaited(sync());
+        },
+      ),
+    );
+  }
+}
+
 class IOSGlassNavigation extends StatefulWidget {
   final int selected;
   final ValueChanged<int> onChanged;
-  const IOSGlassNavigation(
-      {super.key, required this.selected, required this.onChanged});
+  const IOSGlassNavigation({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
   @override
   State<IOSGlassNavigation> createState() => _IOSGlassNavigationState();
 }
 
 class _IOSGlassNavigationState extends State<IOSGlassNavigation> {
   MethodChannel? channel;
+  bool available = true;
+  String? lastConfiguration;
+  Future<void> sync() async {
+    final current = channel;
+    if (current == null) return;
+    try {
+      final next = {
+        'selected': widget.selected,
+        'dark': Theme.brightnessOf(context) == Brightness.dark,
+      };
+      final signature = jsonEncode(next);
+      if (signature == lastConfiguration) return;
+      lastConfiguration = signature;
+      await current.invokeMethod<void>('configure', next);
+    } on PlatformException {
+      if (mounted) setState(() => available = false);
+    } on MissingPluginException {
+      if (mounted) setState(() => available = false);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    unawaited(sync());
+  }
+
   @override
   void didUpdateWidget(covariant IOSGlassNavigation old) {
     super.didUpdateWidget(old);
     if (old.selected != widget.selected) {
-      channel?.invokeMethod<void>('select', widget.selected);
+      unawaited(sync());
     }
   }
 
@@ -305,71 +706,212 @@ class _IOSGlassNavigationState extends State<IOSGlassNavigation> {
     super.dispose();
   }
 
-  Widget previewItem(int i) => Expanded(
-      child: Semantics(
+  Widget previewItem(BuildContext context, int i) => Expanded(
+        child: Semantics(
           selected: i == widget.selected,
           button: true,
           child: InkWell(
-              onTap: () => widget.onChanged(i),
-              borderRadius: BorderRadius.circular(24),
-              child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Column(mainAxisSize: MainAxisSize.min, children: [
-                        Icon(
-                            const [
-                              Icons.dashboard_outlined,
-                              Icons.receipt_long_outlined,
-                              Icons.grid_view_outlined,
-                              Icons.tune
-                            ][i],
-                            color: i == widget.selected
-                                ? const Color(0xff206bc4)
-                                : Colors.blueGrey),
-                        Text(
-                            const [
-                              'Asosiy',
-                              'Buyurtmalar',
-                              'Katalog',
-                              'Sozlamalar'
-                            ][i],
-                            style: TextStyle(
-                                fontSize: 10,
-                                color: i == widget.selected
-                                    ? const Color(0xff206bc4)
-                                    : Colors.blueGrey)),
-                      ]))))));
+            onTap: () => widget.onChanged(i),
+            borderRadius: BorderRadius.circular(24),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      const [
+                        Icons.dashboard_outlined,
+                        Icons.receipt_long_outlined,
+                        Icons.grid_view_outlined,
+                        Icons.tune,
+                      ][i],
+                      color: i == widget.selected
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    Text(
+                      const [
+                        'Asosiy',
+                        'Buyurtmalar',
+                        'Katalog',
+                        'Sozlamalar'
+                      ][i],
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: i == widget.selected
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
   @override
   Widget build(BuildContext context) => Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-      child: SafeArea(
+        padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+        child: SafeArea(
           top: false,
           child: SizedBox(
-            height: 72,
-            child: Platform.isIOS
+            height: nativeGlass && available ? 62 : 72,
+            child: nativeGlass && available
                 ? UiKitView(
                     viewType: 'romflow/liquid-navigation',
-                    creationParams: {'selected': widget.selected},
+                    creationParams: {
+                      'selected': widget.selected,
+                      'dark': Theme.brightnessOf(context) == Brightness.dark,
+                    },
                     creationParamsCodec: const StandardMessageCodec(),
                     onPlatformViewCreated: (id) {
+                      channel?.setMethodCallHandler(null);
                       channel = MethodChannel('romflow/liquid-navigation/$id');
+                      lastConfiguration = null;
                       channel!.setMethodCallHandler((call) async {
                         if (call.method == 'onTab' && mounted) {
-                          widget.onChanged(call.arguments as int);
+                          final index = call.arguments;
+                          if (index is int && index >= 0 && index < 4) {
+                            widget.onChanged(index);
+                          }
                         }
                       });
-                    })
+                      unawaited(sync());
+                    },
+                  )
                 : GlassSurface(
-                    child: Row(children: [
-                    for (var i = 0; i < 4; i++) previewItem(i)
-                  ])),
-          )));
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < 4; i++) previewItem(context, i),
+                      ],
+                    ),
+                  ),
+          ),
+        ),
+      );
 }
 
 /// Keeps lists and forms at a readable width on tablets and desktops;
 /// phones are unaffected.
 Widget readable(Widget child, {double maxWidth = 880}) => Align(
-    alignment: Alignment.topCenter,
-    child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth), child: child));
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: child,
+      ),
+    );
+
+/// The existing Card layout, margins and taps with a readable glass material.
+class GlassCard extends Card {
+  const GlassCard({
+    super.key,
+    super.child,
+    super.margin,
+    super.color,
+    super.elevation,
+    super.shadowColor,
+    super.surfaceTintColor,
+    super.shape,
+    super.clipBehavior,
+    super.borderOnForeground,
+    super.semanticContainer,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!usesIOSGlass) return super.build(context);
+    final effectiveShape = shape ?? Theme.of(context).cardTheme.shape;
+    final radius = effectiveShape is RoundedRectangleBorder
+        ? effectiveShape.borderRadius.resolve(Directionality.of(context))
+        : BorderRadius.circular(16);
+    return Card(
+      margin: margin,
+      color: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      shape: effectiveShape,
+      clipBehavior: clipBehavior,
+      borderOnForeground: borderOnForeground,
+      semanticContainer: semanticContainer,
+      child: GlassSurface(
+        radius: radius,
+        tint: color ??
+            Color.alphaBlend(
+              Theme.of(context).colorScheme.primary.withValues(alpha: .045),
+              Theme.of(context).colorScheme.surface,
+            ),
+        opaque: true,
+        shadow: false,
+        child: child ?? const SizedBox.shrink(),
+      ),
+    );
+  }
+}
+
+/// Keep Flutter's scrolling, keyboard avoidance and accessible dialog layout.
+class GlassAlertDialog extends AlertDialog {
+  const GlassAlertDialog({
+    super.key,
+    super.icon,
+    super.iconPadding,
+    super.iconColor,
+    super.title,
+    super.titlePadding,
+    super.titleTextStyle,
+    super.content,
+    super.contentPadding,
+    super.contentTextStyle,
+    super.actions,
+    super.actionsPadding,
+    super.actionsAlignment,
+    super.actionsOverflowAlignment,
+    super.actionsOverflowDirection,
+    super.actionsOverflowButtonSpacing,
+    super.buttonPadding,
+    super.backgroundColor,
+    super.elevation,
+    super.shadowColor,
+    super.surfaceTintColor,
+    super.semanticLabel,
+    super.insetPadding,
+    super.clipBehavior,
+    super.shape,
+    super.alignment,
+    super.constraints,
+    super.scrollable,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final original = super.build(context);
+    if (!usesIOSGlass || original is! Dialog) return original;
+    final effectiveShape =
+        original.shape ?? Theme.of(context).dialogTheme.shape;
+    final radius = effectiveShape is RoundedRectangleBorder
+        ? effectiveShape.borderRadius.resolve(Directionality.of(context))
+        : BorderRadius.circular(20);
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      insetAnimationDuration: original.insetAnimationDuration,
+      insetAnimationCurve: original.insetAnimationCurve,
+      insetPadding: original.insetPadding,
+      shape: effectiveShape,
+      clipBehavior: original.clipBehavior,
+      alignment: original.alignment,
+      constraints: original.constraints,
+      semanticsRole: original.semanticsRole,
+      child: GlassSurface(
+        radius: radius,
+        tint: backgroundColor,
+        opaque: true,
+        shadow: false,
+        child: original.child ?? const SizedBox.shrink(),
+      ),
+    );
+  }
+}

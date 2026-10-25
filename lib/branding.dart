@@ -22,19 +22,24 @@ class BrandLogo extends StatelessWidget {
     final dark =
         (brightness ?? Theme.of(context).brightness) == Brightness.dark;
     return Semantics(
-        label: 'RomFlow logosi',
-        image: true,
-        child: SizedBox(
-            width: size,
-            height: size,
-            child: FutureBuilder<ui.Image>(
-                future: load(),
-                builder: (context, snapshot) => snapshot.hasData
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(size * .22),
-                        child: CustomPaint(
-                            painter: BrandPainter(snapshot.data!, dark)))
-                    : const SizedBox.shrink())));
+      label: 'RomFlow logosi',
+      image: true,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: FutureBuilder<ui.Image>(
+          future: load(),
+          builder: (context, snapshot) => snapshot.hasData
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(size * .22),
+                  child: CustomPaint(
+                    painter: BrandPainter(snapshot.data!, dark),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ),
+    );
   }
 }
 
@@ -49,11 +54,16 @@ class BrandPainter extends CustomPainter {
         ? const Rect.fromLTWH(268, 869, 301, 303)
         : const Rect.fromLTWH(687, 869, 301, 303);
     canvas.drawImageRect(
-        image,
-        Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale,
-            rect.bottom * scale),
-        Offset.zero & size,
-        Paint()..filterQuality = FilterQuality.high);
+      image,
+      Rect.fromLTRB(
+        rect.left * scale,
+        rect.top * scale,
+        rect.right * scale,
+        rect.bottom * scale,
+      ),
+      Offset.zero & size,
+      Paint()..filterQuality = FilterQuality.high,
+    );
   }
 
   @override

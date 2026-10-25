@@ -35,7 +35,7 @@ import 'installments.dart';
 import 'reminder_service.dart';
 import 'demo_overlay.dart';
 
-const appVersion = '1.0.0';
+const appVersion = '1.0.1';
 
 const ink = Color(0xff172b4d),
     blue = Color(0xff206bc4),
@@ -44,10 +44,12 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   // Bundled assets under their own licences, next to the packages' ones.
   LicenseRegistry.addLicense(() async* {
-    yield LicenseEntryWithLineBreaks(['DejaVu Sans'],
-        await rootBundle.loadString('assets/FONT-LICENSE.txt'));
-    yield LicenseEntryWithLineBreaks(['Tabler Icons'],
-        await rootBundle.loadString('assets/TABLER-ICONS-LICENSE.txt'));
+    yield LicenseEntryWithLineBreaks([
+      'DejaVu Sans',
+    ], await rootBundle.loadString('assets/FONT-LICENSE.txt'));
+    yield LicenseEntryWithLineBreaks([
+      'Tabler Icons',
+    ], await rootBundle.loadString('assets/TABLER-ICONS-LICENSE.txt'));
   });
   runApp(const StartApp());
 }
@@ -148,10 +150,11 @@ class RomFlow extends StatelessWidget {
           // Very large Dynamic Type would push controls over each other on
           // a small phone: text grows at most 1.3×.
           builder: (context, child) => MediaQuery.withClampedTextScaling(
-              maxScaleFactor: 1.3,
-              child: demoMode
-                  ? DemoOverlay(child: WorkshopKeyboardTools(child: child!))
-                  : WorkshopKeyboardTools(child: child!)),
+            maxScaleFactor: 1.3,
+            child: demoMode
+                ? DemoOverlay(child: WorkshopKeyboardTools(child: child!))
+                : WorkshopKeyboardTools(child: child!),
+          ),
           themeMode: store.themePreference == 'dark'
               ? ThemeMode.dark
               : store.themePreference == 'light'
@@ -192,23 +195,31 @@ Widget heading(String text) => Builder(
         ),
       ),
     );
-Widget notice(String text) => Builder(builder: (context) {
-      final scheme = Theme.of(context).colorScheme;
-      return Container(
+Widget notice(String text) => Builder(
+      builder: (context) {
+        final scheme = Theme.of(context).colorScheme;
+        return Container(
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest,
-              border: Border.all(color: scheme.outlineVariant, width: .8),
-              borderRadius: BorderRadius.circular(12)),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Icon(Icons.info_outline, size: 18, color: scheme.onSurfaceVariant),
-            const SizedBox(width: 10),
-            Expanded(
-                child:
-                    Text(text, style: Theme.of(context).textTheme.bodySmall)),
-          ]));
-    });
+            color: scheme.surfaceContainerHighest,
+            border: Border.all(color: scheme.outlineVariant, width: .8),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.info_outline,
+                  size: 18, color: scheme.onSurfaceVariant),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(text, style: Theme.of(context).textTheme.bodySmall),
+              ),
+            ],
+          ),
+        );
+      },
+    );
 Widget field(
   TextEditingController c,
   String label, {
@@ -280,29 +291,40 @@ class _HomeState extends State<Home> {
     final choice = await openPhotoWindow(context, s, catalogRecipe(s));
     if (!mounted || choice == null) return;
     final item = await Navigator.push<Json>(
-        context,
-        MaterialPageRoute(
-            builder: (_) => DrawingEditor(store: s, initial: choice.item())));
+      context,
+      MaterialPageRoute(
+        builder: (_) => DrawingEditor(store: s, initial: choice.item()),
+      ),
+    );
     if (!mounted || item == null) return;
     await Navigator.push<void>(
-        context,
-        MaterialPageRoute(
-            builder: (_) => BuilderPage(store: s, initialItem: item)));
+      context,
+      MaterialPageRoute(
+        builder: (_) => BuilderPage(store: s, initialItem: item),
+      ),
+    );
   }
 
   Future<void> drawWindow() async {
-    final choice =
-        await openDesignCatalog(context, recipe: catalogRecipe(s), store: s);
+    final choice = await openDesignCatalog(
+      context,
+      recipe: catalogRecipe(s),
+      store: s,
+    );
     if (!mounted || choice == null) return;
     final item = await Navigator.push<Json>(
-        context,
-        MaterialPageRoute(
-            builder: (_) => DrawingEditor(store: s, initial: choice.item())));
+      context,
+      MaterialPageRoute(
+        builder: (_) => DrawingEditor(store: s, initial: choice.item()),
+      ),
+    );
     if (!mounted || item == null) return;
     await Navigator.push<void>(
-        context,
-        MaterialPageRoute(
-            builder: (_) => BuilderPage(store: s, initialItem: item)));
+      context,
+      MaterialPageRoute(
+        builder: (_) => BuilderPage(store: s, initialItem: item),
+      ),
+    );
   }
 
   void open(Widget page) =>
@@ -345,16 +367,17 @@ class _HomeState extends State<Home> {
                         keyboardDismissBehavior:
                             ScrollViewKeyboardDismissBehavior.onDrag,
                         padding: EdgeInsets.fromLTRB(
-                            math.max(16, (box.maxWidth - 1120) / 2),
-                            8 +
-                                (glassLayout
-                                    ? MediaQuery.paddingOf(context).top
-                                    : 0),
-                            math.max(16, (box.maxWidth - 1120) / 2),
-                            100 +
-                                (glassLayout
-                                    ? MediaQuery.paddingOf(context).bottom
-                                    : 0)),
+                          math.max(16, (box.maxWidth - 1120) / 2),
+                          8 +
+                              (glassLayout
+                                  ? MediaQuery.paddingOf(context).top
+                                  : 0),
+                          math.max(16, (box.maxWidth - 1120) / 2),
+                          100 +
+                              (glassLayout
+                                  ? MediaQuery.paddingOf(context).bottom
+                                  : 0),
+                        ),
                         children: page == 0
                             ? dashboard(box.maxWidth)
                             : page == 1
@@ -381,77 +404,119 @@ class _HomeState extends State<Home> {
                       wide ? 'RomFlow • ${_destinations[page].$3}' : 'RomFlow',
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          fontWeight: FontWeight.w800, fontSize: 22),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 22,
+                      ),
                     ),
                   ),
                 ],
               ),
               actions: [
-                usesIOSGlass
-                    ? GlassIconButton(
-                        key: const ValueKey('tariff'),
-                        tooltip: 'Tarif va to‘lov',
-                        onPressed: () => open(TariffPage(store: s)),
-                        icon: Icons.workspace_premium_outlined,
-                        size: 40)
-                    : IconButton(
-                        key: const ValueKey('tariff'),
-                        tooltip: 'Tarif va to‘lov',
-                        onPressed: () => open(TariffPage(store: s)),
-                        icon: const Icon(Icons.workspace_premium_outlined),
-                      ),
+                nativeGlass
+                    ? NativeGlassButtons(
+                        height: 40,
+                        width: 40,
+                        items: const [
+                          GlassButton(
+                            'tariff',
+                            symbol: 'crown',
+                            label: 'Tarif va to‘lov',
+                            size: 40,
+                          ),
+                        ],
+                        onTap: (_) => open(TariffPage(store: s)),
+                        fallback: const SizedBox(),
+                      )
+                    : usesIOSGlass
+                        ? GlassIconButton(
+                            key: const ValueKey('tariff'),
+                            tooltip: 'Tarif va to‘lov',
+                            onPressed: () => open(TariffPage(store: s)),
+                            icon: Icons.workspace_premium_outlined,
+                            size: 40,
+                          )
+                        : IconButton(
+                            key: const ValueKey('tariff'),
+                            tooltip: 'Tarif va to‘lov',
+                            onPressed: () => open(TariffPage(store: s)),
+                            icon: const Icon(Icons.workspace_premium_outlined),
+                          ),
                 SizedBox(width: usesIOSGlass ? 12 : 4),
               ],
             ),
             body: wide
-                ? Row(children: [
-                    NavigationRail(
-                      selectedIndex: page,
-                      extended: width >= 1180,
-                      // A phone on its side is too low for the labels.
-                      labelType: width >= 1180 ||
-                              MediaQuery.sizeOf(context).height < 520
-                          ? NavigationRailLabelType.none
-                          : NavigationRailLabelType.all,
-                      onDestinationSelected: (p) => setState(() => page = p),
-                      leading: page == 1
-                          ? Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: FloatingActionButton(
-                                tooltip:
-                                    showCustomers ? 'Mijoz' : 'Yangi smeta',
-                                elevation: 0,
-                                onPressed: showCustomers
-                                    ? () => addCustomer(context, s)
-                                    : newQuote,
-                                child: Icon(showCustomers
-                                    ? Icons.person_add_alt
-                                    : Icons.add),
-                              ),
-                            )
-                          : const SizedBox(height: 8),
-                      destinations: [
-                        for (final (icon, selected, label) in _destinations)
-                          NavigationRailDestination(
+                ? Row(
+                    children: [
+                      GlassControl(
+                          child: NavigationRail(
+                        selectedIndex: page,
+                        extended: width >= 1180,
+                        // A phone on its side is too low for the labels.
+                        labelType: width >= 1180 ||
+                                MediaQuery.sizeOf(context).height < 520
+                            ? NavigationRailLabelType.none
+                            : NavigationRailLabelType.all,
+                        onDestinationSelected: (p) => setState(() => page = p),
+                        leading: page == 1
+                            ? Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: FloatingActionButton(
+                                  tooltip:
+                                      showCustomers ? 'Mijoz' : 'Yangi smeta',
+                                  elevation: 0,
+                                  onPressed: showCustomers
+                                      ? () => addCustomer(context, s)
+                                      : newQuote,
+                                  child: Icon(
+                                    showCustomers
+                                        ? Icons.person_add_alt
+                                        : Icons.add,
+                                  ),
+                                ),
+                              )
+                            : const SizedBox(height: 8),
+                        destinations: [
+                          for (final (icon, selected, label) in _destinations)
+                            NavigationRailDestination(
                               icon: Icon(icon),
                               selectedIcon: Icon(selected),
-                              label: Text(label)),
-                      ],
-                    ),
-                    const VerticalDivider(width: 1),
-                    Expanded(child: content),
-                  ])
-                : content,
-            floatingActionButton: page == 1 && !wide
-                ? FloatingActionButton.extended(
-                    onPressed: showCustomers
-                        ? () => addCustomer(context, s)
-                        : newQuote,
-                    icon:
-                        Icon(showCustomers ? Icons.person_add_alt : Icons.add),
-                    label: Text(showCustomers ? 'Mijoz' : 'Yangi smeta'),
+                              label: Text(label),
+                            ),
+                        ],
+                      )),
+                      const VerticalDivider(width: 1),
+                      Expanded(child: content),
+                    ],
                   )
-                : null,
+                : content,
+            floatingActionButton: page == 1 && !wide && nativeGlass
+                ? NativeGlassButtons(
+                    height: 52,
+                    width: 170,
+                    items: [
+                      GlassButton(
+                        'add',
+                        symbol: showCustomers ? 'person.badge.plus' : 'plus',
+                        title: showCustomers ? 'Mijoz' : 'Yangi smeta',
+                        style: 'prominent',
+                        expand: true,
+                        height: 52,
+                      ),
+                    ],
+                    onTap: (_) =>
+                        showCustomers ? addCustomer(context, s) : newQuote(),
+                    fallback: const SizedBox(),
+                  )
+                : page == 1 && !wide
+                    ? GlassActionButton.extended(
+                        onPressed: showCustomers
+                            ? () => addCustomer(context, s)
+                            : newQuote,
+                        icon: Icon(
+                            showCustomers ? Icons.person_add_alt : Icons.add),
+                        label: Text(showCustomers ? 'Mijoz' : 'Yangi smeta'),
+                      )
+                    : null,
             bottomNavigationBar: wide
                 ? null
                 : usesIOSGlass
@@ -465,9 +530,10 @@ class _HomeState extends State<Home> {
                         destinations: [
                           for (final (icon, selected, label) in _destinations)
                             NavigationDestination(
-                                icon: Icon(icon),
-                                selectedIcon: Icon(selected),
-                                label: label),
+                              icon: Icon(icon),
+                              selectedIcon: Icon(selected),
+                              label: label,
+                            ),
                         ],
                       ),
           );
@@ -477,8 +543,9 @@ class _HomeState extends State<Home> {
   List<Widget> dashboard(double width) {
     final now = DateTime.now();
     final month = FinanceSummary.of(s, periodRange(Period.month, now));
-    final active = s.quotes
-        .where((q) => !const {'cancelled', 'installed'}.contains(q['status']));
+    final active = s.quotes.where(
+      (q) => !const {'cancelled', 'installed'}.contains(q['status']),
+    );
     final balance = s.quotes
         .where((q) => q['status'] != 'cancelled')
         .fold<num>(0, (n, q) => n + (q['balance'] as num));
@@ -490,7 +557,7 @@ class _HomeState extends State<Home> {
             DateTime.parse(q['installDate']).toLocal(),
             'Montaj: ${q['title']}',
             '${q['customer']} • ${q['address'] ?? ''}',
-            () => open(QuotePage(store: s, id: q['id']))
+            () => open(QuotePage(store: s, id: q['id'])),
           ),
       // An install's own reminder is already listed through its order.
       for (final m in s.measurements)
@@ -499,7 +566,7 @@ class _HomeState extends State<Home> {
             DateTime.parse(m['date']).toLocal(),
             'Razmer: ${m['customer']}',
             '${m['address'] ?? ''}',
-            () => open(MeasurementsPage(store: s))
+            () => open(MeasurementsPage(store: s)),
           ),
       for (final r in s.reminders)
         if (r['done'] != true &&
@@ -509,23 +576,38 @@ class _HomeState extends State<Home> {
             DateTime.parse(r['due']).toLocal(),
             r['title'] as String,
             (r['note'] ?? '') as String,
-            () => open(WorkshopTools(store: s, initialPage: 1))
+            () => open(WorkshopTools(store: s, initialPage: 1)),
           ),
     ]..sort((a, b) => a.$1.compareTo(b.$1));
     final kpis = [
-      Kpi('Faol buyurtma', '${active.length}', Icons.receipt_long_outlined,
-          hint: '${s.customers.length} mijoz', tone: 0),
-      Kpi('Bu oy tushum', money(month.income), Icons.south_west,
-          hint: 'Olingan to‘lovlar', tone: 1),
-      Kpi('Mijozlar qarzi', money(balance),
-          Icons.account_balance_wallet_outlined,
-          hint: 'Buyurtmalar qoldig‘i', tone: 2),
-      Kpi('Bu oy foyda', money(month.profit), Icons.trending_up,
-          hint: 'Tushum − xarajat − ish haqi', emphasis: true, tone: 3),
+      Kpi(
+        'Faol buyurtma',
+        '${active.length}',
+        Icons.receipt_long_outlined,
+        tone: 0,
+      ),
+      Kpi('Bu oy tushum', money(month.income), Icons.south_west, tone: 1),
+      Kpi(
+        'Mijozlar qarzi',
+        money(balance),
+        Icons.account_balance_wallet_outlined,
+        tone: 2,
+      ),
+      Kpi(
+        'Bu oy foyda',
+        money(month.profit),
+        Icons.trending_up,
+        emphasis: true,
+        tone: 3,
+      ),
     ];
     final actions = [
-      QuickAction('AI kamera', Icons.photo_camera_outlined, drawFromPhoto,
-          tone: 3),
+      QuickAction(
+        'AI kamera',
+        Icons.photo_camera_outlined,
+        drawFromPhoto,
+        tone: 3,
+      ),
       QuickAction('Mijozlar', Icons.people_outline, () {
         setState(() {
           page = 1;
@@ -533,44 +615,77 @@ class _HomeState extends State<Home> {
         });
       }, tone: 0),
       QuickAction(
-          'Razmer', Icons.straighten, () => open(MeasurementsPage(store: s)),
-          tone: 1,
-          badge: s.measurements.where((m) => m['status'] == 'planned').length),
-      QuickAction('Qarzlar', Icons.account_balance_wallet_outlined,
-          () => open(WorkshopTools(store: s)),
-          tone: 2),
-      QuickAction('Eslatma', Icons.notifications_none,
-          () => open(WorkshopTools(store: s, initialPage: 1)),
-          tone: 3, badge: s.reminders.where((r) => r['done'] != true).length),
+        'Razmer',
+        Icons.straighten,
+        () => open(MeasurementsPage(store: s)),
+        tone: 1,
+        badge: s.measurements.where((m) => m['status'] == 'planned').length,
+      ),
       QuickAction(
-          'Ombor',
-          Icons.inventory_2_outlined,
-          () => openWithPlan(
-              context, s, 'warehouse', () => WarehousePage(store: s)),
-          tone: 4),
-      QuickAction('Xodimlar', Icons.badge_outlined,
-          () => openWithPlan(context, s, 'payroll', () => StaffPage(store: s)),
-          tone: 5),
+        'Qarzlar',
+        Icons.account_balance_wallet_outlined,
+        () => open(WorkshopTools(store: s)),
+        tone: 2,
+      ),
       QuickAction(
-          'Moliya',
-          Icons.payments_outlined,
-          () =>
-              openWithPlan(context, s, 'finance', () => FinancePage(store: s)),
-          tone: 1),
+        'Eslatma',
+        Icons.notifications_none,
+        () => open(WorkshopTools(store: s, initialPage: 1)),
+        tone: 3,
+        badge: s.reminders.where((r) => r['done'] != true).length,
+      ),
       QuickAction(
-          'Statistika',
-          Icons.bar_chart,
-          () => openWithPlan(context, s, 'finance',
-              () => FinancePage(store: s, initialTab: 1)),
-          tone: 0),
-      QuickAction('Narxlar', Icons.cloud_sync_outlined,
-          () => openPriceSources(context, s),
-          tone: 4),
-      QuickAction('Zavodlar', Icons.factory_outlined,
-          () => open(ManufacturersPage(store: s)),
-          tone: 3),
-      QuickAction('Raskroy', Icons.content_cut, () => open(const CutsPage()),
-          tone: 2),
+        'Ombor',
+        Icons.inventory_2_outlined,
+        () => openWithPlan(
+          context,
+          s,
+          'warehouse',
+          () => WarehousePage(store: s),
+        ),
+        tone: 4,
+      ),
+      QuickAction(
+        'Xodimlar',
+        Icons.badge_outlined,
+        () => openWithPlan(context, s, 'payroll', () => StaffPage(store: s)),
+        tone: 5,
+      ),
+      QuickAction(
+        'Moliya',
+        Icons.payments_outlined,
+        () => openWithPlan(context, s, 'finance', () => FinancePage(store: s)),
+        tone: 1,
+      ),
+      QuickAction(
+        'Statistika',
+        Icons.bar_chart,
+        () => openWithPlan(
+          context,
+          s,
+          'finance',
+          () => FinancePage(store: s, initialTab: 1),
+        ),
+        tone: 0,
+      ),
+      QuickAction(
+        'Narxlar',
+        Icons.cloud_sync_outlined,
+        () => openPriceSources(context, s),
+        tone: 4,
+      ),
+      QuickAction(
+        'Zavodlar',
+        Icons.factory_outlined,
+        () => open(ManufacturersPage(store: s)),
+        tone: 3,
+      ),
+      QuickAction(
+        'Raskroy',
+        Icons.content_cut,
+        () => open(const CutsPage()),
+        tone: 2,
+      ),
     ];
     final columns = width >= 1000 ? 4 : 2,
         actionColumns = width >= 1000
@@ -589,11 +704,12 @@ class _HomeState extends State<Home> {
       const SizedBox(height: 16),
       GridView(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            // Taller with larger text, so the figures always fit.
-            mainAxisExtent: 68 + MediaQuery.textScalerOf(context).scale(46)),
+          crossAxisCount: columns,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          // Taller with larger text, so the figures always fit.
+          mainAxisExtent: 58 + MediaQuery.textScalerOf(context).scale(40),
+        ),
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         children: kpis,
@@ -611,19 +727,23 @@ class _HomeState extends State<Home> {
       if (soon.isNotEmpty) ...[
         heading('Yaqin ishlar'),
         for (final (at, title, note, onTap) in soon.take(3))
-          Card(
-            child: ListTile(
-              leading: Icon(Icons.event_outlined,
-                  color: at.isBefore(now)
-                      ? Theme.of(context).colorScheme.error
-                      : Theme.of(context).colorScheme.primary),
+          GlassCard(
+            child: GlassControl(
+                child: ListTile(
+              leading: Icon(
+                Icons.event_outlined,
+                color: at.isBefore(now)
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.primary,
+              ),
               title: Text(title, overflow: TextOverflow.ellipsis),
               subtitle: Text(
-                  '${localDate(at.toIso8601String())}${note.trim().isEmpty ? '' : ' • $note'}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis),
+                '${localDate(at.toIso8601String())}${note.trim().isEmpty ? '' : ' • $note'}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               onTap: onTap,
-            ),
+            )),
           ),
       ],
       heading('Oxirgi buyurtmalar'),
@@ -639,7 +759,7 @@ class _HomeState extends State<Home> {
     ];
   }
 
-  Widget empty(String title, String subtitle) => Card(
+  Widget empty(String title, String subtitle) => GlassCard(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -657,8 +777,9 @@ class _HomeState extends State<Home> {
           ),
         ),
       );
-  Widget orderCard(Json q) => Card(
-        child: ListTile(
+  Widget orderCard(Json q) => GlassCard(
+        child: GlassControl(
+            child: ListTile(
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: Container(
@@ -670,15 +791,17 @@ class _HomeState extends State<Home> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: () {
-              final drawn = (q['items'] as List? ?? const [])
-                  .where((i) => i['drawing'] != null && i['recipe'] != null);
+              final drawn = (q['items'] as List? ?? const []).where(
+                (i) => i['drawing'] != null && i['recipe'] != null,
+              );
               return drawn.isEmpty
                   ? Icon(Icons.window,
                       color: Theme.of(context).colorScheme.primary)
                   : WindowThumb(
                       drawing:
                           Map<String, dynamic>.from(drawn.first['drawing']),
-                      recipe: Map<String, dynamic>.from(drawn.first['recipe']));
+                      recipe: Map<String, dynamic>.from(drawn.first['recipe']),
+                    );
             }(),
           ),
           title: Text(
@@ -692,104 +815,126 @@ class _HomeState extends State<Home> {
           isThreeLine: true,
           trailing: const Icon(Icons.chevron_right),
           onTap: () => open(QuotePage(store: s, id: q['id'])),
-        ),
+        )),
       );
 
   bool matches(Json row, List<String> keys) {
     final text = search.text.trim().toLowerCase();
     if (text.isEmpty) return true;
-    return keys
-        .any((k) => (row[k] ?? '').toString().toLowerCase().contains(text));
+    return keys.any(
+      (k) => (row[k] ?? '').toString().toLowerCase().contains(text),
+    );
   }
 
   List<Widget> orders() {
     final found = s.quotes
-        .where((q) =>
-            (statusFilter == 'all' || q['status'] == statusFilter) &&
-            matches(q, ['title', 'customer', 'phone', 'address', 'notes']))
+        .where(
+          (q) =>
+              (statusFilter == 'all' || q['status'] == statusFilter) &&
+              matches(q, ['title', 'customer', 'phone', 'address', 'notes']),
+        )
         .toList();
     final people = s.customers
         .where((c) => matches(c, ['name', 'phone', 'address']))
         .toList();
     return [
       const SizedBox(height: 8),
-      SegmentedButton<bool>(
-        segments: [
-          ButtonSegment(
+      GlassControl(
+        child: SegmentedButton<bool>(
+          segments: [
+            ButtonSegment(
               value: false,
               label: Text('Buyurtmalar (${s.quotes.length})'),
-              icon: const Icon(Icons.receipt_long_outlined)),
-          ButtonSegment(
+              icon: const Icon(Icons.receipt_long_outlined),
+            ),
+            ButtonSegment(
               value: true,
               label: Text('Mijozlar (${s.customers.length})'),
-              icon: const Icon(Icons.people_outline)),
-        ],
-        selected: {showCustomers},
-        onSelectionChanged: (v) => setState(() => showCustomers = v.single),
+              icon: const Icon(Icons.people_outline),
+            ),
+          ],
+          selected: {showCustomers},
+          onSelectionChanged: (v) => setState(() => showCustomers = v.single),
+        ),
       ),
       const SizedBox(height: 12),
-      TextField(
-        controller: search,
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.search),
-          hintText: showCustomers
-              ? 'Ism, telefon yoki manzil'
-              : 'Buyurtma, mijoz yoki telefon',
-          suffixIcon: search.text.isEmpty
-              ? null
-              : IconButton(
-                  tooltip: 'Tozalash',
-                  onPressed: search.clear,
-                  icon: const Icon(Icons.close)),
+      GlassControl(
+        child: TextField(
+          controller: search,
+          decoration: InputDecoration(
+            prefixIcon: const Icon(Icons.search),
+            hintText: showCustomers
+                ? 'Ism, telefon yoki manzil'
+                : 'Buyurtma, mijoz yoki telefon',
+            suffixIcon: search.text.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: 'Tozalash',
+                    onPressed: search.clear,
+                    icon: const Icon(Icons.close),
+                  ),
+          ),
         ),
       ),
       const SizedBox(height: 10),
       if (!showCustomers) ...[
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Row(children: [
-            for (final e in {'all': 'Barchasi', ...statuses}.entries)
-              Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: ChoiceChip(
-                  label: Text(e.key == 'all'
-                      ? e.value
-                      : '${e.value} ${s.quotes.where((q) => q['status'] == e.key).length}'),
-                  selected: statusFilter == e.key,
-                  onSelected: (_) => setState(() => statusFilter = e.key),
+          child: Row(
+            children: [
+              for (final e in {'all': 'Barchasi', ...statuses}.entries)
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: GlassControl(
+                    child: ChoiceChip(
+                      label: Text(
+                        e.key == 'all'
+                            ? e.value
+                            : '${e.value} ${s.quotes.where((q) => q['status'] == e.key).length}',
+                      ),
+                      selected: statusFilter == e.key,
+                      onSelected: (_) => setState(() => statusFilter = e.key),
+                    ),
+                  ),
                 ),
-              ),
-          ]),
+            ],
+          ),
         ),
         const SizedBox(height: 10),
         if (found.isEmpty)
           empty(
-              s.quotes.isEmpty
-                  ? 'Buyurtmalar hali yo‘q'
-                  : 'Hech narsa topilmadi',
-              s.quotes.isEmpty
-                  ? 'Yangi smeta tuzib, shu yerda kuzating.'
-                  : 'Qidiruv yoki bosqich filtrini o‘zgartiring.'),
+            s.quotes.isEmpty ? 'Buyurtmalar hali yo‘q' : 'Hech narsa topilmadi',
+            s.quotes.isEmpty
+                ? 'Yangi smeta tuzib, shu yerda kuzating.'
+                : 'Qidiruv yoki bosqich filtrini o‘zgartiring.',
+          ),
         ...found.map(orderCard),
       ] else ...[
         if (people.isEmpty)
           empty(
-              s.customers.isEmpty ? 'Mijozlar hali yo‘q' : 'Hech kim topilmadi',
-              'Pastdagi “Mijoz” tugmasi bilan qo‘shing.'),
+            s.customers.isEmpty ? 'Mijozlar hali yo‘q' : 'Hech kim topilmadi',
+            'Pastdagi “Mijoz” tugmasi bilan qo‘shing.',
+          ),
         for (final c in people)
-          Card(
-            child: ListTile(
+          GlassCard(
+            child: GlassControl(
+                child: ListTile(
               leading: CircleAvatar(
-                  child: Text((c['name'] as String).isEmpty
+                child: Text(
+                  (c['name'] as String).isEmpty
                       ? '?'
-                      : (c['name'] as String)[0].toUpperCase())),
+                      : (c['name'] as String)[0].toUpperCase(),
+                ),
+              ),
               title: Text(c['name']),
               subtitle: Text(
-                  '${c['phone'] ?? ''}${(c['address'] ?? '').toString().isEmpty ? '' : '\n${c['address']}'}'),
+                '${c['phone'] ?? ''}${(c['address'] ?? '').toString().isEmpty ? '' : '\n${c['address']}'}',
+              ),
               trailing: Text(
-                  '${s.quotes.where((q) => q['customerId'] == c['id']).length} ta'),
+                '${s.quotes.where((q) => q['customerId'] == c['id']).length} ta',
+              ),
               onTap: () => open(CustomerPage(store: s, customerId: c['id'])),
-            ),
+            )),
           ),
       ],
     ];
@@ -820,7 +965,7 @@ class _HomeState extends State<Home> {
           'Zavod katalogidagi narxlar ochiq bozor e’lonlaridan olingan taxminiy narx. Har bir profilning narxini shu yerda tahrirlang yoki diler, yetkazib beruvchi yoxud o‘z jadvalingizdan yangilang.',
         ),
         ...s.profiles.map(
-          (p) => Card(
+          (p) => GlassCard(
             child: Padding(
               padding: const EdgeInsets.all(18),
               child: Column(
@@ -846,19 +991,22 @@ class _HomeState extends State<Home> {
                   Text('Rama: ${money(p['framePrice'])}/m'),
                   Text('Shisha/panel: ${money(p['glassPrice'])}/m²'),
                   Text('Tannarxga ustama: ${p['markupPct']}%'),
-                  Wrap(spacing: 4, children: [
-                    TextButton.icon(
-                      onPressed: () => editProfile(context, s, p),
-                      icon: const Icon(Icons.edit_outlined),
-                      label: const Text('Narxlarni tahrirlash'),
-                    ),
-                    if (s.profiles.length > 1)
+                  Wrap(
+                    spacing: 4,
+                    children: [
                       TextButton.icon(
-                        onPressed: () => deleteProfile(p),
-                        icon: const Icon(Icons.delete_outline),
-                        label: const Text('O‘chirish'),
+                        onPressed: () => editProfile(context, s, p),
+                        icon: const Icon(Icons.edit_outlined),
+                        label: const Text('Narxlarni tahrirlash'),
                       ),
-                  ]),
+                      if (s.profiles.length > 1)
+                        TextButton.icon(
+                          onPressed: () => deleteProfile(p),
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('O‘chirish'),
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     p['demo'] == true
@@ -883,122 +1031,152 @@ class _HomeState extends State<Home> {
       ];
 
   Future<void> deleteProfile(Json p) async {
-    final yes = await confirm(context, 'Profil o‘chirilsinmi?',
-        '${p['name']}. Saqlangan smetalar o‘z narxini saqlaydi.');
+    final yes = await confirm(
+      context,
+      'Profil o‘chirilsinmi?',
+      '${p['name']}. Saqlangan smetalar o‘z narxini saqlaydi.',
+    );
     if (yes && mounted) await guarded(context, () => s.deleteProfile(p['id']));
   }
 
   List<Widget> settings() => [
         heading('Tarif'),
-        Card(
-          child: ListTile(
+        GlassCard(
+          child: GlassControl(
+              child: ListTile(
             leading: const Icon(Icons.workspace_premium_outlined),
-            title: Text(BillingConfig.paymentsEnabled
-                ? s.activePlan.name
-                : '${s.activePlan.name} • hozircha bepul'),
+            title: Text(
+              BillingConfig.paymentsEnabled
+                  ? s.activePlan.name
+                  : '${s.activePlan.name} • hozircha bepul',
+            ),
             subtitle:
                 const Text('Tariflar, to‘lov usullari va to‘lovlar tarixi'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => open(TariffPage(store: s)),
-          ),
+          )),
         ),
         heading('Ustaxona'),
-        Card(
-          child: ListTile(
+        GlassCard(
+          child: GlassControl(
+              child: ListTile(
             leading: const Icon(Icons.storefront_outlined),
             title: Text(s.workshopName),
-            subtitle: Text([
-              if (s.workshopPhone.isNotEmpty) s.workshopPhone,
-              if (s.workshopAddress.isNotEmpty) s.workshopAddress,
-              if (s.workshopPhone.isEmpty && s.workshopAddress.isEmpty)
-                'Telefon va manzil PDF va ulashilgan smetaga yoziladi',
-            ].join('\n')),
+            subtitle: Text(
+              [
+                if (s.workshopPhone.isNotEmpty) s.workshopPhone,
+                if (s.workshopAddress.isNotEmpty) s.workshopAddress,
+                if (s.workshopPhone.isEmpty && s.workshopAddress.isEmpty)
+                  'Telefon va manzil PDF va ulashilgan smetaga yoziladi',
+              ].join('\n'),
+            ),
             trailing: const Icon(Icons.edit_outlined),
             onTap: editWorkshop,
-          ),
+          )),
         ),
         heading('Narxlar'),
-        Card(
-          child: ListTile(
+        GlassCard(
+          child: GlassControl(
+              child: ListTile(
             key: const ValueKey('settings-manufacturers'),
             leading: const Icon(Icons.factory_outlined),
             title: const Text('Ishlab chiqaruvchilar narxi'),
-            subtitle: Text(s.catalog == null
-                ? 'Katalog yuklanmadi'
-                : '${s.catalog!.manufacturers.length} ta zavod • ${s.catalog!.systems.length} ta tizim • ${s.catalog!.date.split('-').reversed.join('.')}. Har kuni internetdan yangilanadi'),
+            subtitle: Text(
+              s.catalog == null
+                  ? 'Katalog yuklanmadi'
+                  : '${s.catalog!.manufacturers.length} ta zavod • ${s.catalog!.systems.length} ta tizim • ${s.catalog!.date.split('-').reversed.join('.')}. Har kuni internetdan yangilanadi',
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => open(ManufacturersPage(store: s)),
-          ),
+          )),
         ),
-        Card(
-          child: ListTile(
+        GlassCard(
+          child: GlassControl(
+              child: ListTile(
             leading: const Icon(Icons.cloud_sync_outlined),
             title: const Text('Narxlarni internetdan yangilash'),
-            subtitle: Text(s.priceSources.isEmpty
-                ? 'Diler havolasi, Google Sheets jadvali yoki fayl'
-                : '${s.priceSources.length} ta manba'),
+            subtitle: Text(
+              s.priceSources.isEmpty
+                  ? 'Diler havolasi, Google Sheets jadvali yoki fayl'
+                  : '${s.priceSources.length} ta manba',
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => openPriceSources(context, s),
-          ),
+          )),
         ),
-        Card(
-          child: ListTile(
+        GlassCard(
+          child: GlassControl(
+              child: ListTile(
             key: const ValueKey('usd-rate'),
             leading: const Icon(Icons.currency_exchange),
-            title: Text(s.usdRate > 0
-                ? 'Dollar kursi: 1 \$ = ${money(s.usdRate)}'
-                : 'Dollar kursi kiritilmagan'),
-            subtitle: Text([
-              if (s.usdRateSource == 'cbu' || s.usdRateSource == 'open')
-                '${Store.rateSourceName(s.usdRateSource)}${s.usdRateDate.isEmpty ? '' : ', ${s.usdRateDate}'}',
-              s.usdRateAuto
-                  ? 'Har kuni Markaziy bankdan o‘zi yangilanadi; dollardagi narxlar kursga ergashadi'
-                  : 'Qo‘lda kiritiladi; dollardagi narxlar shu kursda',
-            ].join(' • ')),
+            title: Text(
+              s.usdRate > 0
+                  ? 'Dollar kursi: 1 \$ = ${money(s.usdRate)}'
+                  : 'Dollar kursi kiritilmagan',
+            ),
+            subtitle: Text(
+              [
+                if (s.usdRateSource == 'cbu' || s.usdRateSource == 'open')
+                  '${Store.rateSourceName(s.usdRateSource)}${s.usdRateDate.isEmpty ? '' : ', ${s.usdRateDate}'}',
+                s.usdRateAuto
+                    ? 'Har kuni Markaziy bankdan o‘zi yangilanadi; dollardagi narxlar kursga ergashadi'
+                    : 'Qo‘lda kiritiladi; dollardagi narxlar shu kursda',
+              ].join(' • '),
+            ),
             trailing: const Icon(Icons.edit_outlined),
             onTap: editUsdRate,
-          ),
+          )),
         ),
         heading('AI kamera'),
-        Card(
-          child: ListTile(
+        GlassCard(
+          child: GlassControl(
+              child: ListTile(
             key: const ValueKey('ai-key'),
             leading: const Icon(Icons.auto_awesome),
             title: Text(
-                s.aiKey.isEmpty ? 'Claude AI ulanmagan' : 'Claude AI ulangan'),
+              s.aiKey.isEmpty ? 'Claude AI ulanmagan' : 'Claude AI ulangan',
+            ),
             subtitle: const Text(
-                'Kalitsiz ham ishlaydi: impostlar telefonda aniqlanadi. Kalit bilan ochilish turlari ham aniqlanadi.'),
+              'Kalitsiz ham ishlaydi: impostlar telefonda aniqlanadi. Kalit bilan ochilish turlari ham aniqlanadi.',
+            ),
             trailing: const Icon(Icons.edit_outlined),
             onTap: editAiKey,
-          ),
+          )),
         ),
         heading('Ko‘rinish'),
-        DropdownButtonFormField<String>(
-          key: ValueKey('design-${s.designPreference}'),
-          isExpanded: true,
-          initialValue: s.designPreference,
-          decoration: const InputDecoration(labelText: 'Dizayn'),
-          items: const [
-            DropdownMenuItem(
-                value: 'auto', child: Text('Avto • iPhone’da Liquid Glass')),
-            DropdownMenuItem(value: 'glass', child: Text('Liquid Glass')),
-            DropdownMenuItem(value: 'material', child: Text('Oddiy')),
-          ],
-          onChanged: (v) => guarded(context, () => s.setDesign(v!)),
+        GlassControl(
+          child: DropdownButtonFormField<String>(
+            key: ValueKey('design-${s.designPreference}'),
+            isExpanded: true,
+            initialValue: s.designPreference,
+            decoration: const InputDecoration(labelText: 'Dizayn'),
+            items: const [
+              DropdownMenuItem(
+                value: 'auto',
+                child: Text('Avto • iPhone’da Liquid Glass'),
+              ),
+              DropdownMenuItem(value: 'glass', child: Text('Liquid Glass')),
+              DropdownMenuItem(value: 'material', child: Text('Oddiy')),
+            ],
+            onChanged: (v) => guarded(context, () => s.setDesign(v!)),
+          ),
         ),
         const SizedBox(height: 12),
-        DropdownButtonFormField<String>(
-          key: ValueKey(s.themePreference),
-          isExpanded: true,
-          initialValue: s.themePreference,
-          decoration: const InputDecoration(labelText: 'Ilova temasi'),
-          items: const [
-            DropdownMenuItem(value: 'system', child: Text('Tizimga mos')),
-            DropdownMenuItem(value: 'light', child: Text('Och tema • oq logo')),
-            DropdownMenuItem(
-                value: 'dark', child: Text('To‘q tema • qora logo')),
-          ],
-          onChanged: (v) => guarded(context, () => s.setTheme(v!)),
+        GlassControl(
+          child: DropdownButtonFormField<String>(
+            key: ValueKey(s.themePreference),
+            isExpanded: true,
+            initialValue: s.themePreference,
+            decoration: const InputDecoration(labelText: 'Ilova temasi'),
+            items: const [
+              DropdownMenuItem(value: 'system', child: Text('Tizimga mos')),
+              DropdownMenuItem(
+                  value: 'light', child: Text('Och tema • oq logo')),
+              DropdownMenuItem(
+                  value: 'dark', child: Text('To‘q tema • qora logo')),
+            ],
+            onChanged: (v) => guarded(context, () => s.setTheme(v!)),
+          ),
         ),
         const SizedBox(height: 18),
         heading('Asboblar'),
@@ -1008,41 +1186,42 @@ class _HomeState extends State<Home> {
             Icons.payments_outlined,
             'Moliya va statistika',
             'Tushum, xarajat, foyda, grafiklar',
-            () => FinancePage(store: s)
+            () => FinancePage(store: s),
           ),
           (
             Icons.badge_outlined,
             'Xodimlar va ish haqi',
             '${s.staff.length} xodim • oylik, avans, to‘lov',
-            () => StaffPage(store: s)
+            () => StaffPage(store: s),
           ),
           (
             Icons.inventory_2_outlined,
             'Ombor va xarid ro‘yxati',
             '${s.inventory.length} ta material qoldig‘i',
-            () => WarehousePage(store: s)
+            () => WarehousePage(store: s),
           ),
           (
             Icons.content_cut,
             'Profil raskroyi',
             'Tayoqlarga kesish rejasi',
-            () => const CutsPage()
+            () => const CutsPage(),
           ),
           (
             Icons.history,
             'Faoliyat tarixi',
             '${s.audit.length} ta amal',
-            () => AuditPage(store: s)
+            () => AuditPage(store: s),
           ),
         ])
-          Card(
-            child: ListTile(
+          GlassCard(
+            child: GlassControl(
+                child: ListTile(
               leading: Icon(icon),
               title: Text(title),
               subtitle: Text(subtitle),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => open(page()),
-            ),
+            )),
           ),
         heading('Zaxira nusxalar'),
         const Text(
@@ -1053,7 +1232,10 @@ class _HomeState extends State<Home> {
           onPressed: () => guarded(context, () async {
             final raw = await s.exportBackup();
             final ok = await saveFileAs(
-                'RomFlow-backup.json', 'application/json', utf8.encode(raw));
+              'RomFlow-backup.json',
+              'application/json',
+              utf8.encode(raw),
+            );
             if (mounted && ok) {
               message(context, 'Zaxira saqlandi');
             }
@@ -1063,9 +1245,12 @@ class _HomeState extends State<Home> {
         ),
         OutlinedButton.icon(
           onPressed: () => guarded(context, () async {
-            final yes = await confirm(context, 'Zaxiradan tiklash',
-                'Joriy ma’lumotlar tanlangan zaxira bilan almashtiriladi. Avval hozirgi zaxirangizni saqlang.',
-                action: 'Fayl tanlash');
+            final yes = await confirm(
+              context,
+              'Zaxiradan tiklash',
+              'Joriy ma’lumotlar tanlangan zaxira bilan almashtiriladi. Avval hozirgi zaxirangizni saqlang.',
+              action: 'Fayl tanlash',
+            );
             if (!yes) return;
             final raw = await pickTextFile();
             if (raw != null) {
@@ -1096,9 +1281,10 @@ class _HomeState extends State<Home> {
           child: TextButton(
             key: const ValueKey('licenses'),
             onPressed: () => showLicensePage(
-                context: context,
-                applicationName: 'RomFlow',
-                applicationVersion: appVersion),
+              context: context,
+              applicationName: 'RomFlow',
+              applicationVersion: appVersion,
+            ),
             child: const Text('Litsenziyalar'),
           ),
         ),
@@ -1108,35 +1294,44 @@ class _HomeState extends State<Home> {
     final key = TextEditingController(text: s.aiKey);
     final ok = await showSettledDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => GlassAlertDialog(
         title: const Text('Claude AI kaliti'),
         scrollable: true,
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text(
-              'console.anthropic.com saytida olingan API kaliti (sk-ant-…). Rasm Anthropic serveriga yuboriladi va to‘lov shu kalit hisobidan bo‘ladi. Kalit faqat shu qurilmada saqlanadi, zaxira faylga yozilmaydi.'),
-          const SizedBox(height: 12),
-          TextField(
-            controller: key,
-            obscureText: true,
-            autocorrect: false,
-            enableSuggestions: false,
-            decoration: const InputDecoration(labelText: 'API kaliti'),
-          ),
-        ]),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'console.anthropic.com saytida olingan API kaliti (sk-ant-…). Rasm Anthropic serveriga yuboriladi va to‘lov shu kalit hisobidan bo‘ladi. Kalit faqat shu qurilmada saqlanadi, zaxira faylga yozilmaydi.',
+            ),
+            const SizedBox(height: 12),
+            GlassControl(
+              child: TextField(
+                controller: key,
+                obscureText: true,
+                autocorrect: false,
+                enableSuggestions: false,
+                decoration: const InputDecoration(labelText: 'API kaliti'),
+              ),
+            ),
+          ],
+        ),
         actions: [
           if (s.aiKey.isNotEmpty)
             TextButton(
-                onPressed: () {
-                  key.clear();
-                  Navigator.pop(c, true);
-                },
-                child: const Text('O‘chirish')),
+              onPressed: () {
+                key.clear();
+                Navigator.pop(c, true);
+              },
+              child: const Text('O‘chirish'),
+            ),
           TextButton(
-              onPressed: () => Navigator.pop(c, false),
-              child: const Text('Bekor qilish')),
+            onPressed: () => Navigator.pop(c, false),
+            child: const Text('Bekor qilish'),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(c, true),
-              child: const Text('Saqlash')),
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text('Saqlash'),
+          ),
         ],
       ),
     );
@@ -1148,99 +1343,118 @@ class _HomeState extends State<Home> {
 
   Future<void> editUsdRate() async {
     final rate = TextEditingController(
-        text: s.usdRate > 0 ? '${s.usdRate.round()}' : '');
+      text: s.usdRate > 0 ? '${s.usdRate.round()}' : '',
+    );
     var auto = s.usdRateAuto, fetching = false;
     String? note;
     OfficialRate? fetched;
     final ok = await showSettledDialog<bool>(
       context: context,
       builder: (c) => StatefulBuilder(
-          builder: (c, setDialog) => AlertDialog(
-                title: const Text('Dollar kursi'),
-                content: SingleChildScrollView(
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    TextField(
-                      controller: rate,
-                      autofocus: !auto,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                          labelText: '1 \$ necha so‘m',
-                          hintText: 'masalan 12650'),
+        builder: (c, setDialog) => GlassAlertDialog(
+          title: const Text('Dollar kursi'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GlassControl(
+                  child: TextField(
+                    controller: rate,
+                    autofocus: !auto,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: '1 \$ necha so‘m',
+                      hintText: 'masalan 12650',
                     ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: OutlinedButton.icon(
-                        key: const ValueKey('usd-rate-cbu'),
-                        onPressed: fetching
-                            ? null
-                            : () async {
-                                setDialog(() {
-                                  fetching = true;
-                                  note = null;
-                                });
-                                try {
-                                  final r = await fetchUsdRate();
-                                  rate.text = r.rate.toStringAsFixed(2);
-                                  fetched = r;
-                                  note =
-                                      '${Store.rateSourceName(r.source)}${r.date.isEmpty ? '' : ', ${r.date}'}';
-                                } catch (e) {
-                                  note = '$e'.replaceFirst(
-                                      RegExp(r'^\w*Exception: '), '');
-                                }
-                                if (c.mounted) {
-                                  setDialog(() => fetching = false);
-                                }
-                              },
-                        icon: fetching
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2))
-                            : const Icon(Icons.account_balance_outlined),
-                        label: const Text('Markaziy bankdan olish'),
-                      ),
-                    ),
-                    if (note != null)
-                      Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Text(note!,
-                              style: Theme.of(c).textTheme.bodySmall)),
-                    SwitchListTile(
-                      key: const ValueKey('usd-rate-auto'),
-                      contentPadding: EdgeInsets.zero,
-                      value: auto,
-                      onChanged: (v) => setDialog(() => auto = v),
-                      title: const Text('Har kuni o‘zi yangilansin'),
-                      subtitle: const Text(
-                          'Ilova ochilganda Markaziy bankning rasmiy kursi olinadi (cbu.uz ochiq API); bank javob bermasa — xalqaro kurs (ExchangeRate-API)'),
-                    ),
-                  ]),
+                  ),
                 ),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(c, false),
-                      child: const Text('Bekor qilish')),
-                  FilledButton(
-                      onPressed: () => Navigator.pop(c, true),
-                      child: const Text('Saqlash')),
-                ],
-              )),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton.icon(
+                    key: const ValueKey('usd-rate-cbu'),
+                    onPressed: fetching
+                        ? null
+                        : () async {
+                            setDialog(() {
+                              fetching = true;
+                              note = null;
+                            });
+                            try {
+                              final r = await fetchUsdRate();
+                              rate.text = r.rate.toStringAsFixed(2);
+                              fetched = r;
+                              note =
+                                  '${Store.rateSourceName(r.source)}${r.date.isEmpty ? '' : ', ${r.date}'}';
+                            } catch (e) {
+                              note = '$e'.replaceFirst(
+                                RegExp(r'^\w*Exception: '),
+                                '',
+                              );
+                            }
+                            if (c.mounted) {
+                              setDialog(() => fetching = false);
+                            }
+                          },
+                    icon: fetching
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.account_balance_outlined),
+                    label: const Text('Markaziy bankdan olish'),
+                  ),
+                ),
+                if (note != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(note!, style: Theme.of(c).textTheme.bodySmall),
+                  ),
+                GlassControl(
+                  child: SwitchListTile(
+                    key: const ValueKey('usd-rate-auto'),
+                    contentPadding: EdgeInsets.zero,
+                    value: auto,
+                    onChanged: (v) => setDialog(() => auto = v),
+                    title: const Text('Har kuni o‘zi yangilansin'),
+                    subtitle: const Text(
+                      'Ilova ochilganda Markaziy bankning rasmiy kursi olinadi (cbu.uz ochiq API); bank javob bermasa — xalqaro kurs (ExchangeRate-API)',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(c, false),
+              child: const Text('Bekor qilish'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(c, true),
+              child: const Text('Saqlash'),
+            ),
+          ],
+        ),
+      ),
     );
     if (ok != true || !mounted) return;
     await guarded(context, () async {
       final value = num.tryParse(
-          rate.text.replaceAll(RegExp(r'\s'), '').replaceAll(',', '.'));
+        rate.text.replaceAll(RegExp(r'\s'), '').replaceAll(',', '.'),
+      );
       if (value == null) throw Exception('Kursni raqam bilan kiriting');
       if (auto != s.usdRateAuto) await s.setUsdRateAuto(auto);
       final got = fetched;
       if (value != s.usdRate) {
         // The fetched rate keeps its source until a figure is typed over it.
         final same = got != null && (got.rate - value).abs() < .01;
-        await s.setUsdRate(value,
-            source: same ? got.source : 'manual', date: same ? got.date : '');
+        await s.setUsdRate(
+          value,
+          source: same ? got.source : 'manual',
+          date: same ? got.date : '',
+        );
       }
     });
   }
@@ -1252,35 +1466,41 @@ class _HomeState extends State<Home> {
     final form = GlobalKey<FormState>();
     final ok = await showSettledDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => GlassAlertDialog(
         title: const Text('Ustaxona ma’lumotlari'),
         content: SingleChildScrollView(
           child: Form(
             key: form,
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              field(name, 'Ustaxona nomi'),
-              field(phone, 'Telefon', validate: (_) => null),
-              field(address, 'Manzil', validate: (_) => null),
-            ]),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                field(name, 'Ustaxona nomi'),
+                field(phone, 'Telefon', validate: (_) => null),
+                field(address, 'Manzil', validate: (_) => null),
+              ],
+            ),
           ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(c, false),
-              child: const Text('Bekor qilish')),
+            onPressed: () => Navigator.pop(c, false),
+            child: const Text('Bekor qilish'),
+          ),
           FilledButton(
-              onPressed: () {
-                if (form.currentState!.validate()) Navigator.pop(c, true);
-              },
-              child: const Text('Saqlash')),
+            onPressed: () {
+              if (form.currentState!.validate()) Navigator.pop(c, true);
+            },
+            child: const Text('Saqlash'),
+          ),
         ],
       ),
     );
     if (ok == true && mounted) {
       await guarded(
-          context,
-          () => s.setWorkshop(name.text,
-              phone: phone.text, address: address.text));
+        context,
+        () =>
+            s.setWorkshop(name.text, phone: phone.text, address: address.text),
+      );
     }
     for (final t in [name, phone, address]) {
       t.dispose();
@@ -1291,7 +1511,7 @@ class _HomeState extends State<Home> {
     final confirmText = TextEditingController();
     final yes = await showSettledDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => GlassAlertDialog(
         title: const Text('Butunlay o‘chirish'),
         content: SingleChildScrollView(
           child: Column(
@@ -1330,29 +1550,38 @@ class _Stepper extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     Widget button(IconData icon, int next, String tip) => SizedBox(
-        width: 34,
-        height: 34,
-        child: IconButton(
+          width: 34,
+          height: 34,
+          child: IconButton(
             tooltip: tip,
             padding: EdgeInsets.zero,
             iconSize: 18,
             onPressed: onChanged == null || next < 1 || next > 100
                 ? null
                 : () => onChanged!(next),
-            icon: Icon(icon)));
+            icon: Icon(icon),
+          ),
+        );
     return Container(
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: scheme.outlineVariant)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        button(Icons.remove, value - 1, 'Kamaytirish'),
-        SizedBox(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          button(Icons.remove, value - 1, 'Kamaytirish'),
+          SizedBox(
             width: 34,
-            child: Text('$value',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.w700))),
-        button(Icons.add, value + 1, 'Ko‘paytirish'),
-      ]),
+            child: Text(
+              '$value',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+          button(Icons.add, value + 1, 'Ko‘paytirish'),
+        ],
+      ),
     );
   }
 }
@@ -1362,41 +1591,67 @@ class QuickAction extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final int badge, tone;
-  const QuickAction(this.label, this.icon, this.onTap,
-      {super.key, this.badge = 0, this.tone = 0});
+  const QuickAction(
+    this.label,
+    this.icon,
+    this.onTap, {
+    super.key,
+    this.badge = 0,
+    this.tone = 0,
+  });
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme,
         accent = toneColor(tone, Theme.of(context).brightness);
-    return Material(
-      color: scheme.surface,
+    final control = Material(
+      color: usesIOSGlass ? Colors.transparent : scheme.surface,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: scheme.outlineVariant, width: .8)),
-      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: scheme.outlineVariant, width: .8),
+      ),
+      child: GlassControl(
+          child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Badge(
-            isLabelVisible: badge > 0,
-            label: Text('$badge'),
-            child: Container(
-              padding: const EdgeInsets.all(9),
-              decoration: BoxDecoration(
-                  color: accent.withValues(alpha: .13), shape: BoxShape.circle),
-              child: Icon(icon, color: accent, size: 22),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Badge(
+              isLabelVisible: badge > 0,
+              label: Text('$badge'),
+              child: Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: .13),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: accent, size: 22),
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(label,
-                style:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-          ),
-        ]),
-      ),
+            const SizedBox(height: 6),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: scheme.onSurface,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      )),
     );
+    return usesIOSGlass
+        ? GlassSurface(
+            radius: BorderRadius.circular(16),
+            tint:
+                Color.alphaBlend(accent.withValues(alpha: .09), scheme.surface),
+            shadow: false,
+            child: control)
+        : control;
   }
 }
 
@@ -1407,7 +1662,7 @@ const _weekdays = [
   'Payshanba',
   'Juma',
   'Shanba',
-  'Yakshanba'
+  'Yakshanba',
 ];
 const _months = [
   'yanvar',
@@ -1421,7 +1676,7 @@ const _months = [
   'sentabr',
   'oktabr',
   'noyabr',
-  'dekabr'
+  'dekabr',
 ];
 
 /// "Payshanba, 22-oktabr"
@@ -1432,13 +1687,14 @@ String uzbekDay(DateTime d) =>
 class DashboardHero extends StatelessWidget {
   final String workshop, plan;
   final VoidCallback onDraw, onMeasure, onPlan;
-  const DashboardHero(
-      {super.key,
-      required this.workshop,
-      required this.plan,
-      required this.onDraw,
-      required this.onMeasure,
-      required this.onPlan});
+  const DashboardHero({
+    super.key,
+    required this.workshop,
+    required this.plan,
+    required this.onDraw,
+    required this.onMeasure,
+    required this.onPlan,
+  });
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
@@ -1447,105 +1703,178 @@ class DashboardHero extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
-            colors: dark
-                ? const [Color(0xff123a6e), Color(0xff1d5aa6)]
-                : const [Color(0xff1659b8), Color(0xff2f86ea)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight),
+          colors: dark
+              ? const [Color(0xff123a6e), Color(0xff1d5aa6)]
+              : const [Color(0xff1659b8), Color(0xff2f86ea)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xff1659b8).withValues(alpha: dark ? .2 : .25),
-              blurRadius: 18,
-              offset: const Offset(0, 8))
+            color: const Color(0xff1659b8).withValues(alpha: dark ? .2 : .25),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('ISH MAYDONI',
-                  style: TextStyle(
-                      color: Colors.white70,
-                      letterSpacing: 1.4,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700)),
-              const SizedBox(height: 4),
-              Text(workshop,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      height: 1.15,
-                      fontWeight: FontWeight.w800)),
-              const SizedBox(height: 4),
-              Text(uzbekDay(DateTime.now()),
-                  style: const TextStyle(color: Colors.white70, fontSize: 13)),
-            ]),
-          ),
-          Material(
-            color: Colors.white.withValues(alpha: .16),
-            borderRadius: BorderRadius.circular(20),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(20),
-              onTap: onPlan,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.workspace_premium,
-                      color: Colors.white, size: 16),
-                  const SizedBox(width: 4),
-                  Text(plan,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'ISH MAYDONI',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        letterSpacing: 1.4,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      workshop,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w700)),
-                ]),
-              ),
-            ),
-          ),
-        ]),
-        const SizedBox(height: 16),
-        // Side by side on every phone; the labels shrink before wrapping.
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
-          child: Row(children: [
-            Expanded(
-              child: FilledButton.icon(
-                key: const ValueKey('home-draw'),
-                style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xff1659b8),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 14)),
-                onPressed: onDraw,
-                icon: const Icon(Icons.design_services_outlined, size: 20),
-                label: const FittedBox(
-                    fit: BoxFit.scaleDown, child: Text('Yangi smeta')),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: glassOver(
-                OutlinedButton.icon(
-                  key: const ValueKey('home-measure'),
-                  style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: usesIOSGlass
-                          ? BorderSide.none
-                          : const BorderSide(color: Colors.white70),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 14)),
-                  onPressed: onMeasure,
-                  icon: const Icon(Icons.straighten, size: 20),
-                  label: const FittedBox(
-                      fit: BoxFit.scaleDown, child: Text('Razmer yozish')),
+                        color: Colors.white,
+                        fontSize: 24,
+                        height: 1.15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      uzbekDay(DateTime.now()),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              Material(
+                color: Colors.white.withValues(alpha: .16),
+                borderRadius: BorderRadius.circular(20),
+                child: GlassControl(
+                    child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: onPlan,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.workspace_premium,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          plan,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Side by side on every phone; the labels shrink before wrapping.
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 440),
+            child: NativeGlassButtons(
+              height: 50,
+              equal: true,
+              spacing: 10,
+              items: const [
+                GlassButton(
+                  'draw',
+                  symbol: 'pencil.and.ruler',
+                  title: 'Yangi smeta',
+                  style: 'white',
+                  expand: true,
+                  height: 50,
+                ),
+                GlassButton(
+                  'measure',
+                  symbol: 'ruler',
+                  title: 'Razmer yozish',
+                  light: true,
+                  expand: true,
+                  height: 50,
+                ),
+              ],
+              onTap: (id) => id == 'draw' ? onDraw() : onMeasure(),
+              fallback: Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      key: const ValueKey('home-draw'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xff1659b8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 14,
+                        ),
+                      ),
+                      onPressed: onDraw,
+                      icon: const Icon(
+                        Icons.design_services_outlined,
+                        size: 20,
+                      ),
+                      label: const FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text('Yangi smeta'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: glassOver(
+                      OutlinedButton.icon(
+                        key: const ValueKey('home-measure'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: usesIOSGlass
+                              ? BorderSide.none
+                              : const BorderSide(color: Colors.white70),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 14,
+                          ),
+                        ),
+                        onPressed: onMeasure,
+                        icon: const Icon(Icons.straighten, size: 20),
+                        label: const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text('Razmer yozish'),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ]),
-        ),
-      ]),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1560,22 +1889,32 @@ String _designKey(String preference) {
 /// [child] on a glass pill when Liquid Glass is on.
 Widget glassOver(Widget child, {double radius = 22}) => usesIOSGlass
     ? GlassSurface(
-        radius: BorderRadius.circular(radius), shadow: false, child: child)
+        radius: BorderRadius.circular(radius),
+        shadow: false,
+        child: child,
+      )
     : child;
 
-Future<bool> confirm(BuildContext context, String title, String text,
-    {String action = 'O‘chirish'}) async {
+Future<bool> confirm(
+  BuildContext context,
+  String title,
+  String text, {
+  String action = 'O‘chirish',
+}) async {
   final yes = await showSettledDialog<bool>(
     context: context,
-    builder: (c) => AlertDialog(
+    builder: (c) => GlassAlertDialog(
       title: Text(title),
       content: Text(text),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(c, false),
-            child: const Text('Bekor qilish')),
+          onPressed: () => Navigator.pop(c, false),
+          child: const Text('Bekor qilish'),
+        ),
         FilledButton(
-            onPressed: () => Navigator.pop(c, true), child: Text(action)),
+          onPressed: () => Navigator.pop(c, true),
+          child: Text(action),
+        ),
       ],
     ),
   );
@@ -1602,8 +1941,11 @@ Future<void> callNumber(BuildContext context, String phone) async {
 class CustomerPage extends StatelessWidget {
   final Store store;
   final String customerId;
-  const CustomerPage(
-      {super.key, required this.store, required this.customerId});
+  const CustomerPage({
+    super.key,
+    required this.store,
+    required this.customerId,
+  });
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: store,
@@ -1611,8 +1953,9 @@ class CustomerPage extends StatelessWidget {
           final found = store.customers.where((c) => c['id'] == customerId);
           if (found.isEmpty) {
             return Scaffold(
-                appBar: GlassAppBar(),
-                body: const Center(child: Text('Mijoz topilmadi')));
+              appBar: GlassAppBar(),
+              body: const Center(child: Text('Mijoz topilmadi')),
+            );
           }
           final c = found.first;
           final orders =
@@ -1624,80 +1967,113 @@ class CustomerPage extends StatelessWidget {
               .where((q) => q['status'] != 'cancelled')
               .fold<num>(0, (a, q) => a + (q['balance'] as num));
           return Scaffold(
-            appBar: GlassAppBar(title: Text(c['name']), actions: [
-              IconButton(
+            appBar: GlassAppBar(
+              title: Text(c['name']),
+              actions: [
+                IconButton(
                   tooltip: 'Tahrirlash',
                   onPressed: () => addCustomer(context, store, c),
-                  icon: const Icon(Icons.edit_outlined)),
-              IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                ),
+                IconButton(
                   tooltip: 'O‘chirish',
                   onPressed: () async {
-                    if (await confirm(context, 'Mijoz o‘chirilsinmi?',
-                            'Buyurtmalari o‘chmaydi, ularda ism va telefon saqlanadi.') &&
+                    if (await confirm(
+                          context,
+                          'Mijoz o‘chirilsinmi?',
+                          'Buyurtmalari o‘chmaydi, ularda ism va telefon saqlanadi.',
+                        ) &&
                         context.mounted) {
                       await guarded(
-                          context, () => store.deleteCustomer(customerId));
+                        context,
+                        () => store.deleteCustomer(customerId),
+                      );
                       if (context.mounted) Navigator.pop(context);
                     }
                   },
-                  icon: const Icon(Icons.delete_outline)),
-            ]),
-            floatingActionButton: FloatingActionButton.extended(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => BuilderPage(
-                            store: store, initialCustomer: customerId))),
-                icon: const Icon(Icons.add),
-                label: const Text('Smeta')),
-            body: readable(ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-              children: [
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.phone_outlined),
-                    title: Text((c['phone'] ?? '').toString().isEmpty
-                        ? 'Telefon kiritilmagan'
-                        : c['phone']),
-                    subtitle: (c['address'] ?? '').toString().isEmpty
-                        ? null
-                        : Text(c['address']),
-                    trailing: FilledButton.tonalIcon(
+                  icon: const Icon(Icons.delete_outline),
+                ),
+              ],
+            ),
+            floatingActionButton: GlassActionButton.extended(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      BuilderPage(store: store, initialCustomer: customerId),
+                ),
+              ),
+              icon: const Icon(Icons.add),
+              label: const Text('Smeta'),
+            ),
+            body: readable(
+              ListView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                children: [
+                  GlassCard(
+                    child: GlassControl(
+                        child: ListTile(
+                      leading: const Icon(Icons.phone_outlined),
+                      title: Text(
+                        (c['phone'] ?? '').toString().isEmpty
+                            ? 'Telefon kiritilmagan'
+                            : c['phone'],
+                      ),
+                      subtitle: (c['address'] ?? '').toString().isEmpty
+                          ? null
+                          : Text(c['address']),
+                      trailing: FilledButton.tonalIcon(
                         onPressed: () => callNumber(context, c['phone'] ?? ''),
                         icon: const Icon(Icons.call),
-                        label: const Text('Qo‘ng‘iroq')),
+                        label: const Text('Qo‘ng‘iroq'),
+                      ),
+                    )),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(children: [
-                  Expanded(
-                      child: Kpi('Buyurtmalar', money(total),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Kpi(
+                          'Buyurtmalar',
+                          money(total),
                           Icons.receipt_long_outlined,
-                          hint: '${orders.length} ta smeta')),
-                  const SizedBox(width: 10),
-                  Expanded(
-                      child: Kpi('Qoldiq', money(balance),
+                          hint: '${orders.length} ta smeta',
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Kpi(
+                          'Qoldiq',
+                          money(balance),
                           Icons.account_balance_wallet_outlined,
-                          emphasis: balance > 0)),
-                ]),
-                heading('Buyurtmalar'),
-                if (orders.isEmpty) const Text('Hali smeta yo‘q.'),
-                for (final q in orders)
-                  Card(
-                    child: ListTile(
-                      title: Text(q['title']),
-                      subtitle: Text(
-                          '${money(q['total'])} · ${statuses[q['status']]}'),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => Navigator.push(
+                          emphasis: balance > 0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  heading('Buyurtmalar'),
+                  if (orders.isEmpty) const Text('Hali smeta yo‘q.'),
+                  for (final q in orders)
+                    GlassCard(
+                      child: GlassControl(
+                          child: ListTile(
+                        title: Text(q['title']),
+                        subtitle: Text(
+                          '${money(q['total'])} · ${statuses[q['status']]}',
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) =>
-                                  QuotePage(store: store, id: q['id']))),
+                            builder: (_) =>
+                                QuotePage(store: store, id: q['id']),
+                          ),
+                        ),
+                      )),
                     ),
-                  ),
-              ],
-            )),
+                ],
+              ),
+            ),
           );
         },
       );
@@ -1712,7 +2088,7 @@ Future<void> addCustomer(BuildContext context, Store s, [Json? initial]) async {
   await showSettledDialog(
     context: context,
     builder: (c) => StatefulBuilder(
-      builder: (c, set) => AlertDialog(
+      builder: (c, set) => GlassAlertDialog(
         title: const Text('Yangi mijoz'),
         content: SingleChildScrollView(
           child: Form(
@@ -1775,15 +2151,16 @@ class BuilderPage extends StatefulWidget {
 
   /// When set, the page edits this saved order instead of creating one.
   final Json? editing;
-  const BuilderPage(
-      {super.key,
-      required this.store,
-      this.initialItem,
-      this.initialCustomer,
-      this.initialItems = const [],
-      this.initialTitle,
-      this.initialNotes,
-      this.editing});
+  const BuilderPage({
+    super.key,
+    required this.store,
+    this.initialItem,
+    this.initialCustomer,
+    this.initialItems = const [],
+    this.initialTitle,
+    this.initialNotes,
+    this.editing,
+  });
   @override
   State<BuilderPage> createState() => _BuilderPageState();
 }
@@ -1826,7 +2203,7 @@ class _BuilderPageState extends State<BuilderPage> {
     if (q != null) {
       items = [
         for (final i in q['items'] as List)
-          Map<String, dynamic>.from(jsonDecode(jsonEncode(i)))
+          Map<String, dynamic>.from(jsonDecode(jsonEncode(i))),
       ];
       title.text = q['title'];
       discount.text = '${q['discount'] ?? 0}';
@@ -1834,7 +2211,7 @@ class _BuilderPageState extends State<BuilderPage> {
       notes.text = q['notes'] ?? '';
       extras = [
         for (final e in q['extras'] as List? ?? const [])
-          Map<String, dynamic>.from(e)
+          Map<String, dynamic>.from(e),
       ];
       if (s.customers.any((c) => c['id'] == q['customerId'])) {
         customer = q['customerId'];
@@ -1881,40 +2258,56 @@ class _BuilderPageState extends State<BuilderPage> {
     final name = TextEditingController(text: old?['name'] ?? name0),
         qty = TextEditingController(text: '${old?['qty'] ?? 1}'),
         price = TextEditingController(
-            text: '${old?['price'] ?? s.extraPrices[key] ?? sample}');
+          text: '${old?['price'] ?? s.extraPrices[key] ?? sample}',
+        );
     final ok = await showSettledDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => GlassAlertDialog(
         title: Text(name0),
         content: SingleChildScrollView(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            if (key == 'other') ...[
-              TextField(
-                  controller: name,
-                  decoration: const InputDecoration(labelText: 'Nomi')),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (key == 'other') ...[
+                GlassControl(
+                  child: TextField(
+                    controller: name,
+                    decoration: const InputDecoration(labelText: 'Nomi'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+              GlassControl(
+                child: TextField(
+                  key: const ValueKey('extra-qty'),
+                  controller: qty,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(labelText: 'Miqdori ($unit)'),
+                ),
+              ),
               const SizedBox(height: 12),
+              GlassControl(
+                child: TextField(
+                  key: const ValueKey('extra-price'),
+                  controller: price,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Narxi, so‘m / $unit'),
+                ),
+              ),
             ],
-            TextField(
-                key: const ValueKey('extra-qty'),
-                controller: qty,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: 'Miqdori ($unit)')),
-            const SizedBox(height: 12),
-            TextField(
-                key: const ValueKey('extra-price'),
-                controller: price,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Narxi, so‘m / $unit')),
-          ]),
+          ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(c, false),
-              child: const Text('Bekor qilish')),
+            onPressed: () => Navigator.pop(c, false),
+            child: const Text('Bekor qilish'),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(c, true),
-              child: const Text('Qo‘shish')),
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text('Qo‘shish'),
+          ),
         ],
       ),
     );
@@ -1930,7 +2323,7 @@ class _BuilderPageState extends State<BuilderPage> {
       'name': name.text.trim(),
       'unit': unit,
       'qty': q,
-      'price': p
+      'price': p,
     };
     setState(() {
       index == null ? extras.add(line) : extras[index] = line;
@@ -1941,34 +2334,48 @@ class _BuilderPageState extends State<BuilderPage> {
   List<Widget> extrasSection() => [
         heading('Qo‘shimcha ishlar'),
         for (var i = 0; i < extras.length; i++)
-          Card(
-            child: ListTile(
+          GlassCard(
+            child: GlassControl(
+                child: ListTile(
               title: Text(extras[i]['name']),
               subtitle: Text(
-                  '${extras[i]['qty']} ${extras[i]['unit']} × ${money(extras[i]['price'])}'),
+                '${extras[i]['qty']} ${extras[i]['unit']} × ${money(extras[i]['price'])}',
+              ),
               onTap: () => editExtra(extras[i]['key'] ?? 'other', i),
-              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                Text(money(extraLine(extras[i])),
-                    style: const TextStyle(fontWeight: FontWeight.w700)),
-                IconButton(
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    money(extraLine(extras[i])),
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  IconButton(
                     tooltip: 'Olib tashlash',
                     onPressed: () => setState(() {
-                          extras.removeAt(i);
-                          result = null;
-                        }),
-                    icon: const Icon(Icons.close)),
-              ]),
-            ),
+                      extras.removeAt(i);
+                      result = null;
+                    }),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            )),
           ),
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final e in extraCatalog.entries)
-            ActionChip(
-              key: ValueKey('extra-${e.key}'),
-              avatar: const Icon(Icons.add, size: 18),
-              label: Text(e.value.$1),
-              onPressed: () => editExtra(e.key),
-            ),
-        ]),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final e in extraCatalog.entries)
+              GlassControl(
+                child: ActionChip(
+                  key: ValueKey('extra-${e.key}'),
+                  avatar: const Icon(Icons.add, size: 18),
+                  label: Text(e.value.$1),
+                  onPressed: () => editExtra(e.key),
+                ),
+              ),
+          ],
+        ),
         const SizedBox(height: 14),
       ];
   Widget choice(
@@ -1979,12 +2386,14 @@ class _BuilderPageState extends State<BuilderPage> {
   ) =>
       Padding(
         padding: const EdgeInsets.only(bottom: 14),
-        child: DropdownButtonFormField<String>(
-          initialValue: value,
-          isExpanded: true,
-          decoration: InputDecoration(labelText: label),
-          items: options,
-          onChanged: changed,
+        child: GlassControl(
+          child: DropdownButtonFormField<String>(
+            initialValue: value,
+            isExpanded: true,
+            decoration: InputDecoration(labelText: label),
+            items: options,
+            onChanged: changed,
+          ),
         ),
       );
 
@@ -2004,7 +2413,7 @@ class _BuilderPageState extends State<BuilderPage> {
           } catch (_) {
             return null;
           }
-        }()
+        }(),
     ];
     return _itemTotals;
   }
@@ -2026,14 +2435,21 @@ class _BuilderPageState extends State<BuilderPage> {
       });
 
   Future<void> addWindow() async {
-    final choice =
-        await openDesignCatalog(context, recipe: catalogRecipe(s), store: s);
+    final choice = await openDesignCatalog(
+      context,
+      recipe: catalogRecipe(s),
+      store: s,
+    );
     if (!mounted || choice == null) return;
     final item = await Navigator.push<Json>(
       context,
       MaterialPageRoute(
-          builder: (_) => DrawingEditor(
-              store: s, title: 'Smetaga rom qo‘shish', initial: choice.item())),
+        builder: (_) => DrawingEditor(
+          store: s,
+          title: 'Smetaga rom qo‘shish',
+          initial: choice.item(),
+        ),
+      ),
     );
     if (item != null && mounted) changed(() => items.add(item));
   }
@@ -2045,10 +2461,11 @@ class _BuilderPageState extends State<BuilderPage> {
       context,
       MaterialPageRoute(
         builder: (_) => DrawingEditor(
-            store: s,
-            title: 'Romni tahrirlash',
-            initial: item,
-            key: ValueKey('edit-$index')),
+          store: s,
+          title: 'Romni tahrirlash',
+          initial: item,
+          key: ValueKey('edit-$index'),
+        ),
       ),
     );
     if (updated != null && mounted) changed(() => items[index] = updated);
@@ -2061,30 +2478,41 @@ class _BuilderPageState extends State<BuilderPage> {
       case 'room':
         final value = await pickRoom(context, items[index]['label']);
         if (value == null || !mounted) return;
-        changed(() => value.isEmpty
-            ? items[index].remove('label')
-            : items[index]['label'] = value);
+        changed(
+          () => value.isEmpty
+              ? items[index].remove('label')
+              : items[index]['label'] = value,
+        );
       case 'copy':
-        changed(() => items.insert(
+        changed(
+          () => items.insert(
             index + 1,
             Map<String, dynamic>.from(jsonDecode(jsonEncode(items[index])))
-              ..remove('label')));
+              ..remove('label'),
+          ),
+        );
         message(context, 'Rom nusxalandi');
       case 'delete':
         final removed = items[index];
         changed(() => items.removeAt(index));
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(
+          ..showSnackBar(
+            SnackBar(
               content: const Text('Rom olib tashlandi'),
               action: SnackBarAction(
-                  label: 'Qaytarish',
-                  onPressed: () {
-                    if (mounted) {
-                      changed(() =>
-                          items.insert(math.min(index, items.length), removed));
-                    }
-                  })));
+                label: 'Qaytarish',
+                onPressed: () {
+                  if (mounted) {
+                    changed(
+                      () =>
+                          items.insert(math.min(index, items.length), removed),
+                    );
+                  }
+                },
+              ),
+            ),
+          );
     }
   }
 
@@ -2094,116 +2522,157 @@ class _BuilderPageState extends State<BuilderPage> {
         text = Theme.of(context).textTheme,
         drawn = item['drawing'] != null,
         count = (item['quantity'] as num).toInt(),
-        profileName = s.profiles.firstWhere((p) => p['id'] == item['profileId'],
-            orElse: () => {'name': item['profileName'] ?? ''})['name'];
-    return Card(
+        profileName = s.profiles.firstWhere(
+          (p) => p['id'] == item['profileId'],
+          orElse: () => {'name': item['profileName'] ?? ''},
+        )['name'];
+    return GlassCard(
       key: ValueKey('window-$index'),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
+      child: GlassControl(
+          child: InkWell(
         onTap: drawn && !busy ? () => editWindow(index) : null,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 12, 4, 10),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
-              width: 78,
-              height: 78,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 78,
+                height: 78,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: scheme.outlineVariant)),
-              child: drawn
-                  ? WindowThumb(
-                      drawing: Map<String, dynamic>.from(item['drawing']),
-                      recipe: Map<String, dynamic>.from(item['recipe'] ??
-                          recipeFor(s.profiles.firstWhere(
-                              (p) => p['id'] == item['profileId'],
-                              orElse: () => s.profiles.first))))
-                  : Icon(Icons.window_outlined,
-                      size: 36, color: scheme.onSurfaceVariant),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
+                  border: Border.all(color: scheme.outlineVariant),
+                ),
+                child: drawn
+                    ? WindowThumb(
+                        drawing: Map<String, dynamic>.from(item['drawing']),
+                        recipe: Map<String, dynamic>.from(
+                          item['recipe'] ??
+                              recipeFor(
+                                s.profiles.firstWhere(
+                                  (p) => p['id'] == item['profileId'],
+                                  orElse: () => s.profiles.first,
+                                ),
+                              ),
+                        ),
+                      )
+                    : Icon(
+                        Icons.window_outlined,
+                        size: 36,
+                        color: scheme.onSurfaceVariant,
+                      ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(children: [
-                      Expanded(
-                        child: Text(item['label'] ?? '${index + 1}-rom',
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item['label'] ?? '${index + 1}-rom',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: text.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w700)),
-                      ),
-                    ]),
-                    Text(
-                        '${item['widthMm']} × ${item['heightMm']} mm • $profileName',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: text.bodySmall),
-                    const SizedBox(height: 6),
-                    Row(children: [
-                      _Stepper(
-                        value: count,
-                        onChanged: busy
-                            ? null
-                            : (v) =>
-                                changed(() => items[index]['quantity'] = v),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerRight,
-                          child: Text(price == null ? '—' : money(price),
-                              style: text.titleSmall?.copyWith(
-                                  color: scheme.primary,
-                                  fontWeight: FontWeight.w800)),
+                            style: text.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
-                      ),
-                    ]),
-                  ]),
-            ),
-            PopupMenuButton<String>(
-              key: ValueKey('window-menu-$index'),
-              tooltip: 'Amallar',
-              enabled: !busy,
-              onSelected: (v) => windowMenu(index, v),
-              itemBuilder: (_) => [
-                if (drawn)
-                  const PopupMenuItem(
+                      ],
+                    ),
+                    Text(
+                      '${item['widthMm']} × ${item['heightMm']} mm • $profileName',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.bodySmall,
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        _Stepper(
+                          value: count,
+                          onChanged: busy
+                              ? null
+                              : (v) =>
+                                  changed(() => items[index]['quantity'] = v),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              price == null ? '—' : money(price),
+                              style: text.titleSmall?.copyWith(
+                                color: scheme.primary,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuButton<String>(
+                key: ValueKey('window-menu-$index'),
+                tooltip: 'Amallar',
+                enabled: !busy,
+                onSelected: (v) => windowMenu(index, v),
+                itemBuilder: (_) => [
+                  if (drawn)
+                    const PopupMenuItem(
                       value: 'edit',
-                      child: ListTile(
-                          leading: Icon(Icons.edit_outlined),
-                          title: Text('Chizmani tahrirlash'))),
-                const PopupMenuItem(
+                      child: GlassControl(
+                          child: ListTile(
+                        leading: Icon(Icons.edit_outlined),
+                        title: Text('Chizmani tahrirlash'),
+                      )),
+                    ),
+                  const PopupMenuItem(
                     value: 'room',
-                    child: ListTile(
-                        leading: Icon(Icons.place_outlined),
-                        title: Text('Joyini yozish'))),
-                const PopupMenuItem(
+                    child: GlassControl(
+                        child: ListTile(
+                      leading: Icon(Icons.place_outlined),
+                      title: Text('Joyini yozish'),
+                    )),
+                  ),
+                  const PopupMenuItem(
                     value: 'copy',
-                    child: ListTile(
-                        leading: Icon(Icons.copy_outlined),
-                        title: Text('Nusxa olish'))),
-                const PopupMenuItem(
+                    child: GlassControl(
+                        child: ListTile(
+                      leading: Icon(Icons.copy_outlined),
+                      title: Text('Nusxa olish'),
+                    )),
+                  ),
+                  const PopupMenuItem(
                     value: 'delete',
-                    child: ListTile(
-                        leading: Icon(Icons.delete_outline),
-                        title: Text('Olib tashlash'))),
-              ],
-            ),
-          ]),
+                    child: GlassControl(
+                        child: ListTile(
+                      leading: Icon(Icons.delete_outline),
+                      title: Text('Olib tashlash'),
+                    )),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
+      )),
     );
   }
 
   /// The old quick form: a window from a fixed layout, without drawing.
   Widget quickForm() {
     final t = templates.firstWhere((t) => t['id'] == template);
-    return Card(
-      child: ExpansionTile(
+    return GlassCard(
+      child: GlassControl(
+          child: ExpansionTile(
         key: const ValueKey('quick-form'),
         leading: const Icon(Icons.bolt_outlined),
         title: const Text('Tezkor hisob (chizmasiz)'),
@@ -2263,12 +2732,7 @@ class _BuilderPageState extends State<BuilderPage> {
           Row(
             children: [
               Expanded(
-                child: field(
-                  w,
-                  'Eni (mm)',
-                  number: true,
-                  validate: dimension,
-                ),
+                child: field(w, 'Eni (mm)', number: true, validate: dimension),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -2286,10 +2750,7 @@ class _BuilderPageState extends State<BuilderPage> {
             color,
             const [
               DropdownMenuItem(value: 'white', child: Text('Oq')),
-              DropdownMenuItem(
-                value: 'anthracite',
-                child: Text('Antratsit'),
-              ),
+              DropdownMenuItem(value: 'anthracite', child: Text('Antratsit')),
               DropdownMenuItem(value: 'oak', child: Text('Yog‘och rang')),
             ],
             (v) => setState(() {
@@ -2306,13 +2767,15 @@ class _BuilderPageState extends State<BuilderPage> {
               return n == null || n < 1 || n > 100 ? '1–100 dona' : null;
             },
           ),
-          CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            value: mosquito,
-            onChanged: (v) => setState(() => mosquito = v!),
-            title: const Text('Setka qo‘shish'),
-            subtitle: Text(
-              '${money(s.profiles.firstWhere((p) => p['id'] == profile)['meshPrice'] ?? 75000)}/m²',
+          GlassControl(
+            child: CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              value: mosquito,
+              onChanged: (v) => setState(() => mosquito = v!),
+              title: const Text('Setka qo‘shish'),
+              subtitle: Text(
+                '${money(s.profiles.firstWhere((p) => p['id'] == profile)['meshPrice'] ?? 75000)}/m²',
+              ),
             ),
           ),
           OutlinedButton.icon(
@@ -2322,71 +2785,85 @@ class _BuilderPageState extends State<BuilderPage> {
           ),
           const SizedBox(height: 8),
           Text(
-              'Hisob taxminiy, chizma sxematik. To‘liq material, rezina va chiqindi uchun romni chizing.',
-              style: Theme.of(context).textTheme.bodySmall),
+            'Hisob taxminiy, chizma sxematik. To‘liq material, rezina va chiqindi uchun romni chizing.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
-      ),
+      )),
     );
   }
 
   Widget totalBar(num? total) {
     final scheme = Theme.of(context).colorScheme;
-    final count =
-        items.fold<int>(0, (n, i) => n + (i['quantity'] as num).toInt());
+    final count = items.fold<int>(
+      0,
+      (n, i) => n + (i['quantity'] as num).toInt(),
+    );
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
         border: Border(top: BorderSide(color: scheme.outlineVariant)),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: .06),
-              blurRadius: 16,
-              offset: const Offset(0, -4))
+            color: Colors.black.withValues(alpha: .06),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
         ],
       ),
       child: SafeArea(
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-          child: Row(children: [
-            Expanded(
-              child: Column(
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                        items.isEmpty
-                            ? 'Hali rom yo‘q'
-                            : '${items.length} xil rom • $count dona',
-                        style: Theme.of(context).textTheme.bodySmall),
+                      items.isEmpty
+                          ? 'Hali rom yo‘q'
+                          : '${items.length} xil rom • $count dona',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text(total == null ? '—' : money(total),
-                          key: const ValueKey('smeta-total'),
-                          style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              color: scheme.primary)),
+                      child: Text(
+                        total == null ? '—' : money(total),
+                        key: const ValueKey('smeta-total'),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: scheme.primary,
+                        ),
+                      ),
                     ),
                     if (total != null && s.usdRate > 0)
-                      Text(dollars(total, s.usdRate),
-                          style: Theme.of(context).textTheme.bodySmall),
-                  ]),
-            ),
-            const SizedBox(width: 12),
-            FilledButton.icon(
-              key: const ValueKey('save-smeta'),
-              onPressed: busy ? null : () => run(true),
-              icon: busy
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.check),
-              label: Text(widget.editing == null ? 'Saqlash' : 'Yangilash'),
-            ),
-          ]),
+                      Text(
+                        dollars(total, s.usdRate),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilledButton.icon(
+                key: const ValueKey('save-smeta'),
+                onPressed: busy ? null : () => run(true),
+                icon: busy
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.check),
+                label: Text(widget.editing == null ? 'Saqlash' : 'Yangilash'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -2398,148 +2875,166 @@ class _BuilderPageState extends State<BuilderPage> {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: GlassAppBar(
-          title: Text(widget.editing == null ? 'Smeta' : 'Smetani tahrirlash')),
+        title: Text(widget.editing == null ? 'Smeta' : 'Smetani tahrirlash'),
+      ),
       bottomNavigationBar: totalBar(total),
-      body: readable(SafeArea(
-        bottom: false,
-        child: Form(
-          key: form,
-          child: ListView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                  child: Column(children: [
-                    field(title, 'Buyurtma nomi'),
-                    if (s.customers.isNotEmpty)
-                      choice(
-                        'Mijoz',
-                        customer ?? s.customers.first['id'],
-                        s.customers
-                            .map(
-                              (c) => DropdownMenuItem<String>(
-                                value: c['id'],
-                                child: Text(c['name']),
-                              ),
-                            )
-                            .toList(),
-                        (v) => setState(() {
-                          customer = v;
-                          result = null;
-                        }),
-                      ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        onPressed: busy
-                            ? null
-                            : () async {
-                                await addCustomer(context, s);
-                                if (mounted) {
-                                  setState(
-                                    () => customer = s.customers.isEmpty
-                                        ? null
-                                        : s.customers.first['id'],
-                                  );
-                                }
-                              },
-                        icon: const Icon(Icons.person_add_alt),
-                        label: Text(s.customers.isEmpty
-                            ? 'Mijoz qo‘shish'
-                            : 'Yangi mijoz'),
-                      ),
-                    ),
-                  ]),
-                ),
-              ),
-              Row(children: [
-                Expanded(child: heading('Romlar')),
-                if (items.isNotEmpty)
-                  Text(
-                      '${items.fold<int>(0, (n, i) => n + (i['quantity'] as num).toInt())} dona',
-                      style: Theme.of(context).textTheme.bodySmall),
-              ]),
-              for (var i = 0; i < items.length; i++)
-                windowCard(i, i < prices.length ? prices[i] : null),
-              Material(
-                color: scheme.primaryContainer,
-                borderRadius: BorderRadius.circular(16),
-                child: InkWell(
-                  key: const ValueKey('add-window'),
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: busy ? null : addWindow,
+      body: readable(
+        SafeArea(
+          bottom: false,
+          child: Form(
+            key: form,
+            child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              children: [
+                GlassCard(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    child: Row(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                    child: Column(
+                      children: [
+                        field(title, 'Buyurtma nomi'),
+                        if (s.customers.isNotEmpty)
+                          choice(
+                            'Mijoz',
+                            customer ?? s.customers.first['id'],
+                            s.customers
+                                .map(
+                                  (c) => DropdownMenuItem<String>(
+                                    value: c['id'],
+                                    child: Text(c['name']),
+                                  ),
+                                )
+                                .toList(),
+                            (v) => setState(() {
+                              customer = v;
+                              result = null;
+                            }),
+                          ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: busy
+                                ? null
+                                : () async {
+                                    await addCustomer(context, s);
+                                    if (mounted) {
+                                      setState(
+                                        () => customer = s.customers.isEmpty
+                                            ? null
+                                            : s.customers.first['id'],
+                                      );
+                                    }
+                                  },
+                            icon: const Icon(Icons.person_add_alt),
+                            label: Text(
+                              s.customers.isEmpty
+                                  ? 'Mijoz qo‘shish'
+                                  : 'Yangi mijoz',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(child: heading('Romlar')),
+                    if (items.isNotEmpty)
+                      Text(
+                        '${items.fold<int>(0, (n, i) => n + (i['quantity'] as num).toInt())} dona',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                  ],
+                ),
+                for (var i = 0; i < items.length; i++)
+                  windowCard(i, i < prices.length ? prices[i] : null),
+                Material(
+                  color: scheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(16),
+                  child: GlassControl(
+                      child: InkWell(
+                    key: const ValueKey('add-window'),
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: busy ? null : addWindow,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.add_circle_outline, color: scheme.primary),
                           const SizedBox(width: 8),
                           Text(
-                              items.isEmpty
-                                  ? 'Rom chizib qo‘shish'
-                                  : 'Yana rom qo‘shish',
-                              style: TextStyle(
-                                  color: scheme.primary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700)),
-                        ]),
-                  ),
+                            items.isEmpty
+                                ? 'Rom chizib qo‘shish'
+                                : 'Yana rom qo‘shish',
+                            style: TextStyle(
+                              color: scheme.primary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )),
                 ),
-              ),
-              const SizedBox(height: 12),
-              quickForm(),
-              const SizedBox(height: 4),
-              ...extrasSection(),
-              heading('Montaj, chegirma, izoh'),
-              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: WorkshopField(
-                      controller: install,
-                      label: 'Montaj, so‘m',
-                      number: true,
-                      decimal: false,
-                      validator: nonnegative,
-                      onChanged: (_) => setState(() => result = null),
+                const SizedBox(height: 12),
+                quickForm(),
+                const SizedBox(height: 4),
+                ...extrasSection(),
+                heading('Montaj, chegirma, izoh'),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: WorkshopField(
+                          controller: install,
+                          label: 'Montaj, so‘m',
+                          number: true,
+                          decimal: false,
+                          validator: nonnegative,
+                          onChanged: (_) => setState(() => result = null),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: WorkshopField(
+                          controller: discount,
+                          label: 'Chegirma, so‘m',
+                          number: true,
+                          decimal: false,
+                          validator: nonnegative,
+                          onChanged: (_) => setState(() => result = null),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                field(notes, 'Izoh', validate: (_) => null),
+                if (items.isNotEmpty)
+                  OutlinedButton.icon(
+                    onPressed: busy ? null : () => run(false),
+                    icon: const Icon(Icons.fact_check_outlined),
+                    label: const Text('Tekshirish'),
+                  ),
+                if (result != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: notice(
+                      'Smeta to‘g‘ri: ${(result!['items'] as List).length} ta pozitsiya, jami ${money(result!['total'])}.',
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: WorkshopField(
-                      controller: discount,
-                      label: 'Chegirma, so‘m',
-                      number: true,
-                      decimal: false,
-                      validator: nonnegative,
-                      onChanged: (_) => setState(() => result = null),
-                    ),
-                  ),
-                ),
-              ]),
-              field(notes, 'Izoh', validate: (_) => null),
-              if (items.isNotEmpty)
-                OutlinedButton.icon(
-                  onPressed: busy ? null : () => run(false),
-                  icon: const Icon(Icons.fact_check_outlined),
-                  label: const Text('Tekshirish'),
-                ),
-              if (result != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: notice(
-                      'Smeta to‘g‘ri: ${(result!['items'] as List).length} ta pozitsiya, jami ${money(result!['total'])}.'),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
-      )),
+      ),
     );
   }
 
@@ -2780,286 +3275,332 @@ class _QuotePageState extends State<QuotePage> {
                       ('delete', Icons.delete_outline, 'O‘chirish'),
                     ])
                       PopupMenuItem(
-                          value: id,
-                          child: ListTile(
-                              dense: true,
-                              contentPadding: EdgeInsets.zero,
-                              leading: Icon(icon),
-                              title: Text(label))),
+                        value: id,
+                        child: GlassControl(
+                            child: ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(icon),
+                          title: Text(label),
+                        )),
+                      ),
                   ],
                 ),
               ],
             ),
-            body: readable(SafeArea(
-              child: ListView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.all(20),
-                children: [
-                  Text(
-                    statuses[q['status']]!,
-                    style: const TextStyle(
-                      color: blue,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  heading(q['title']),
-                  OutlinedButton.icon(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => WarehousePage(
-                          store: s,
-                          items: q['items'],
-                          quoteId: q['id'],
-                        ),
+            body: readable(
+              SafeArea(
+                child: ListView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.all(20),
+                  children: [
+                    Text(
+                      statuses[q['status']]!,
+                      style: const TextStyle(
+                        color: blue,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    icon: const Icon(Icons.inventory_2_outlined),
-                    label: const Text('Ombor / xarid ro‘yxati'),
-                  ),
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.person_outline),
-                      title: Text(q['customer']),
-                      subtitle: Text([
-                        if ((q['phone'] ?? '').toString().isNotEmpty)
-                          q['phone'],
-                        if ((q['address'] ?? '').toString().isNotEmpty)
-                          q['address'],
-                      ].join('\n')),
-                      trailing: IconButton(
+                    heading(q['title']),
+                    OutlinedButton.icon(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WarehousePage(
+                            store: s,
+                            items: q['items'],
+                            quoteId: q['id'],
+                          ),
+                        ),
+                      ),
+                      icon: const Icon(Icons.inventory_2_outlined),
+                      label: const Text('Ombor / xarid ro‘yxati'),
+                    ),
+                    GlassCard(
+                      child: GlassControl(
+                          child: ListTile(
+                        leading: const Icon(Icons.person_outline),
+                        title: Text(q['customer']),
+                        subtitle: Text(
+                          [
+                            if ((q['phone'] ?? '').toString().isNotEmpty)
+                              q['phone'],
+                            if ((q['address'] ?? '').toString().isNotEmpty)
+                              q['address'],
+                          ].join('\n'),
+                        ),
+                        trailing: IconButton(
                           tooltip: 'Qo‘ng‘iroq',
                           onPressed: () =>
                               callNumber(context, q['phone'] ?? ''),
-                          icon: const Icon(Icons.call_outlined)),
-                    ),
-                  ),
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.event_outlined),
-                      title: const Text('Montaj sanasi'),
-                      subtitle: Text(q['installDate'] == null
-                          ? 'Belgilanmagan — bosing'
-                          : localDate(q['installDate'])),
-                      trailing: q['installDate'] == null
-                          ? const Icon(Icons.chevron_right)
-                          : IconButton(
-                              tooltip: 'Olib tashlash',
-                              onPressed: () =>
-                                  action(() => s.setInstallDate(q['id'], null)),
-                              icon: const Icon(Icons.close)),
-                      onTap: busy ? null : () => pickInstallDate(q),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  notice(
-                    'Chizmali pozitsiyalarda material va raskroy hisobi mavjud. Sex me’yorlari va namuna narxlarini haqiqiy katalog/prays bilan tekshiring.',
-                  ),
-                  ...((q['items'] as List).map(
-                    (i) => Card(
-                      child: ExpansionTile(
-                        leading: i['drawing'] == null
-                            ? const Icon(Icons.window_outlined)
-                            : SizedBox(
-                                width: 44,
-                                height: 44,
-                                child: WindowThumb(
-                                    drawing:
-                                        Map<String, dynamic>.from(i['drawing']),
-                                    recipe: Map<String, dynamic>.from(
-                                        i['recipe']))),
-                        title: Text(i['label'] == null
-                            ? i['profileName']
-                            : '${i['label']} • ${i['profileName']}'),
-                        subtitle: Text(
-                          '${i['widthMm']}×${i['heightMm']} mm · ${i['quantity']} dona\n${money(i['total'])}',
+                          icon: const Icon(Icons.call_outlined),
                         ),
-                        children: [
-                          if (i['drawing'] != null) ...[
-                            TextButton.icon(
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => View3D(
+                      )),
+                    ),
+                    GlassCard(
+                      child: GlassControl(
+                          child: ListTile(
+                        leading: const Icon(Icons.event_outlined),
+                        title: const Text('Montaj sanasi'),
+                        subtitle: Text(
+                          q['installDate'] == null
+                              ? 'Belgilanmagan — bosing'
+                              : localDate(q['installDate']),
+                        ),
+                        trailing: q['installDate'] == null
+                            ? const Icon(Icons.chevron_right)
+                            : IconButton(
+                                tooltip: 'Olib tashlash',
+                                onPressed: () => action(
+                                    () => s.setInstallDate(q['id'], null)),
+                                icon: const Icon(Icons.close),
+                              ),
+                        onTap: busy ? null : () => pickInstallDate(q),
+                      )),
+                    ),
+                    const SizedBox(height: 10),
+                    notice(
+                      'Chizmali pozitsiyalarda material va raskroy hisobi mavjud. Sex me’yorlari va namuna narxlarini haqiqiy katalog/prays bilan tekshiring.',
+                    ),
+                    ...((q['items'] as List).map(
+                      (i) => GlassCard(
+                        child: GlassControl(
+                            child: ExpansionTile(
+                          leading: i['drawing'] == null
+                              ? const Icon(Icons.window_outlined)
+                              : SizedBox(
+                                  width: 44,
+                                  height: 44,
+                                  child: WindowThumb(
                                     drawing: Map<String, dynamic>.from(
                                       i['drawing'],
                                     ),
                                     recipe:
                                         Map<String, dynamic>.from(i['recipe']),
-                                    aiKey: s.aiKey,
-                                    calculation: Map<String, dynamic>.from(i),
+                                  ),
+                                ),
+                          title: Text(
+                            i['label'] == null
+                                ? i['profileName']
+                                : '${i['label']} • ${i['profileName']}',
+                          ),
+                          subtitle: Text(
+                            '${i['widthMm']}×${i['heightMm']} mm · ${i['quantity']} dona\n${money(i['total'])}',
+                          ),
+                          children: [
+                            if (i['drawing'] != null) ...[
+                              TextButton.icon(
+                                onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => View3D(
+                                      drawing: Map<String, dynamic>.from(
+                                        i['drawing'],
+                                      ),
+                                      recipe: Map<String, dynamic>.from(
+                                        i['recipe'],
+                                      ),
+                                      aiKey: s.aiKey,
+                                      calculation: Map<String, dynamic>.from(i),
+                                    ),
+                                  ),
+                                ),
+                                icon: const Icon(Icons.view_in_ar),
+                                label: const Text('3D / animatsiya'),
+                              ),
+                              SizedBox(
+                                height: 300,
+                                child: CustomPaint(
+                                  painter: DrawingPainter(
+                                    Map<String, dynamic>.from(i['drawing']),
+                                    Map<String, dynamic>.from(i['recipe']),
                                   ),
                                 ),
                               ),
-                              icon: const Icon(Icons.view_in_ar),
-                              label: const Text('3D / animatsiya'),
-                            ),
-                            SizedBox(
-                              height: 300,
-                              child: CustomPaint(
-                                painter: DrawingPainter(
-                                  Map<String, dynamic>.from(i['drawing']),
-                                  Map<String, dynamic>.from(i['recipe']),
+                              Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: DrawingReport(
+                                  item: Map<String, dynamic>.from(i),
                                 ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: DrawingReport(
-                                item: Map<String, dynamic>.from(i),
-                              ),
-                            ),
-                          ] else
-                            ...((i['parts'] as List).map(
-                              (p) => ListTile(
-                                dense: true,
-                                title: Text(p['name']),
-                                subtitle: Text('${p['quantity']} ${p['unit']}'),
-                                trailing: Text(money(p['cost'])),
-                              ),
-                            )),
-                        ],
+                            ] else
+                              ...((i['parts'] as List).map(
+                                (p) => GlassControl(
+                                    child: ListTile(
+                                  dense: true,
+                                  title: Text(p['name']),
+                                  subtitle:
+                                      Text('${p['quantity']} ${p['unit']}'),
+                                  trailing: Text(money(p['cost'])),
+                                )),
+                              )),
+                          ],
+                        )),
                       ),
-                    ),
-                  )),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Oraliq: ${money(q['subtotal'])}'),
-                          for (final e in q['extras'] as List? ?? const [])
+                    )),
+                    GlassCard(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Oraliq: ${money(q['subtotal'])}'),
+                            for (final e in q['extras'] as List? ?? const [])
+                              Text(
+                                '${e['name']}: ${e['qty']} ${e['unit']} × ${money(e['price'])} = ${money(extraLine(Map<String, dynamic>.from(e)))}',
+                              ),
+                            Text('Montaj: ${money(q['installation'])}'),
+                            Text('Chegirma: ${money(q['discount'])}'),
+                            const Divider(),
                             Text(
-                                '${e['name']}: ${e['qty']} ${e['unit']} × ${money(e['price'])} = ${money(extraLine(Map<String, dynamic>.from(e)))}'),
-                          Text('Montaj: ${money(q['installation'])}'),
-                          Text('Chegirma: ${money(q['discount'])}'),
-                          const Divider(),
-                          Text(
-                            money(q['total']),
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              color: blue,
+                              money(q['total']),
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                color: blue,
+                              ),
                             ),
-                          ),
-                          if (s.usdRate > 0)
-                            Text(dollars(q['total'], s.usdRate),
-                                style: const TextStyle(color: muted)),
-                          Text('To‘langan: ${money(q['paid'])}'),
-                          Text('Qoldiq: ${money(q['balance'])}'),
-                        ],
+                            if (s.usdRate > 0)
+                              Text(
+                                dollars(q['total'], s.usdRate),
+                                style: const TextStyle(color: muted),
+                              ),
+                            Text('To‘langan: ${money(q['paid'])}'),
+                            Text('Qoldiq: ${money(q['balance'])}'),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  if ((q['notes'] ?? '').toString().isNotEmpty)
-                    Text(q['notes']),
-                  profitCard(q),
-                  OutlinedButton.icon(
-                    onPressed: busy
-                        ? null
-                        : () => action(() => exportPdf(q, save: true)),
-                    icon: const Icon(Icons.save_alt),
-                    label: const Text('PDFni faylga saqlash'),
-                  ),
-                  heading('Buyurtma bosqichi'),
-                  if (s.staff.isNotEmpty)
-                    DropdownButtonFormField<String>(
-                      initialValue: s.staff.any((p) => p['id'] == q['staffId'])
-                          ? q['staffId']
-                          : null,
-                      decoration:
-                          const InputDecoration(labelText: 'Mas’ul xodim'),
-                      items: [
-                        for (final person in s.staff)
-                          DropdownMenuItem<String>(
-                            value: person['id'],
-                            child: Text(person['name']),
+                    if ((q['notes'] ?? '').toString().isNotEmpty)
+                      Text(q['notes']),
+                    profitCard(q),
+                    OutlinedButton.icon(
+                      onPressed: busy
+                          ? null
+                          : () => action(() => exportPdf(q, save: true)),
+                      icon: const Icon(Icons.save_alt),
+                      label: const Text('PDFni faylga saqlash'),
+                    ),
+                    heading('Buyurtma bosqichi'),
+                    if (s.staff.isNotEmpty)
+                      GlassControl(
+                        child: DropdownButtonFormField<String>(
+                          initialValue:
+                              s.staff.any((p) => p['id'] == q['staffId'])
+                                  ? q['staffId']
+                                  : null,
+                          decoration: const InputDecoration(
+                            labelText: 'Mas’ul xodim',
+                          ),
+                          items: [
+                            for (final person in s.staff)
+                              DropdownMenuItem<String>(
+                                value: person['id'],
+                                child: Text(person['name']),
+                              ),
+                          ],
+                          onChanged: busy
+                              ? null
+                              : (id) => action(() => s.assignStaff(q, id)),
+                        ),
+                      ),
+                    if (s.staff.any((p) => p['id'] == q['staffId']))
+                      Builder(
+                        builder: (context) {
+                          final worker = s.staff.firstWhere(
+                            (p) => p['id'] == q['staffId'],
+                          );
+                          final done = s.payroll.any(
+                            (e) =>
+                                e['quoteId'] == q['id'] &&
+                                e['staffId'] == worker['id'] &&
+                                e['kind'] == 'accrual',
+                          );
+                          return GlassControl(
+                              child: ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.badge_outlined),
+                            title: Text(
+                              done
+                                  ? 'Ish haqi yozilgan'
+                                  : 'Ish haqi: ${money(Store.suggestedPay(worker, q))}',
+                            ),
+                            subtitle: Text(rateLabel(worker)),
+                            trailing: done
+                                ? const Icon(Icons.check_circle_outline)
+                                : FilledButton.tonal(
+                                    onPressed: () => payrollDialog(
+                                      context,
+                                      s,
+                                      worker['id'],
+                                      suggested: Store.suggestedPay(worker, q),
+                                      quoteId: q['id'],
+                                      note: q['title'],
+                                    ),
+                                    child: const Text('Yozish'),
+                                  ),
+                          ));
+                        },
+                      ),
+                    if (s.staff.isEmpty)
+                      TextButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => StaffPage(store: s)),
+                        ),
+                        icon: const Icon(Icons.person_add_alt),
+                        label:
+                            const Text('Xodim qo‘shib, buyurtmani biriktirish'),
+                      ),
+                    const SizedBox(height: 12),
+                    for (final payment in q['payments'] ?? [])
+                      GlassControl(
+                          child: ListTile(
+                        title: Text(money(payment['amount'])),
+                        subtitle: Text(
+                          '${payment['note']} · ${payment['created']}',
+                        ),
+                      )),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final status in transitions[q['status']]!)
+                          FilledButton.tonal(
+                            onPressed: busy
+                                ? null
+                                : () => action(() => s.changeStatus(q, status)),
+                            child: Text(statuses[status]!),
                           ),
                       ],
-                      onChanged: busy
-                          ? null
-                          : (id) => action(() => s.assignStaff(q, id)),
                     ),
-                  if (s.staff.any((p) => p['id'] == q['staffId']))
-                    Builder(builder: (context) {
-                      final worker =
-                          s.staff.firstWhere((p) => p['id'] == q['staffId']);
-                      final done = s.payroll.any((e) =>
-                          e['quoteId'] == q['id'] &&
-                          e['staffId'] == worker['id'] &&
-                          e['kind'] == 'accrual');
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.badge_outlined),
-                        title: Text(done
-                            ? 'Ish haqi yozilgan'
-                            : 'Ish haqi: ${money(Store.suggestedPay(worker, q))}'),
-                        subtitle: Text(rateLabel(worker)),
-                        trailing: done
-                            ? const Icon(Icons.check_circle_outline)
-                            : FilledButton.tonal(
-                                onPressed: () => payrollDialog(
-                                    context, s, worker['id'],
-                                    suggested: Store.suggestedPay(worker, q),
-                                    quoteId: q['id'],
-                                    note: q['title']),
-                                child: const Text('Yozish')),
-                      );
-                    }),
-                  if (s.staff.isEmpty)
-                    TextButton.icon(
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => StaffPage(store: s))),
-                        icon: const Icon(Icons.person_add_alt),
-                        label: const Text(
-                            'Xodim qo‘shib, buyurtmani biriktirish')),
-                  const SizedBox(height: 12),
-                  for (final payment in q['payments'] ?? [])
-                    ListTile(
-                      title: Text(money(payment['amount'])),
-                      subtitle:
-                          Text('${payment['note']} · ${payment['created']}'),
-                    ),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final status in transitions[q['status']]!)
-                        FilledButton.tonal(
-                          onPressed: busy
-                              ? null
-                              : () => action(() => s.changeStatus(q, status)),
-                          child: Text(statuses[status]!),
+                    if (s.isOwner &&
+                        q['balance'] > 0 &&
+                        q['status'] != 'cancelled')
+                      Padding(
+                        padding: const EdgeInsets.only(top: 18),
+                        child: FilledButton.icon(
+                          onPressed: busy ? null : () => recordPayment(q),
+                          icon: const Icon(Icons.payments_outlined),
+                          label: const Text('To‘lovni qayd etish'),
                         ),
-                    ],
-                  ),
-                  if (s.isOwner &&
-                      q['balance'] > 0 &&
-                      q['status'] != 'cancelled')
-                    Padding(
-                      padding: const EdgeInsets.only(top: 18),
-                      child: FilledButton.icon(
-                        onPressed: busy ? null : () => recordPayment(q),
-                        icon: const Icon(Icons.payments_outlined),
-                        label: const Text('To‘lovni qayd etish'),
+                      ),
+                    InstallmentCard(store: s, quote: q),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: busy ? null : () => action(() => exportPdf(q)),
+                      icon: const Icon(Icons.picture_as_pdf_outlined),
+                      label: Text(
+                        busy ? 'Bajarilmoqda…' : 'PDF ulashish / saqlash',
                       ),
                     ),
-                  InstallmentCard(store: s, quote: q),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: busy ? null : () => action(() => exportPdf(q)),
-                    icon: const Icon(Icons.picture_as_pdf_outlined),
-                    label:
-                        Text(busy ? 'Bajarilmoqda…' : 'PDF ulashish / saqlash'),
-                  ),
-                  const SizedBox(height: 30),
-                ],
+                    const SizedBox(height: 30),
+                  ],
+                ),
               ),
-            )),
+            ),
           );
         },
       );
@@ -3069,21 +3610,26 @@ class _QuotePageState extends State<QuotePage> {
     final form = GlobalKey<FormState>();
     final yes = await showSettledDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => GlassAlertDialog(
         title: const Text('Qabul qilingan to‘lov'),
         content: Form(
           key: form,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              field(a, 'Summa (UZS)', number: true, validate: (v) {
-                final amount = int.tryParse(v ?? '');
-                if (amount == null || amount <= 0) return 'Summani kiriting';
-                if (amount > (q['balance'] as num)) {
-                  return 'Qoldiqdan (${money(q['balance'])}) oshmasin';
-                }
-                return null;
-              }),
+              field(
+                a,
+                'Summa (UZS)',
+                number: true,
+                validate: (v) {
+                  final amount = int.tryParse(v ?? '');
+                  if (amount == null || amount <= 0) return 'Summani kiriting';
+                  if (amount > (q['balance'] as num)) {
+                    return 'Qoldiqdan (${money(q['balance'])}) oshmasin';
+                  }
+                  return null;
+                },
+              ),
               field(n, 'Izoh', validate: (_) => null),
             ],
           ),
@@ -3114,40 +3660,53 @@ class _QuotePageState extends State<QuotePage> {
     switch (choice) {
       case 'edit':
         if (q['stockConsumed'] == true) {
-          message(context,
-              'Material ombordan chiqarilgan. Avval “Ombor / xarid ro‘yxati”dan qaytaring.');
+          message(
+            context,
+            'Material ombordan chiqarilgan. Avval “Ombor / xarid ro‘yxati”dan qaytaring.',
+          );
           return;
         }
         await Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (_) => BuilderPage(store: s, editing: q)));
+          context,
+          MaterialPageRoute(
+            builder: (_) => BuilderPage(store: s, editing: q),
+          ),
+        );
       case 'copy':
         await action(() async {
           final copy = await s.duplicateQuote(q['id']);
           if (!mounted) return;
           Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => QuotePage(store: s, id: copy['id'])));
+            context,
+            MaterialPageRoute(
+              builder: (_) => QuotePage(store: s, id: copy['id']),
+            ),
+          );
         });
       case 'text':
         await action(() async {
-          final note = await shareText(quoteText(s, q),
-              subject: 'RomFlow • ${q['title']}');
+          final note = await shareText(
+            quoteText(s, q),
+            subject: 'RomFlow • ${q['title']}',
+          );
           if (note != null && mounted) message(context, note);
         });
       case 'cuts':
         await action(() async {
-          final note = await shareText(cutListText(q),
-              subject: 'Kesish ro‘yxati • ${q['title']}');
+          final note = await shareText(
+            cutListText(q),
+            subject: 'Kesish ro‘yxati • ${q['title']}',
+          );
           if (note != null && mounted) message(context, note);
         });
       case 'call':
         await callNumber(context, q['phone'] ?? '');
       case 'delete':
-        if (await confirm(context, 'Smeta o‘chirilsinmi?',
-                '${q['title']} • ${money(q['total'])}. To‘lov tarixi ham o‘chadi.') &&
+        if (await confirm(
+              context,
+              'Smeta o‘chirilsinmi?',
+              '${q['title']} • ${money(q['total'])}. To‘lov tarixi ham o‘chadi.',
+            ) &&
             mounted) {
           await action(() async {
             await s.deleteQuote(q['id']);
@@ -3163,18 +3722,26 @@ class _QuotePageState extends State<QuotePage> {
         ? null
         : DateTime.parse(q['installDate']).toLocal();
     final day = await showDatePicker(
-        context: context,
-        initialDate: current ?? now.add(const Duration(days: 1)),
-        firstDate: now.subtract(const Duration(days: 365)),
-        lastDate: now.add(const Duration(days: 730)));
+      context: context,
+      initialDate: current ?? now.add(const Duration(days: 1)),
+      firstDate: now.subtract(const Duration(days: 365)),
+      lastDate: now.add(const Duration(days: 730)),
+    );
     if (day == null || !mounted) return;
     final time = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(
-            current ?? DateTime(now.year, now.month, now.day, 10)));
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(
+        current ?? DateTime(now.year, now.month, now.day, 10),
+      ),
+    );
     if (!mounted) return;
     final at = DateTime(
-        day.year, day.month, day.day, time?.hour ?? 10, time?.minute ?? 0);
+      day.year,
+      day.month,
+      day.day,
+      time?.hour ?? 10,
+      time?.minute ?? 0,
+    );
     await action(() async {
       await s.setInstallDate(q['id'], at);
       if (at.isAfter(DateTime.now())) {
@@ -3198,36 +3765,49 @@ class _QuotePageState extends State<QuotePage> {
   Widget profitCard(Json q) {
     final p = orderProfit(s, q);
     Widget row(String label, int value, {bool strong = false}) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Row(children: [
-          Expanded(child: Text(label)),
-          Text(money(value),
-              style: TextStyle(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            children: [
+              Expanded(child: Text(label)),
+              Text(
+                money(value),
+                style: TextStyle(
                   fontWeight: strong ? FontWeight.w800 : FontWeight.w500,
                   color: strong && value < 0
                       ? Theme.of(context).colorScheme.error
-                      : null)),
-        ]));
-    return Card(
+                      : null,
+                ),
+              ),
+            ],
+          ),
+        );
+    return GlassCard(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Foyda hisobi', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          row('Smeta summasi', p.total),
-          row('Material tannarxi', -p.material),
-          row('Ish haqi (yozilgan)', -p.labour),
-          row('Qo‘shimcha xarajat', -p.extra),
-          const Divider(),
-          row('Sof foyda', p.profit, strong: true),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Foyda hisobi',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            row('Smeta summasi', p.total),
+            row('Material tannarxi', -p.material),
+            row('Ish haqi (yozilgan)', -p.labour),
+            row('Qo‘shimcha xarajat', -p.extra),
+            const Divider(),
+            row('Sof foyda', p.profit, strong: true),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
                 onPressed: () => expenseDialog(context, s, q['id']),
                 icon: const Icon(Icons.add),
-                label: const Text('Shu buyurtmaga xarajat')),
-          ),
-        ]),
+                label: const Text('Shu buyurtmaga xarajat'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -3240,22 +3820,34 @@ class _QuotePageState extends State<QuotePage> {
         maxPages: 200,
         theme: pw.ThemeData.withFont(base: font, bold: font),
         build: (_) => [
-          pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-            pw.Expanded(
+          pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Expanded(
                 child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                  pw.Text(s.workshopName, style: pw.TextStyle(fontSize: 20)),
-                  if (s.workshopPhone.isNotEmpty) pw.Text(s.workshopPhone),
-                  if (s.workshopAddress.isNotEmpty) pw.Text(s.workshopAddress),
-                ])),
-            pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
-              pw.Text('SMETA', style: pw.TextStyle(fontSize: 20)),
-              pw.Text(
-                  localDate(DateTime.now().toIso8601String()).split(' ').first),
-              pw.Text(statuses[q['status']] ?? ''),
-            ]),
-          ]),
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(s.workshopName, style: pw.TextStyle(fontSize: 20)),
+                    if (s.workshopPhone.isNotEmpty) pw.Text(s.workshopPhone),
+                    if (s.workshopAddress.isNotEmpty)
+                      pw.Text(s.workshopAddress),
+                  ],
+                ),
+              ),
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.end,
+                children: [
+                  pw.Text('SMETA', style: pw.TextStyle(fontSize: 20)),
+                  pw.Text(
+                    localDate(
+                      DateTime.now().toIso8601String(),
+                    ).split(' ').first,
+                  ),
+                  pw.Text(statuses[q['status']] ?? ''),
+                ],
+              ),
+            ],
+          ),
           pw.Divider(),
           pw.Text(q['title'], style: pw.TextStyle(fontSize: 15)),
           pw.Text('Mijoz: ${q['customer']} / ${q['phone']}'),
@@ -3263,8 +3855,10 @@ class _QuotePageState extends State<QuotePage> {
             pw.Text('Manzil: ${q['address']}'),
           if (q['installDate'] != null)
             pw.Text('Montaj: ${localDate(q['installDate'])}'),
-          pw.Text('TAXMINIY SMETA. Ishlab chiqarish kesish kartasi emas.',
-              style: const pw.TextStyle(fontSize: 9)),
+          pw.Text(
+            'TAXMINIY SMETA. Ishlab chiqarish kesish kartasi emas.',
+            style: const pw.TextStyle(fontSize: 9),
+          ),
           pw.SizedBox(height: 14),
           ...((q['items'] as List).expand<pw.Widget>(
             (i) => [
@@ -3299,7 +3893,7 @@ class _QuotePageState extends State<QuotePage> {
                       '${((p['charged'] ?? p['quantity']) as num).toStringAsFixed(p['unit'] == 'dona' ? 0 : 2)} ${p['unit']}',
                       money(p['price']),
                       money(p['cost']),
-                    ]
+                    ],
                 ],
               ),
               if (i['cuts'] != null) ...[
@@ -3328,7 +3922,8 @@ class _QuotePageState extends State<QuotePage> {
           )),
           for (final e in q['extras'] as List? ?? const [])
             pw.Text(
-                '${e['name']}: ${e['qty']} ${e['unit']} x ${money(e['price'])} = ${money(extraLine(Map<String, dynamic>.from(e)))}'),
+              '${e['name']}: ${e['qty']} ${e['unit']} x ${money(e['price'])} = ${money(extraLine(Map<String, dynamic>.from(e)))}',
+            ),
           pw.Text('Montaj: ${money(q['installation'])}'),
           pw.Text('Chegirma: ${money(q['discount'])}'),
           pw.Text(
@@ -3344,16 +3939,22 @@ class _QuotePageState extends State<QuotePage> {
     );
     if (save) {
       await saveFileAs(
-          'RomFlow-${q['id']}.pdf', 'application/pdf', await doc.save());
+        'RomFlow-${q['id']}.pdf',
+        'application/pdf',
+        await doc.save(),
+      );
       return;
     }
     final bytes = await doc.save();
     if (!mounted) return;
     final box = context.findRenderObject() as RenderBox?;
     final note = await shareFile(
-        'RomFlow-${q['id']}.pdf', 'application/pdf', bytes,
-        text: 'RomFlow — taxminiy smeta',
-        origin: box == null ? null : box.localToGlobal(Offset.zero) & box.size);
+      'RomFlow-${q['id']}.pdf',
+      'application/pdf',
+      bytes,
+      text: 'RomFlow — taxminiy smeta',
+      origin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+    );
     if (note != null && mounted) message(context, note);
   }
 }
@@ -3394,7 +3995,7 @@ Future<void> editProfile(
   await showSettledDialog(
     context: context,
     builder: (c) => StatefulBuilder(
-      builder: (c, set) => AlertDialog(
+      builder: (c, set) => GlassAlertDialog(
         title: Text(
           initial == null ? 'Yangi profil tizimi' : 'Narxlarni tahrirlash',
         ),
@@ -3437,17 +4038,20 @@ Future<void> editProfile(
                       final data = <String, dynamic>{
                         ...p,
                         'demo': false,
-                        'reference': false
+                        'reference': false,
                       };
                       for (final k in fields.keys) {
                         data[k] = ['name', 'brand'].contains(k)
                             ? fields[k]!.text.trim()
                             : num.parse(fields[k]!.text.replaceAll(',', '.'));
                       }
-                      await store.saveProfile(data, typed: {
-                        for (final k in fields.keys)
-                          if (data[k] != p[k]) k
-                      });
+                      await store.saveProfile(
+                        data,
+                        typed: {
+                          for (final k in fields.keys)
+                            if (data[k] != p[k]) k,
+                        },
+                      );
                       if (c.mounted) Navigator.pop(c);
                     } catch (e) {
                       if (c.mounted) {
@@ -3489,75 +4093,79 @@ class _CutsPageState extends State<CutsPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: GlassAppBar(title: const Text('Profil raskroyi')),
-        body: readable(ListView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.all(20),
-          children: [
-            notice(
-              'Har bir profil artikulini alohida hisoblang. Tayyor kesish uzunliklarini kiriting. Usul chiqindini kamaytirishga yordam beradi; matematik eng yaxshi natija kafolatlanmaydi.',
-            ),
-            field(stock, 'Xom profil (mm)', number: true),
-            field(kerf, 'Har detal uchun arra izi (mm)', number: true),
-            TextField(
-              controller: pieces,
-              minLines: 6,
-              maxLines: 12,
-              decoration: const InputDecoration(
-                labelText: 'Uzunlik × son; har qatorda: 1400 x 4',
+        body: readable(
+          ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.all(20),
+            children: [
+              notice(
+                'Har bir profil artikulini alohida hisoblang. Tayyor kesish uzunliklarini kiriting. Usul chiqindini kamaytirishga yordam beradi; matematik eng yaxshi natija kafolatlanmaydi.',
               ),
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () {
-                try {
-                  final parts = pieces.text
-                      .trim()
-                      .split('\n')
-                      .where((line) => line.trim().isNotEmpty)
-                      .map((line) {
-                    final m = RegExp(
-                      r'^(\d+)\s*[x×*]\s*(\d+)$',
-                    ).firstMatch(line.trim());
-                    if (m == null) throw Exception('Format: 1400 x 4');
-                    return {
-                      'lengthMm': int.parse(m[1]!),
-                      'quantity': int.parse(m[2]!),
-                    };
-                  }).toList();
-                  setState(
-                    () => result = optimizeCuts(
-                      int.parse(stock.text),
-                      num.parse(kerf.text.replaceAll(',', '.')),
-                      parts,
-                    ),
-                  );
-                } catch (e) {
-                  message(context, e);
-                }
-              },
-              child: const Text('Raskroyni hisoblash'),
-            ),
-            if (result != null) ...[
-              heading('${(result!['bars'] as List).length} dona xom profil'),
-              for (final bar in result!['bars'])
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('${(bar['pieces'] as List).join(' + ')} mm'),
-                        Text(
-                          'Qoldiq: ${bar['remainingMm']} mm',
-                          style: const TextStyle(color: muted),
-                        ),
-                      ],
-                    ),
+              field(stock, 'Xom profil (mm)', number: true),
+              field(kerf, 'Har detal uchun arra izi (mm)', number: true),
+              GlassControl(
+                child: TextField(
+                  controller: pieces,
+                  minLines: 6,
+                  maxLines: 12,
+                  decoration: const InputDecoration(
+                    labelText: 'Uzunlik × son; har qatorda: 1400 x 4',
                   ),
                 ),
+              ),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: () {
+                  try {
+                    final parts = pieces.text
+                        .trim()
+                        .split('\n')
+                        .where((line) => line.trim().isNotEmpty)
+                        .map((line) {
+                      final m = RegExp(
+                        r'^(\d+)\s*[x×*]\s*(\d+)$',
+                      ).firstMatch(line.trim());
+                      if (m == null) throw Exception('Format: 1400 x 4');
+                      return {
+                        'lengthMm': int.parse(m[1]!),
+                        'quantity': int.parse(m[2]!),
+                      };
+                    }).toList();
+                    setState(
+                      () => result = optimizeCuts(
+                        int.parse(stock.text),
+                        num.parse(kerf.text.replaceAll(',', '.')),
+                        parts,
+                      ),
+                    );
+                  } catch (e) {
+                    message(context, e);
+                  }
+                },
+                child: const Text('Raskroyni hisoblash'),
+              ),
+              if (result != null) ...[
+                heading('${(result!['bars'] as List).length} dona xom profil'),
+                for (final bar in result!['bars'])
+                  GlassCard(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${(bar['pieces'] as List).join(' + ')} mm'),
+                          Text(
+                            'Qoldiq: ${bar['remainingMm']} mm',
+                            style: const TextStyle(color: muted),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ],
-          ],
-        )),
+          ),
+        ),
       );
 }
 
@@ -3567,19 +4175,22 @@ class AuditPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: GlassAppBar(title: const Text('Faoliyat tarixi')),
-        body: readable(ListView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.all(20),
-          children: [
-            if (store.audit.isEmpty) const Text('Hali amallar yo‘q.'),
-            for (final entry in store.audit)
-              Card(
-                child: ListTile(
-                  title: Text(entry['action']),
-                  subtitle: Text(entry['created']),
+        body: readable(
+          ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.all(20),
+            children: [
+              if (store.audit.isEmpty) const Text('Hali amallar yo‘q.'),
+              for (final entry in store.audit)
+                GlassCard(
+                  child: GlassControl(
+                      child: ListTile(
+                    title: Text(entry['action']),
+                    subtitle: Text(entry['created']),
+                  )),
                 ),
-              ),
-          ],
-        )),
+            ],
+          ),
+        ),
       );
 }

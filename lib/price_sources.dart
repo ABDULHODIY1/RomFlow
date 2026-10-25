@@ -23,8 +23,13 @@ class PriceRow {
   /// Profile id or name the price is for; null for every chosen profile.
   final String? profile;
   final bool usd;
-  const PriceRow(this.key, this.label, this.price, this.profile,
-      {this.usd = false});
+  const PriceRow(
+    this.key,
+    this.label,
+    this.price,
+    this.profile, {
+    this.usd = false,
+  });
 }
 
 class PriceList {
@@ -60,7 +65,8 @@ const _aliases = <String, String>{
   'zapor': 'windowLock',
   'rezina': 'uGasket',
   'setka': 'mesh',
-  'qayt': 'cornerProfile',
+  'qayt': 'cornerProfile', // Older imported price sheets.
+  'archa': 'corner',
   'samorez': 'screw',
   'anker': 'anchor',
   "ko'pik": 'foam',
@@ -134,9 +140,15 @@ PriceList parsePriceList(String text) {
       return;
     }
     final p = _norm(profile);
-    rows.add(PriceRow(key, materialNames[key] ?? key, value,
+    rows.add(
+      PriceRow(
+        key,
+        materialNames[key] ?? key,
+        value,
         p.isEmpty ? null : '$profile'.trim(),
-        usd: _norm(currency) == 'usd' || '$price'.contains(r'$')));
+        usd: _norm(currency) == 'usd' || '$price'.contains(r'$'),
+      ),
+    );
   }
 
   if (body.startsWith('{') || body.startsWith('[')) {
@@ -152,10 +164,11 @@ PriceList parsePriceList(String text) {
       for (final item in items) {
         if (item is! Map) continue;
         add(
-            item['material'] ?? item['key'] ?? item['name'] ?? item['nomi'],
-            item['price'] ?? item['narx'],
-            item['profile'] ?? item['profil'],
-            item['currency'] ?? item['valyuta'] ?? currency);
+          item['material'] ?? item['key'] ?? item['name'] ?? item['nomi'],
+          item['price'] ?? item['narx'],
+          item['profile'] ?? item['profil'],
+          item['currency'] ?? item['valyuta'] ?? currency,
+        );
       }
     }
   } else {
@@ -164,8 +177,10 @@ PriceList parsePriceList(String text) {
         .where((l) => l.trim().isNotEmpty)
         .toList();
     final first = lines.first;
-    final sep = [';', '\t', ','].reduce((a, b) =>
-        a.allMatches(first).length >= b.allMatches(first).length ? a : b);
+    final sep = [';', '\t', ','].reduce(
+      (a, b) =>
+          a.allMatches(first).length >= b.allMatches(first).length ? a : b,
+    );
     var cols = (name: 0, price: 1, profile: 2, currency: -1);
     var start = 0;
     final head = _csvLine(first, sep).map(_norm).toList();
@@ -191,7 +206,8 @@ PriceList parsePriceList(String text) {
   }
   if (rows.isEmpty) {
     throw FormatException(
-        'Tanish material topilmadi. Birinchi ustun — material (masalan frame yoki “Tashqi rama”), ikkinchisi — narx.');
+      'Tanish material topilmadi. Birinchi ustun — material (masalan frame yoki “Tashqi rama”), ikkinchisi — narx.',
+    );
   }
   return PriceList(rows, skipped);
 }
@@ -200,14 +216,17 @@ PriceList parsePriceList(String text) {
 Future<String> downloadPriceList(Uri url, {HttpClient? client}) async {
   if (url.scheme != 'https' && url.scheme != 'http') {
     throw const FormatException(
-        'Havola http:// yoki https:// bilan boshlansin');
+      'Havola http:// yoki https:// bilan boshlansin',
+    );
   }
   final http = client ?? HttpClient()
     ..connectionTimeout = const Duration(seconds: 20);
   try {
     final request = await http.getUrl(url).timeout(const Duration(seconds: 20));
-    request.headers.set(HttpHeaders.acceptHeader,
-        'text/csv, application/json, text/plain, */*');
+    request.headers.set(
+      HttpHeaders.acceptHeader,
+      'text/csv, application/json, text/plain, */*',
+    );
     final response = await request.close().timeout(const Duration(seconds: 20));
     if (response.statusCode != 200) {
       throw HttpException('Server javobi: ${response.statusCode}');
@@ -242,21 +261,31 @@ class PriceChange {
 
   /// The dollar price when the list gave one: it follows the rate later.
   final num? usd;
-  const PriceChange(this.profileId, this.profileName, this.key, this.label,
-      this.before, this.after,
-      {this.usd});
+  const PriceChange(
+    this.profileId,
+    this.profileName,
+    this.key,
+    this.label,
+    this.before,
+    this.after, {
+    this.usd,
+  });
 }
 
 /// What applying [list] would change in the chosen profiles. USD prices
 /// are converted at [usdRate] so‘m.
 List<PriceChange> priceChanges(
-    List<Json> profiles, PriceList list, Set<String> chosen,
-    {num usdRate = 0}) {
+  List<Json> profiles,
+  PriceList list,
+  Set<String> chosen, {
+  num usdRate = 0,
+}) {
   final out = <PriceChange>[];
   for (final p in profiles.where((p) => chosen.contains(p['id']))) {
     final prices = Map<String, dynamic>.from(recipeFor(p)['prices']),
         dollars = Map<String, dynamic>.from(
-            (p['drawingRecipe'] as Map?)?['usdPrices'] ?? {});
+          (p['drawingRecipe'] as Map?)?['usdPrices'] ?? {},
+        );
     final latest = <String, PriceRow>{};
     for (final row in list.rows) {
       final target = _norm(row.profile);
@@ -272,15 +301,25 @@ List<PriceChange> priceChanges(
     for (final row in latest.values) {
       if (row.usd && usdRate <= 0) {
         throw const FormatException(
-            'Narxlar dollarda: avval Sozlamalarda dollar kursini kiriting');
+          'Narxlar dollarda: avval Sozlamalarda dollar kursini kiriting',
+        );
       }
       final value = (row.usd ? row.price * usdRate : row.price).round();
       final before = prices[row.key] as num?;
       if (before == value && dollars[row.key] == (row.usd ? row.price : null)) {
         continue;
       }
-      out.add(PriceChange(p['id'], p['name'], row.key, row.label, before, value,
-          usd: row.usd ? row.price : null));
+      out.add(
+        PriceChange(
+          p['id'],
+          p['name'],
+          row.key,
+          row.label,
+          before,
+          value,
+          usd: row.usd ? row.price : null,
+        ),
+      );
     }
   }
   return out;
@@ -312,15 +351,17 @@ String priceTemplateCsv(Json profile) {
 Future<List<String>> autoUpdatePrices(Store s, {HttpClient? client}) async {
   final notes = <String>[];
   try {
-    final rate =
-        await s.refreshOfficialRate(fetch: () => fetchCbuUsd(client: client));
+    final rate = await s.refreshOfficialRate(
+      fetch: () => fetchCbuUsd(client: client),
+    );
     if (rate != null) notes.add(rate);
   } catch (_) {
     // Offline: the last rate stays.
   }
   try {
     final note = await s.refreshCatalog(
-        fetch: () => downloadPriceList(manufacturersUrl, client: client));
+      fetch: () => downloadPriceList(manufacturersUrl, client: client),
+    );
     if (note != null) notes.add(note);
   } catch (_) {
     // Offline or not published yet: the catalog in the app stays.
@@ -333,12 +374,21 @@ Future<List<String>> autoUpdatePrices(Store s, {HttpClient? client}) async {
     }
     try {
       final list = parsePriceList(
-          await downloadPriceList(Uri.parse(src['url']), client: client));
+        await downloadPriceList(Uri.parse(src['url']), client: client),
+      );
       final changes = priceChanges(
-          s.profiles, list, {for (final p in s.profiles) p['id'] as String},
+          s.profiles,
+          list,
+          {
+            for (final p in s.profiles) p['id'] as String,
+          },
           usdRate: s.usdRate);
-      await s.applyPriceChanges(changes, src['name'],
-          sourceId: src['id'], count: list.rows.length);
+      await s.applyPriceChanges(
+        changes,
+        src['name'],
+        sourceId: src['id'],
+        count: list.rows.length,
+      );
       if (changes.isNotEmpty) {
         notes.add('${src['name']}: ${changes.length} ta narx yangilandi');
       }
@@ -360,8 +410,11 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
   Store get s => widget.store;
   String? busy;
 
-  void say(Object text) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('$text'.replaceFirst(RegExp(r'^\w*Exception: '), ''))));
+  void say(Object text) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$text'.replaceFirst(RegExp(r'^\w*Exception: '), '')),
+        ),
+      );
 
   Future<void> editSource([Json? source]) async {
     final name = TextEditingController(text: source?['name'] ?? ''),
@@ -370,48 +423,66 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
     final ok = await showSettledDialog<bool>(
       context: context,
       builder: (c) => StatefulBuilder(
-          builder: (c, setDialog) => AlertDialog(
-                title: Text(source == null
-                    ? 'Narx manbasi qo‘shish'
-                    : 'Manbani tahrirlash'),
-                content: SingleChildScrollView(
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    TextField(
-                        controller: name,
-                        decoration: const InputDecoration(
-                            labelText: 'Nomi (masalan: Diler)')),
-                    const SizedBox(height: 12),
-                    TextField(
-                        key: const ValueKey('price-source-url'),
-                        controller: url,
-                        keyboardType: TextInputType.url,
-                        decoration: const InputDecoration(
-                            labelText: 'Havola (CSV yoki JSON)',
-                            hintText: 'https://…')),
-                    const SizedBox(height: 8),
-                    Text(
-                        'Google Sheets: Fayl → Ulashish → Internetda e’lon qilish → CSV havolasini nusxalang.',
-                        style: Theme.of(c).textTheme.bodySmall),
-                    SwitchListTile(
-                      key: const ValueKey('price-source-auto'),
-                      contentPadding: EdgeInsets.zero,
-                      value: auto == true,
-                      onChanged: (v) => setDialog(() => auto = v),
-                      title: const Text('Har kuni o‘zi yangilansin'),
-                      subtitle: const Text(
-                          'Ilova ochilganda kuniga bir marta narxlar shu havoladan olinadi'),
+        builder: (c, setDialog) => GlassAlertDialog(
+          title: Text(
+            source == null ? 'Narx manbasi qo‘shish' : 'Manbani tahrirlash',
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GlassControl(
+                  child: TextField(
+                    controller: name,
+                    decoration: const InputDecoration(
+                      labelText: 'Nomi (masalan: Diler)',
                     ),
-                  ]),
+                  ),
                 ),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(c, false),
-                      child: const Text('Bekor qilish')),
-                  FilledButton(
-                      onPressed: () => Navigator.pop(c, true),
-                      child: const Text('Saqlash')),
-                ],
-              )),
+                const SizedBox(height: 12),
+                GlassControl(
+                  child: TextField(
+                    key: const ValueKey('price-source-url'),
+                    controller: url,
+                    keyboardType: TextInputType.url,
+                    decoration: const InputDecoration(
+                      labelText: 'Havola (CSV yoki JSON)',
+                      hintText: 'https://…',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Google Sheets: Fayl → Ulashish → Internetda e’lon qilish → CSV havolasini nusxalang.',
+                  style: Theme.of(c).textTheme.bodySmall,
+                ),
+                GlassControl(
+                  child: SwitchListTile(
+                    key: const ValueKey('price-source-auto'),
+                    contentPadding: EdgeInsets.zero,
+                    value: auto == true,
+                    onChanged: (v) => setDialog(() => auto = v),
+                    title: const Text('Har kuni o‘zi yangilansin'),
+                    subtitle: const Text(
+                      'Ilova ochilganda kuniga bir marta narxlar shu havoladan olinadi',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(c, false),
+              child: const Text('Bekor qilish'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(c, true),
+              child: const Text('Saqlash'),
+            ),
+          ],
+        ),
+      ),
     );
     if (ok != true) return;
     try {
@@ -419,7 +490,7 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
         ...?source,
         'name': name.text,
         'url': url.text.trim(),
-        'auto': auto == true
+        'auto': auto == true,
       });
     } catch (e) {
       say(e);
@@ -444,7 +515,9 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
   Future<void> fromFile() async {
     try {
       final text = await pickTextFile(
-          label: 'CSV / JSON', extensions: const ['csv', 'json', 'txt']);
+        label: 'CSV / JSON',
+        extensions: const ['csv', 'json', 'txt'],
+      );
       if (text == null || !mounted) return;
       await review(parsePriceList(text), 'Fayl');
     } catch (e) {
@@ -454,8 +527,11 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
 
   Future<void> template() async {
     try {
-      final ok = await saveFileAs('RomFlow-narxlar.csv', 'text/csv',
-          utf8.encode(priceTemplateCsv(s.profiles.first)));
+      final ok = await saveFileAs(
+        'RomFlow-narxlar.csv',
+        'text/csv',
+        utf8.encode(priceTemplateCsv(s.profiles.first)),
+      );
       if (ok && mounted) {
         say('Namuna saqlandi — to‘ldirib, havola yoki fayl sifatida yuklang');
       }
@@ -464,18 +540,24 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
     }
   }
 
-  Future<void> review(PriceList list, String sourceName,
-      {String? sourceId}) async {
+  Future<void> review(
+    PriceList list,
+    String sourceName, {
+    String? sourceId,
+  }) async {
     final chosen = {for (final p in s.profiles) p['id'] as String};
     final applied = await Navigator.push<bool>(
-        context,
-        MaterialPageRoute(
-            builder: (_) => PriceReviewPage(
-                store: s,
-                list: list,
-                sourceName: sourceName,
-                sourceId: sourceId,
-                initial: chosen)));
+      context,
+      MaterialPageRoute(
+        builder: (_) => PriceReviewPage(
+          store: s,
+          list: list,
+          sourceName: sourceName,
+          sourceId: sourceId,
+          initial: chosen,
+        ),
+      ),
+    );
     if (applied == true && mounted) say('Narxlar yangilandi');
   }
 
@@ -486,80 +568,94 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
       animation: s,
       builder: (context, _) => Scaffold(
         appBar: GlassAppBar(title: const Text('Narxlarni yangilash')),
-        floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => editSource(),
-            icon: const Icon(Icons.add_link),
-            label: const Text('Manba')),
+        floatingActionButton: GlassActionButton.extended(
+          onPressed: () => editSource(),
+          icon: const Icon(Icons.add_link),
+          label: const Text('Manba'),
+        ),
         body: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 820),
             child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                children: [
-                  Text(
-                      'Narxlarni diler, yetkazib beruvchi yoki o‘zingizning Google Sheets jadvalingizdan oling. Ochiq havola yoki ruxsat berilgan API bo‘lsa yetarli: CSV yoki JSON. Qo‘llashdan oldin har bir o‘zgarish ko‘rsatiladi.',
-                      style: text.bodyMedium),
-                  const SizedBox(height: 12),
-                  Wrap(spacing: 8, runSpacing: 8, children: [
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+              children: [
+                Text(
+                  'Narxlarni diler, yetkazib beruvchi yoki o‘zingizning Google Sheets jadvalingizdan oling. Ochiq havola yoki ruxsat berilgan API bo‘lsa yetarli: CSV yoki JSON. Qo‘llashdan oldin har bir o‘zgarish ko‘rsatiladi.',
+                  style: text.bodyMedium,
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
                     OutlinedButton.icon(
-                        onPressed: fromFile,
-                        icon: const Icon(Icons.upload_file),
-                        label: const Text('Fayldan yuklash')),
+                      onPressed: fromFile,
+                      icon: const Icon(Icons.upload_file),
+                      label: const Text('Fayldan yuklash'),
+                    ),
                     OutlinedButton.icon(
-                        onPressed: template,
-                        icon: const Icon(Icons.table_view_outlined),
-                        label: const Text('Namuna jadval')),
-                  ]),
-                  const SizedBox(height: 16),
-                  Text('Manbalar', style: text.titleLarge),
-                  const SizedBox(height: 8),
-                  if (s.priceSources.isEmpty)
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(18),
-                        child: Text(
-                            'Hali manba yo‘q. “Manba” tugmasi bilan diler havolasini yoki e’lon qilingan jadvalingizni qo‘shing.',
-                            style: text.bodySmall),
+                      onPressed: template,
+                      icon: const Icon(Icons.table_view_outlined),
+                      label: const Text('Namuna jadval'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text('Manbalar', style: text.titleLarge),
+                const SizedBox(height: 8),
+                if (s.priceSources.isEmpty)
+                  GlassCard(
+                    child: Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Text(
+                        'Hali manba yo‘q. “Manba” tugmasi bilan diler havolasini yoki e’lon qilingan jadvalingizni qo‘shing.',
+                        style: text.bodySmall,
                       ),
                     ),
-                  for (final src in s.priceSources)
-                    Card(
-                      child: ListTile(
-                        leading: const Icon(Icons.cloud_download_outlined),
-                        title: Text(src['name']),
-                        subtitle: Text(
-                            [
-                              src['url'],
-                              if (src['lastFetched'] != null)
-                                'Oxirgi: ${localDate(src['lastFetched'])} • ${src['lastCount'] ?? 0} ta narx${src['auto'] == true ? ' • har kuni o‘zi' : ''}',
-                              if (src['lastError'] != null)
-                                'Xato: ${src['lastError']}',
-                            ].join('\n'),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis),
-                        isThreeLine: true,
-                        onTap: () => editSource(src),
-                        onLongPress: () async {
-                          await s.deletePriceSource(src['id']);
-                        },
-                        trailing: busy == src['id']
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2))
-                            : IconButton(
-                                tooltip: 'Yangilash',
-                                onPressed: () => refresh(src),
-                                icon: const Icon(Icons.sync)),
+                  ),
+                for (final src in s.priceSources)
+                  GlassCard(
+                    child: GlassControl(
+                        child: ListTile(
+                      leading: const Icon(Icons.cloud_download_outlined),
+                      title: Text(src['name']),
+                      subtitle: Text(
+                        [
+                          src['url'],
+                          if (src['lastFetched'] != null)
+                            'Oxirgi: ${localDate(src['lastFetched'])} • ${src['lastCount'] ?? 0} ta narx${src['auto'] == true ? ' • har kuni o‘zi' : ''}',
+                          if (src['lastError'] != null)
+                            'Xato: ${src['lastError']}',
+                        ].join('\n'),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  const SizedBox(height: 12),
-                  Text(
-                      'Ustunlar: material (masalan frame, “Tashqi rama”, kosa, qanot, orta, shtapik, shisha), narx, ixtiyoriy profil va valyuta (USD). Manbani o‘chirish uchun uzoq bosing.',
-                      style: text.bodySmall),
-                ]),
+                      isThreeLine: true,
+                      onTap: () => editSource(src),
+                      onLongPress: () async {
+                        await s.deletePriceSource(src['id']);
+                      },
+                      trailing: busy == src['id']
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : IconButton(
+                              tooltip: 'Yangilash',
+                              onPressed: () => refresh(src),
+                              icon: const Icon(Icons.sync),
+                            ),
+                    )),
+                  ),
+                const SizedBox(height: 12),
+                Text(
+                  'Ustunlar: material (masalan frame, “Tashqi rama”, kosa, qanot, orta, shtapik, shisha), narx, ixtiyoriy profil va valyuta (USD). Manbani o‘chirish uchun uzoq bosing.',
+                  style: text.bodySmall,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -573,13 +669,14 @@ class PriceReviewPage extends StatefulWidget {
   final String sourceName;
   final String? sourceId;
   final Set<String> initial;
-  const PriceReviewPage(
-      {super.key,
-      required this.store,
-      required this.list,
-      required this.sourceName,
-      required this.initial,
-      this.sourceId});
+  const PriceReviewPage({
+    super.key,
+    required this.store,
+    required this.list,
+    required this.sourceName,
+    required this.initial,
+    this.sourceId,
+  });
   @override
   State<PriceReviewPage> createState() => _PriceReviewPageState();
 }
@@ -594,8 +691,12 @@ class _PriceReviewPageState extends State<PriceReviewPage> {
     List<PriceChange> changes = const [];
     error = null;
     try {
-      changes =
-          priceChanges(s.profiles, widget.list, chosen, usdRate: s.usdRate);
+      changes = priceChanges(
+        s.profiles,
+        widget.list,
+        chosen,
+        usdRate: s.usdRate,
+      );
     } catch (e) {
       error = '$e'.replaceFirst('FormatException: ', '');
     }
@@ -609,15 +710,20 @@ class _PriceReviewPageState extends State<PriceReviewPage> {
             onPressed: changes.isEmpty
                 ? null
                 : () async {
-                    await s.applyPriceChanges(changes, widget.sourceName,
-                        sourceId: widget.sourceId,
-                        count: widget.list.rows.length);
+                    await s.applyPriceChanges(
+                      changes,
+                      widget.sourceName,
+                      sourceId: widget.sourceId,
+                      count: widget.list.rows.length,
+                    );
                     if (context.mounted) Navigator.pop(context, true);
                   },
             icon: const Icon(Icons.check),
-            label: Text(changes.isEmpty
-                ? 'O‘zgarish yo‘q'
-                : '${changes.length} ta narxni qo‘llash'),
+            label: Text(
+              changes.isEmpty
+                  ? 'O‘zgarish yo‘q'
+                  : '${changes.length} ta narxni qo‘llash',
+            ),
           ),
         ),
       ),
@@ -625,47 +731,67 @@ class _PriceReviewPageState extends State<PriceReviewPage> {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 820),
-          child: ListView(padding: const EdgeInsets.all(16), children: [
-            Text(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text(
                 '${widget.list.rows.length} ta narx o‘qildi${widget.list.skipped.isEmpty ? '' : ', ${widget.list.skipped.length} ta qator tanilmadi'}.',
-                style: text.bodyMedium),
-            const SizedBox(height: 10),
-            Text('Qaysi profillarga', style: text.titleMedium),
-            for (final p in s.profiles)
-              CheckboxListTile(
-                contentPadding: EdgeInsets.zero,
-                value: chosen.contains(p['id']),
-                title: Text(p['name'],
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
-                onChanged: (v) => setState(() =>
-                    v == true ? chosen.add(p['id']) : chosen.remove(p['id'])),
+                style: text.bodyMedium,
               ),
-            if (error != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text(error!,
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.error)),
-              ),
-            const Divider(),
-            for (final c in changes)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-                title: Text(c.label),
-                subtitle: Text(c.profileName,
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
-                trailing: Text(
-                    '${c.before == null ? '—' : money(c.before!)} → ${money(c.after)}',
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-              ),
-            if (widget.list.skipped.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text('Qaysi profillarga', style: text.titleMedium),
+              for (final p in s.profiles)
+                GlassControl(
+                  child: CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: chosen.contains(p['id']),
+                    title: Text(
+                      p['name'],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onChanged: (v) => setState(
+                      () => v == true
+                          ? chosen.add(p['id'])
+                          : chosen.remove(p['id']),
+                    ),
+                  ),
+                ),
+              if (error != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    error!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
               const Divider(),
-              Text('Tanilmagan qatorlar', style: text.titleSmall),
-              for (final line in widget.list.skipped.take(20))
-                Text(line, style: text.bodySmall),
+              for (final c in changes)
+                GlassControl(
+                    child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: Text(c.label),
+                  subtitle: Text(
+                    c.profileName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: Text(
+                    '${c.before == null ? '—' : money(c.before!)} → ${money(c.after)}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                )),
+              if (widget.list.skipped.isNotEmpty) ...[
+                const Divider(),
+                Text('Tanilmagan qatorlar', style: text.titleSmall),
+                for (final line in widget.list.skipped.take(20))
+                  Text(line, style: text.bodySmall),
+              ],
             ],
-          ]),
+          ),
         ),
       ),
     );
@@ -675,4 +801,8 @@ class _PriceReviewPageState extends State<PriceReviewPage> {
 /// Opens the price sources if the plan includes them.
 Future<void> openPriceSources(BuildContext context, Store store) =>
     openWithPlan(
-        context, store, 'priceSources', () => PriceSourcesPage(store: store));
+      context,
+      store,
+      'priceSources',
+      () => PriceSourcesPage(store: store),
+    );

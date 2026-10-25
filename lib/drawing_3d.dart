@@ -1,3 +1,9 @@
+import 'dart:typed_data';
+import 'dart:collection';
+import 'model_motion.dart';
+import 'model_quality.dart';
+import 'dart:async';
+import 'model_textures.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -31,8 +37,14 @@ class ModelFace {
 
   /// Faces of closed, consistently wound solids: hidden when they turn away.
   final bool closed;
-  const ModelFace(this.vertices, this.color, this.group,
-      {this.glass = false, this.partId, this.closed = false});
+  const ModelFace(
+    this.vertices,
+    this.color,
+    this.group, {
+    this.glass = false,
+    this.partId,
+    this.closed = false,
+  });
 }
 
 class ModelGroup {
@@ -47,16 +59,22 @@ class ModelGroup {
         door = type.startsWith('door') || type == 'passive';
     if (type.startsWith('slide')) {
       return p +
-          P3((type == 'slideLeft' ? -1 : 1) * (b[2] - b[0]) * .8 * progress, 0,
-              12 * progress);
+          P3(
+            (type == 'slideLeft' ? -1 : 1) * (b[2] - b[0]) * .8 * progress,
+            0,
+            12 * progress,
+          );
     }
     if (type == 'fixed' || progress == 0) return p;
     if (type == 'top' || type == 'bottom') {
       final a = progress * math.pi * .32 * sign * (type == 'bottom' ? 1 : -1),
           dy = p.y - hingeY,
           dz = p.z - hingeZ;
-      return P3(p.x, hingeY + dy * math.cos(a) - dz * math.sin(a),
-          hingeZ + dy * math.sin(a) + dz * math.cos(a));
+      return P3(
+        p.x,
+        hingeY + dy * math.cos(a) - dz * math.sin(a),
+        hingeZ + dy * math.sin(a) + dz * math.cos(a),
+      );
     }
     final right = type == 'right' || type == 'doorRight';
     final a = progress *
@@ -65,8 +83,11 @@ class ModelGroup {
             (right ? 1 : -1),
         dx = p.x - hingeX,
         dz = p.z - hingeZ;
-    return P3(hingeX + dx * math.cos(a) + dz * math.sin(a), p.y,
-        hingeZ - dx * math.sin(a) + dz * math.cos(a));
+    return P3(
+      hingeX + dx * math.cos(a) + dz * math.sin(a),
+      p.y,
+      hingeZ - dx * math.sin(a) + dz * math.cos(a),
+    );
   }
 }
 
@@ -78,21 +99,32 @@ class HardwareMotion {
   /// For 'turn': the angle the handle turns about the axis through [pivot]
   /// that is square to the sash, before the sash starts to swing.
   final double turn;
-  HardwareMotion(this.ownerId, this.owner, this.mode, this.pivot,
-      {this.turn = 0});
+  HardwareMotion(
+    this.ownerId,
+    this.owner,
+    this.mode,
+    this.pivot, {
+    this.turn = 0,
+  });
   P3 transform(P3 p, double progress) {
     final release = (progress / .22).clamp(0.0, 1.0);
     P3 moved = p;
     if (mode == 'rod') moved = p + P3(0, 24 * release, 0);
     if (mode == 'turn') {
       final a = release * turn, dx = p.x - pivot.x, dy = p.y - pivot.y;
-      moved = P3(pivot.x + dx * math.cos(a) - dy * math.sin(a),
-          pivot.y + dx * math.sin(a) + dy * math.cos(a), p.z);
+      moved = P3(
+        pivot.x + dx * math.cos(a) - dy * math.sin(a),
+        pivot.y + dx * math.sin(a) + dy * math.cos(a),
+        p.z,
+      );
     }
     if (mode == 'pull') {
       final a = release * math.pi * .19, dy = p.y - pivot.y, dz = p.z - pivot.z;
-      moved = P3(p.x, pivot.y + dy * math.cos(a) - dz * math.sin(a),
-          pivot.z + dy * math.sin(a) + dz * math.cos(a));
+      moved = P3(
+        p.x,
+        pivot.y + dy * math.cos(a) - dz * math.sin(a),
+        pivot.z + dy * math.sin(a) + dz * math.cos(a),
+      );
     }
     return owner.transform(moved, progress);
   }
@@ -103,9 +135,15 @@ class ModelPart {
   final P3 center, extent;
   final double explosionLayer;
   final String? group;
-  const ModelPart(this.id, this.materialKey, this.title, this.center,
-      this.extent, this.group,
-      {this.explosionLayer = 0});
+  const ModelPart(
+    this.id,
+    this.materialKey,
+    this.title,
+    this.center,
+    this.extent,
+    this.group, {
+    this.explosionLayer = 0,
+  });
   static const _layers = <String, double>{
     'frame': -.12,
     'mullion': .06,
@@ -145,7 +183,7 @@ class ModelPart {
     'meshRubber': -.9,
     'threshold': -.25,
     'closer': 1.1,
-    'screw': 1.18
+    'screw': 1.18,
   };
   P3 explosionOffset(double amount, double span, double width, double height) {
     if (amount == 0) return const P3(0, 0, 0);
@@ -164,8 +202,52 @@ class ModelPart {
   }
 }
 
+/// Typed vertex buffers are reused across camera frames. Vertices.raw copies
+/// the active ranges into the engine; no per-frame list flattening is needed.
+class _MeshBuffers {
+  Float32List positions = Float32List(0), uv = Float32List(0);
+  Int32List colors = Int32List(0);
+  Uint16List indices = Uint16List(0);
+  int vertices = 0, indexCount = 0;
+  void reserve(int count) {
+    if (colors.length >= count) return;
+    var capacity = 128;
+    while (capacity < count) {
+      capacity *= 2;
+    }
+    capacity = math.min(capacity, 60000);
+    positions = Float32List(capacity * 2);
+    uv = Float32List(capacity * 2);
+    colors = Int32List(capacity);
+    indices = Uint16List(capacity * 3);
+  }
+
+  void reset() {
+    vertices = 0;
+    indexCount = 0;
+  }
+
+  void vertex(Offset p, int color, Offset? tex) {
+    final i = vertices++;
+    positions[i * 2] = p.dx;
+    positions[i * 2 + 1] = p.dy;
+    colors[i] = color;
+    if (tex != null) {
+      uv[i * 2] = tex.dx;
+      uv[i * 2 + 1] = tex.dy;
+    }
+  }
+
+  void triangle(int a, int b, int c) {
+    indices[indexCount++] = a;
+    indices[indexCount++] = b;
+    indices[indexCount++] = c;
+  }
+}
+
 class WindowModel {
   final DMap drawing, recipe;
+  final _mesh = _MeshBuffers();
   final faces = <ModelFace>[];
   final groups = <String, ModelGroup>{};
   final motions = <String, HardwareMotion>{};
@@ -179,17 +261,77 @@ class WindowModel {
   String? worldKey;
   List<(ModelFace, List<P3>)>? world;
   double explosionLayer = 0;
+  double? orbitRadius;
+  P3? orbitCenter;
+  final _uvLevels = <(int, bool), Map<ModelFace, List<Offset>>>{};
+  List<Offset> textureUV(ModelFace face, int size, {bool cinematic = false}) {
+    final key = (size, cinematic);
+    if (!_uvLevels.containsKey(key)) {
+      if (_uvLevels.length >= 2) _uvLevels.remove(_uvLevels.keys.first);
+      _uvLevels[key] = {};
+    }
+    return _uvLevels[key]!.putIfAbsent(face, () {
+      final vertices = face.vertices;
+      final n = (vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]);
+      if (cinematic) {
+        final part = parts[face.partId];
+        final finish = ModelFinish.forMaterial(part?.materialKey);
+        final tile = finish.atlasTile;
+        final origin = Offset((tile % 2) * size / 2, (tile ~/ 2) * size / 2);
+        final center = part?.center ?? const P3(0, 0, 0);
+        final extent = part?.extent ?? const P3(1, 1, 1);
+        final gutter = math.max(.002, 4 / size);
+        double local(double p, double c, double e) =>
+            ((p - c) / math.max(e, .01) + .5).clamp(gutter, 1 - gutter);
+        return [
+          for (final v in vertices)
+            origin +
+                (n.z.abs() >= n.x.abs() && n.z.abs() >= n.y.abs()
+                        ? Offset(
+                            local(v.x, center.x, extent.x),
+                            local(v.y, center.y, extent.y),
+                          )
+                        : n.x.abs() >= n.y.abs()
+                            ? Offset(
+                                local(v.z, center.z, extent.z),
+                                local(v.y, center.y, extent.y),
+                              )
+                            : Offset(
+                                local(v.x, center.x, extent.x),
+                                local(v.z, center.z, extent.z),
+                              )) *
+                    (size / 2),
+        ];
+      }
+      final scale =
+          size / (parts[face.partId]?.materialKey == 'panel' ? 180 : 36);
+      return [
+        for (final v in vertices)
+          n.z.abs() >= n.x.abs() && n.z.abs() >= n.y.abs()
+              ? Offset(v.x * scale, v.y * scale)
+              : n.x.abs() >= n.y.abs()
+                  ? Offset(v.z * scale, v.y * scale)
+                  : Offset(v.x * scale, v.z * scale),
+      ];
+    });
+  }
+
   ModelPart registerPart(
-      List<V> polygon, double z, double depth, String? group) {
+    List<V> polygon,
+    double z,
+    double depth,
+    String? group,
+  ) {
     final b = bounds(polygon), id = 'p${parts.length + 1}';
     final part = ModelPart(
-        id,
-        materialKey,
-        partLabel ?? materialNames[materialKey] ?? 'Yordamchi 3D detal',
-        P3((b[0] + b[2]) / 2, (b[1] + b[3]) / 2, z + depth / 2),
-        P3(b[2] - b[0], b[3] - b[1], depth),
-        group,
-        explosionLayer: explosionLayer);
+      id,
+      materialKey,
+      partLabel ?? materialNames[materialKey] ?? 'Yordamchi 3D detal',
+      P3((b[0] + b[2]) / 2, (b[1] + b[3]) / 2, z + depth / 2),
+      P3(b[2] - b[0], b[3] - b[1], depth),
+      group,
+      explosionLayer: explosionLayer,
+    );
     parts[id] = part;
     return part;
   }
@@ -205,12 +347,31 @@ class WindowModel {
     build();
     buildWall();
   }
-  void face(List<P3> p, Color color, String? group,
-          {bool glass = false, bool closed = false}) =>
-      faces.add(ModelFace(p, color, group,
-          glass: glass, partId: sharedPart, closed: closed));
-  void prism(List<V> poly, double z, double depth, Color color, String? group,
-      {bool glass = false}) {
+  void face(
+    List<P3> p,
+    Color color,
+    String? group, {
+    bool glass = false,
+    bool closed = false,
+  }) =>
+      faces.add(
+        ModelFace(
+          p,
+          color,
+          group,
+          glass: glass,
+          partId: sharedPart,
+          closed: closed,
+        ),
+      );
+  void prism(
+    List<V> poly,
+    double z,
+    double depth,
+    Color color,
+    String? group, {
+    bool glass = false,
+  }) {
     if (poly.length < 3) return;
     // One winding for every solid, so back faces can be skipped when drawing.
     if (signedArea(poly) < 0) poly = poly.reversed.toList();
@@ -222,8 +383,13 @@ class WindowModel {
     face(back.reversed.toList(), color, group, glass: glass, closed: true);
     for (var j = 0; j < poly.length; j++) {
       final k = (j + 1) % poly.length;
-      face([back[j], back[k], front[k], front[j]], color, group,
-          glass: glass, closed: true);
+      face(
+        [back[j], back[k], front[k], front[j]],
+        color,
+        group,
+        glass: glass,
+        closed: true,
+      );
     }
     sharedPart = previous;
   }
@@ -249,19 +415,30 @@ class WindowModel {
       if (!joins.contains('left')) [-margin, 0, margin, h],
       if (!joins.contains('right')) [w, 0, margin, h],
     ]) {
-      prism([
-        V(r[0], r[1]),
-        V(r[0] + r[2], r[1]),
-        V(r[0] + r[2], r[1] + r[3]),
-        V(r[0], r[1] + r[3])
-      ], -160, 250, plaster, null);
+      prism(
+        [
+          V(r[0], r[1]),
+          V(r[0] + r[2], r[1]),
+          V(r[0] + r[2], r[1] + r[3]),
+          V(r[0], r[1] + r[3]),
+        ],
+        -160,
+        250,
+        plaster,
+        null,
+      );
     }
     final outer = layout.outer;
     if (outer.length == 4) {
       final sillL = joins.contains('left') ? 0.0 : -45.0,
           sillR = joins.contains('right') ? w : w + 45;
-      prism([V(sillL, h), V(sillR, h), V(sillR, h + 28), V(sillL, h + 28)], 55,
-          230, sill, null);
+      prism(
+        [V(sillL, h), V(sillR, h), V(sillR, h + 28), V(sillL, h + 28)],
+        55,
+        230,
+        sill,
+        null,
+      );
     } else {
       // A stepped frame: the wall fills the steps…
       final xs = {for (final v in outer) v.x}.toList()..sort(),
@@ -283,12 +460,18 @@ class WindowModel {
           if (inside((xs[i] + xs[i + 1]) / 2, (ys[j] + ys[j + 1]) / 2)) {
             continue;
           }
-          prism([
-            V(xs[i], ys[j]),
-            V(xs[i + 1], ys[j]),
-            V(xs[i + 1], ys[j + 1]),
-            V(xs[i], ys[j + 1])
-          ], -160, 250, plaster, null);
+          prism(
+            [
+              V(xs[i], ys[j]),
+              V(xs[i + 1], ys[j]),
+              V(xs[i + 1], ys[j + 1]),
+              V(xs[i], ys[j + 1]),
+            ],
+            -160,
+            250,
+            plaster,
+            null,
+          );
         }
       }
       // …and a sill runs under every window part; a door goes to the floor.
@@ -296,22 +479,31 @@ class WindowModel {
       for (var j = 0; j < outer.length; j++) {
         final a = outer[j], b = outer[(j + 1) % outer.length];
         if ((a.y - b.y).abs() > .5 || b.x >= a.x) continue;
-        final door = layout.cells.any((c) =>
-            isDoorOpening(c.node['opening'] as String? ?? 'fixed') &&
-            c.box[0] < a.x &&
-            c.box[2] > b.x &&
-            (c.box[3] + face - a.y).abs() < 1);
+        final door = layout.cells.any(
+          (c) =>
+              isDoorOpening(c.node['opening'] as String? ?? 'fixed') &&
+              c.box[0] < a.x &&
+              c.box[2] > b.x &&
+              (c.box[3] + face - a.y).abs() < 1,
+        );
         if (door) continue;
         final x0 = b.x < .5 && !joins.contains('left') ? -45.0 : b.x,
             x1 =
                 (a.x - w).abs() < .5 && !joins.contains('right') ? w + 45 : a.x;
-        prism([V(x0, a.y), V(x1, a.y), V(x1, a.y + 28), V(x0, a.y + 28)], 55,
-            230, sill, null);
+        prism(
+          [V(x0, a.y), V(x1, a.y), V(x1, a.y + 28), V(x0, a.y + 28)],
+          55,
+          230,
+          sill,
+          null,
+        );
       }
     }
     for (final side in joins) {
-      neighbourFrame(side,
-          Color(finishColors[recipe['finish'] ?? 'silver'] ?? 0xffd7dee7));
+      neighbourFrame(
+        side,
+        Color(finishColors[recipe['finish'] ?? 'silver'] ?? 0xffd7dee7),
+      );
     }
     sharedPart = previous;
     wallFaces.addAll(faces.sublist(start));
@@ -320,19 +512,34 @@ class WindowModel {
 
   /// A solid extruded along y from [y0] to [y1]; [xz] is its plan section
   /// with x across and z through the depth.
-  void columnPrism(List<V> xz, double y0, double y1, Color color, String? group,
-      {bool glass = false}) {
+  void columnPrism(
+    List<V> xz,
+    double y0,
+    double y1,
+    Color color,
+    String? group, {
+    bool glass = false,
+  }) {
     face([for (final v in xz) P3(v.x, y0, v.y)], color, group, glass: glass);
-    face([for (final v in xz.reversed) P3(v.x, y1, v.y)], color, group,
-        glass: glass);
+    face(
+      [for (final v in xz.reversed) P3(v.x, y1, v.y)],
+      color,
+      group,
+      glass: glass,
+    );
     for (var j = 0; j < xz.length; j++) {
       final a = xz[j], b = xz[(j + 1) % xz.length];
-      face([
-        P3(a.x, y0, a.y),
-        P3(b.x, y0, b.y),
-        P3(b.x, y1, b.y),
-        P3(a.x, y1, a.y)
-      ], color, group, glass: glass);
+      face(
+        [
+          P3(a.x, y0, a.y),
+          P3(b.x, y0, b.y),
+          P3(b.x, y1, b.y),
+          P3(a.x, y1, a.y),
+        ],
+        color,
+        group,
+        glass: glass,
+      );
     }
   }
 
@@ -350,15 +557,19 @@ class WindowModel {
       e1: V(s, 0),
       e2: const V(0, 1),
       web: (depth + t) * math.sqrt2,
-      leg: (depth + t) * math.sqrt2 * .83
+      leg: (depth + t) * math.sqrt2 * .83,
     );
   }
 
   double get cornerWall =>
       ((recipe['profileWallMm'] as num?)?.toDouble() ?? 1.8).clamp(1.2, 3.0);
 
-  void cornerJoint(String side, Color color,
-      {double? height, double shift = 0}) {
+  void cornerJoint(
+    String side,
+    Color color, {
+    double? height,
+    double shift = 0,
+  }) {
     final g = cornerGeometry(side),
         h = height ?? (drawing['heightMm'] as num).toDouble(),
         t = cornerWall,
@@ -378,7 +589,7 @@ class WindowModel {
     }
 
     material('cornerProfile');
-    component('Burchak (qayt) ulash profili 90°', null, () {
+    component(materialNames['cornerProfile']!, null, () {
       final legs = g.leg * k;
       for (final piece in [
         strip(0, 0, 0, -g.web, t),
@@ -406,33 +617,62 @@ class WindowModel {
         z0 = depth + t * 1.5,
         len = math.min(900.0, math.max(400.0, h * .6)),
         ghost = color.withValues(alpha: .38);
-    List<V> rect(double a, double b, double c, double d) =>
-        [V(a, c), V(b, c), V(b, d), V(a, d)];
+    List<V> rect(double a, double b, double c, double d) => [
+          V(a, c),
+          V(b, c),
+          V(b, d),
+          V(a, d),
+        ];
     columnPrism(rect(x0, x1, z0, z0 + face), 0, h, ghost, null);
     columnPrism(rect(x0, x1, z0 + len - face, z0 + len), 0, h, ghost, null);
     columnPrism(rect(x0, x1, z0 + face, z0 + len - face), 0, face, ghost, null);
     columnPrism(
-        rect(x0, x1, z0 + face, z0 + len - face), h - face, h, ghost, null);
+      rect(x0, x1, z0 + face, z0 + len - face),
+      h - face,
+      h,
+      ghost,
+      null,
+    );
     columnPrism(
-        rect((x0 + x1) / 2 - 2, (x0 + x1) / 2 + 2, z0 + face, z0 + len - face),
-        face,
-        h - face,
-        const Color(0x553abfcf),
-        null,
-        glass: true);
+      rect((x0 + x1) / 2 - 2, (x0 + x1) / 2 + 2, z0 + face, z0 + len - face),
+      face,
+      h - face,
+      const Color(0x553abfcf),
+      null,
+      glass: true,
+    );
   }
 
-  void box(double x, double y, double z, double w, double h, double depth,
-      Color color, String? group) {
-    prism([V(x, y), V(x + w, y), V(x + w, y + h), V(x, y + h)], z, depth, color,
-        group);
+  void box(
+    double x,
+    double y,
+    double z,
+    double w,
+    double h,
+    double depth,
+    Color color,
+    String? group,
+  ) {
+    prism(
+      [V(x, y), V(x + w, y), V(x + w, y + h), V(x, y + h)],
+      z,
+      depth,
+      color,
+      group,
+    );
   }
 
   // Generic workshop section. All dimensions are millimetres. Each hollow
   // extrusion is one physical profile, including its walls and chamber webs.
   // This is deliberately not labelled as a manufacturer-certified section.
-  void profileBar(List<V> quad, double width, double depth, double z,
-      Color color, String? group) {
+  void profileBar(
+    List<V> quad,
+    double width,
+    double depth,
+    double z,
+    Color color,
+    String? group,
+  ) {
     if (quad.length != 4 || width < 5 || depth < 5) {
       prism(quad, z, depth, color, group);
       return;
@@ -442,27 +682,41 @@ class WindowModel {
     final wall = ((recipe['profileWallMm'] as num?)?.toDouble() ?? 1.8)
         .clamp(.5, math.min(width, depth) / 5)
         .toDouble();
-    final chambers =
-        ((recipe['profileChambers'] as num?)?.toInt() ?? 2).clamp(1, 4);
+    final chambers = ((recipe['profileChambers'] as num?)?.toInt() ?? 2).clamp(
+      1,
+      4,
+    );
     void strip(double from, double to, double back, double thick) {
       final a = quad[0], b = quad[1], ib = quad[2], ia = quad[3];
-      prism([
-        a + (ia - a) * from,
-        b + (ib - b) * from,
-        b + (ib - b) * to,
-        a + (ia - a) * to
-      ], z + back, thick, color, group);
+      prism(
+        [
+          a + (ia - a) * from,
+          b + (ib - b) * from,
+          b + (ib - b) * to,
+          a + (ia - a) * to,
+        ],
+        z + back,
+        thick,
+        color,
+        group,
+      );
     }
 
     final t = wall / width;
     if (simpleAluminium &&
-        const {'frame', 'sash', 'mullion', 'sashMullion', 'bead'}
-            .contains(materialKey)) {
+        const {
+          'frame',
+          'sash',
+          'mullion',
+          'sashMullion',
+          'bead',
+        }.contains(materialKey)) {
       simpleSection(
-          (u0, u1, w0, w1) => strip(u0 / width, u1 / width, w0, w1 - w0),
-          width,
-          depth,
-          wall);
+        (u0, u1, w0, w1) => strip(u0 / width, u1 / width, w0, w1 - w0),
+        width,
+        depth,
+        wall,
+      );
       sharedPart = previous;
       return;
     }
@@ -525,14 +779,16 @@ class WindowModel {
     final bead = (recipe['beadFaceMm'] as num?)?.toDouble() ?? 18;
     return (bead - 2)
         .clamp(
+          4.0,
+          math.max(
             4.0,
-            math.max(
-                4.0,
-                [
-                  face('frameFace') * .4,
-                  face('sashFace') * .4,
-                  face('mullionFace') * .3
-                ].reduce(math.min)))
+            [
+              face('frameFace') * .4,
+              face('sashFace') * .4,
+              face('mullionFace') * .3,
+            ].reduce(math.min),
+          ),
+        )
         .toDouble();
   }
 
@@ -541,10 +797,11 @@ class WindowModel {
   // a clip on the box wall for the U-shaped bead. u runs across the face
   // from the outer edge of the bar, w through the depth from the exterior.
   void simpleSection(
-      void Function(double u0, double u1, double w0, double w1) rect,
-      double width,
-      double depth,
-      double t) {
+    void Function(double u0, double u1, double w0, double w1) rect,
+    double width,
+    double depth,
+    double t,
+  ) {
     if (materialKey == 'bead') {
       // U channel opening towards the glass; the closed side faces the room.
       final hookW = math.min(2.5 * t, width * .25);
@@ -615,11 +872,18 @@ class WindowModel {
         'rail',
         'threshold',
         'spacer',
-        'bead'
+        'bead',
       }.contains(materialKey);
 
-  void beam(V a, V b, double width, double depth, double z, Color color,
-      String? group) {
+  void beam(
+    V a,
+    V b,
+    double width,
+    double depth,
+    double z,
+    Color color,
+    String? group,
+  ) {
     final delta = b - a, len = delta.length;
     if (len < .1) return;
     final normal = V(-delta.y / len, delta.x / len) * (width / 2);
@@ -631,8 +895,14 @@ class WindowModel {
     }
   }
 
-  void ring(List<V> outer, double width, double depth, double z, Color color,
-      String? group) {
+  void ring(
+    List<V> outer,
+    double width,
+    double depth,
+    double z,
+    Color color,
+    String? group,
+  ) {
     final previous = sharedPart;
     if (outer.length > 8) {
       sharedPart ??= registerPart(outer, z, depth, group).id;
@@ -652,7 +922,8 @@ class WindowModel {
         }
       }
       inner = [
-        for (var j = 0; j < inner.length; j++) inner[(j + shift) % inner.length]
+        for (var j = 0; j < inner.length; j++)
+          inner[(j + shift) % inner.length],
       ];
     }
     if (inner.length == outer.length) {
@@ -677,8 +948,14 @@ class WindowModel {
     sharedPart = previous;
   }
 
-  void cornerConnectors(List<V> outer, double faceWidth, double depth, double z,
-      Color color, String? group) {
+  void cornerConnectors(
+    List<V> outer,
+    double faceWidth,
+    double depth,
+    double z,
+    Color color,
+    String? group,
+  ) {
     // A curved extrusion has no connector at each tessellation vertex.
     if (outer.length > 24 ||
         (const {'circle', 'ellipse', 'arch'}.contains(drawing['shape']) &&
@@ -700,33 +977,53 @@ class WindowModel {
       final width = faceWidth * .38,
           height = depth * .56,
           back = z + depth * .19;
-      component('Archasimon burchak ulagichi • tishli alyuminiy', group, () {
+      component('Archa • tishli alyuminiy burchak qotirgich', group, () {
         for (final direction in [da, db]) {
           final u = direction * (1 / direction.length), normal = V(-u.y, u.x);
           beam(at, at + u * arm, width, height, back, color, group);
           for (double t = 12; t < arm - 5; t += 8) {
             for (final sign in [-1.0, 1.0]) {
               final center = at + u * t + normal * (width * .5 * sign);
-              prism([
-                center - u * 3,
-                center + normal * (2.5 * sign),
-                center + u * 3
-              ], back, height, color, group);
+              prism(
+                [
+                  center - u * 3,
+                  center + normal * (2.5 * sign),
+                  center + u * 3,
+                ],
+                back,
+                height,
+                color,
+                group,
+              );
             }
           }
-          beam(at + u * 5, at + u * (arm - 4), width * .28, 2, back + height,
-              color, group);
+          beam(
+            at + u * 5,
+            at + u * (arm - 4),
+            width * .28,
+            2,
+            back + height,
+            color,
+            group,
+          );
         }
       });
     }
   }
 
   void cylinder(
-      P3 center, double radius, double height, Color color, String? group) {
+    P3 center,
+    double radius,
+    double height,
+    Color color,
+    String? group,
+  ) {
     final poly = [
       for (var j = 0; j < 20; j++)
-        V(center.x + radius * math.cos(j * math.pi / 10),
-            center.y + radius * math.sin(j * math.pi / 10))
+        V(
+          center.x + radius * math.cos(j * math.pi / 10),
+          center.y + radius * math.sin(j * math.pi / 10),
+        ),
     ];
     prism(poly, center.z, height, color, group);
   }
@@ -741,7 +1038,13 @@ class WindowModel {
     partLabel = title;
     sharedPart = id;
     parts[id] = ModelPart(
-        id, materialKey, title, const P3(0, 0, 0), const P3(0, 0, 0), group);
+      id,
+      materialKey,
+      title,
+      const P3(0, 0, 0),
+      const P3(0, 0, 0),
+      group,
+    );
     build();
     final vertices = faces.skip(start).expand((f) => f.vertices).toList();
     if (vertices.isNotEmpty) {
@@ -754,20 +1057,26 @@ class WindowModel {
           yy = hi((p) => p.y),
           zz = hi((p) => p.z);
       parts[id] = ModelPart(
-          id,
-          materialKey,
-          title,
-          P3((x + xx) / 2, (y + yy) / 2, (z + zz) / 2),
-          P3(xx - x, yy - y, zz - z),
-          group,
-          explosionLayer: explosionLayer);
+        id,
+        materialKey,
+        title,
+        P3((x + xx) / 2, (y + yy) / 2, (z + zz) / 2),
+        P3(xx - x, yy - y, zz - z),
+        group,
+        explosionLayer: explosionLayer,
+      );
     }
     sharedPart = previous;
     partLabel = label;
   }
 
   List<V> roundedOutline(
-      double x, double y, double w, double h, double radius) {
+    double x,
+    double y,
+    double w,
+    double h,
+    double radius,
+  ) {
     final r = math.min(radius, math.min(w, h) / 2), out = <V>[];
     for (var corner = 0; corner < 4; corner++) {
       final cx = corner == 0 || corner == 3 ? x + w - r : x + r,
@@ -781,11 +1090,25 @@ class WindowModel {
     return out;
   }
 
-  void plate(double x, double y, double z, double w, double h, double d,
-      double radius, Color color, String? group) {
+  void plate(
+    double x,
+    double y,
+    double z,
+    double w,
+    double h,
+    double d,
+    double radius,
+    Color color,
+    String? group,
+  ) {
     final outer = roundedOutline(x, y, w, h, radius),
         inner = roundedOutline(
-            x + .7, y + .7, w - 1.4, h - 1.4, math.max(.5, radius - .7));
+          x + .7,
+          y + .7,
+          w - 1.4,
+          h - 1.4,
+          math.max(.5, radius - .7),
+        );
     final previous = sharedPart;
     sharedPart ??= registerPart(outer, z, d, group).id;
     face([for (final v in outer.reversed) P3(v.x, v.y, z)], color, group);
@@ -796,37 +1119,55 @@ class WindowModel {
           b = outer[k],
           c = inner[j],
           e = inner[k];
-      face([
-        P3(a.x, a.y, z),
-        P3(b.x, b.y, z),
-        P3(b.x, b.y, z + d - .8),
-        P3(a.x, a.y, z + d - .8)
-      ], color, group);
-      face([
-        P3(a.x, a.y, z + d - .8),
-        P3(b.x, b.y, z + d - .8),
-        P3(e.x, e.y, z + d),
-        P3(c.x, c.y, z + d)
-      ], color, group);
+      face(
+        [
+          P3(a.x, a.y, z),
+          P3(b.x, b.y, z),
+          P3(b.x, b.y, z + d - .8),
+          P3(a.x, a.y, z + d - .8),
+        ],
+        color,
+        group,
+      );
+      face(
+        [
+          P3(a.x, a.y, z + d - .8),
+          P3(b.x, b.y, z + d - .8),
+          P3(e.x, e.y, z + d),
+          P3(c.x, c.y, z + d),
+        ],
+        color,
+        group,
+      );
     }
     sharedPart = previous;
   }
 
-  void tube(List<P3> centers, double radius, Color color, String? group,
-      {P3 reference = const P3(0, 1, 0), double oval = 1}) {
+  void tube(
+    List<P3> centers,
+    double radius,
+    Color color,
+    String? group, {
+    P3 reference = const P3(0, 1, 0),
+    double oval = 1,
+  }) {
     if (centers.length < 2) return;
     final previous = sharedPart;
     if (sharedPart == null) {
       final xy = [
             for (final c in centers) ...[
               V(c.x - radius, c.y - radius),
-              V(c.x + radius, c.y + radius)
-            ]
+              V(c.x + radius, c.y + radius),
+            ],
           ],
           zs = centers.map((c) => c.z);
       final z = zs.reduce(math.min) - radius;
-      sharedPart =
-          registerPart(xy, z, zs.reduce(math.max) + radius - z, group).id;
+      sharedPart = registerPart(
+        xy,
+        z,
+        zs.reduce(math.max) + radius - z,
+        group,
+      ).id;
     }
     final rings = <List<P3>>[];
     for (var j = 0; j < centers.length; j++) {
@@ -841,7 +1182,7 @@ class WindowModel {
         for (var k = 0; k < 20; k++)
           centers[j] +
               normal * (radius * math.cos(k * math.pi / 10)) +
-              other * (radius * oval * math.sin(k * math.pi / 10))
+              other * (radius * oval * math.sin(k * math.pi / 10)),
       ]);
     }
     face(rings.first.reversed.toList(), color, group);
@@ -849,8 +1190,11 @@ class WindowModel {
     for (var j = 0; j < rings.length - 1; j++) {
       for (var k = 0; k < 20; k++) {
         final n = (k + 1) % 20;
-        face([rings[j][k], rings[j][n], rings[j + 1][n], rings[j + 1][k]],
-            color, group);
+        face(
+          [rings[j][k], rings[j][n], rings[j + 1][n], rings[j + 1][k]],
+          color,
+          group,
+        );
       }
     }
     sharedPart = previous;
@@ -861,59 +1205,104 @@ class WindowModel {
     box(x - 1.4, y - .4, z + 1.65, 2.8, .8, .1, const Color(0xff27313c), group);
   }
 
-  void leverHandle(double x, double y, double back, double front, bool door,
-      bool right, String? group) {
+  void leverHandle(
+    double x,
+    double y,
+    double back,
+    double front,
+    bool door,
+    bool right,
+    String? group,
+  ) {
     final color = recipe['hardwareFinish'] == 'silver'
         ? const Color(0xffb7c3ce)
         : recipe['hardwareFinish'] == 'gold'
             ? const Color(0xffbc9d50)
             : const Color(0xff343c45);
     component(
-        door
-            ? 'Eshik dastasi • ichki va tashqi to‘plam'
-            : 'Deraza dastasi • egri tutqich',
-        group, () {
-      for (final side in door ? [1.0, -1.0] : [1.0]) {
-        final z = side > 0 ? front : back;
-        final long = door && recipe['handleStyle'] != 'rosette';
-        plate(x - (door ? 15 : 12), y - (long ? 45 : 30), side > 0 ? z : z - 6,
-            door ? 30 : 24, long ? 220 : 60, 6, door ? 10 : 8, color, group);
-        final neck = z + side * 6;
-        tube([P3(x, y, neck), P3(x, y, neck + side * 17)], 8, color, group);
-        final dir = right ? 1.0 : -1.0;
-        if (door) {
-          tube([
-            P3(x, y, neck + side * 15),
-            P3(x + dir * 5, y, neck + side * 28),
-            P3(x + dir * 16, y + 1, neck + side * 35),
-            P3(x + dir * 38, y + 2, neck + side * 37),
-            P3(x + dir * 78, y + 2, neck + side * 37),
-            P3(x + dir * 111, y, neck + side * 34)
-          ], 7.5, color, group, oval: .88);
-        } else {
-          tube([
-            P3(x, y, neck + side * 15),
-            P3(x, y + 6, neck + side * 27),
-            P3(x, y + 17, neck + side * 33),
-            P3(x, y + 42, neck + side * 35),
-            P3(x, y + 68, neck + side * 35),
-            P3(x, y + 87, neck + side * 31)
-          ], 6.5, color, group, reference: const P3(1, 0, 0), oval: .86);
-        }
-        if (side > 0) {
-          for (final delta in long ? [-33.0, 162.0] : [-21.5, 21.5]) {
-            screwHead(x, y + delta, z + 6, group);
+      door
+          ? 'Eshik dastasi • ichki va tashqi to‘plam'
+          : 'Deraza dastasi • egri tutqich',
+      group,
+      () {
+        for (final side in door ? [1.0, -1.0] : [1.0]) {
+          final z = side > 0 ? front : back;
+          final long = door && recipe['handleStyle'] != 'rosette';
+          plate(
+            x - (door ? 15 : 12),
+            y - (long ? 45 : 30),
+            side > 0 ? z : z - 6,
+            door ? 30 : 24,
+            long ? 220 : 60,
+            6,
+            door ? 10 : 8,
+            color,
+            group,
+          );
+          final neck = z + side * 6;
+          tube([P3(x, y, neck), P3(x, y, neck + side * 17)], 8, color, group);
+          final dir = right ? 1.0 : -1.0;
+          if (door) {
+            tube(
+              [
+                P3(x, y, neck + side * 15),
+                P3(x + dir * 5, y, neck + side * 28),
+                P3(x + dir * 16, y + 1, neck + side * 35),
+                P3(x + dir * 38, y + 2, neck + side * 37),
+                P3(x + dir * 78, y + 2, neck + side * 37),
+                P3(x + dir * 111, y, neck + side * 34),
+              ],
+              7.5,
+              color,
+              group,
+              oval: .88,
+            );
+          } else {
+            tube(
+              [
+                P3(x, y, neck + side * 15),
+                P3(x, y + 6, neck + side * 27),
+                P3(x, y + 17, neck + side * 33),
+                P3(x, y + 42, neck + side * 35),
+                P3(x, y + 68, neck + side * 35),
+                P3(x, y + 87, neck + side * 31),
+              ],
+              6.5,
+              color,
+              group,
+              reference: const P3(1, 0, 0),
+              oval: .86,
+            );
+          }
+          if (side > 0) {
+            for (final delta in long ? [-33.0, 162.0] : [-21.5, 21.5]) {
+              screwHead(x, y + delta, z + 6, group);
+            }
           }
         }
-      }
-      box(x - 3.5, y - 3.5, back - 3, 7, 7, front - back + 6,
-          const Color(0xff79858f), group);
-    });
+        box(
+          x - 3.5,
+          y - 3.5,
+          back - 3,
+          7,
+          7,
+          front - back + 6,
+          const Color(0xff79858f),
+          group,
+        );
+      },
+    );
   }
 
   void barrelHinge(
-      double x, double y, double z, bool horizontal, bool door, String? group,
-      {bool right = false}) {
+    double x,
+    double y,
+    double z,
+    bool horizontal,
+    bool door,
+    String? group, {
+    bool right = false,
+  }) {
     final color = recipe['hardwareFinish'] == 'silver'
             ? const Color(0xffa9b7c5)
             : const Color(0xff424c57),
@@ -936,28 +1325,39 @@ class WindowModel {
         plate(x - 24, y + 2, z - 13, 48, 18, 5, 5, color, group);
       } else {
         plate(
-            x + (right ? -20 : 2), y - 24, z - 13, 18, 48, 5, 5, color, group);
+          x + (right ? -20 : 2),
+          y - 24,
+          z - 13,
+          18,
+          48,
+          5,
+          5,
+          color,
+          group,
+        );
       }
       for (var k = 0; k < 3; k++) {
         final from = -length / 2 + k * length / 3 + 1,
             to = -length / 2 + (k + 1) * length / 3 - 1;
         tube(
-            horizontal
-                ? [P3(x + from, y, z), P3(x + to, y, z)]
-                : [P3(x, y + from, z), P3(x, y + to, z)],
-            r,
-            color,
-            group,
-            reference: horizontal ? const P3(0, 1, 0) : const P3(1, 0, 0));
+          horizontal
+              ? [P3(x + from, y, z), P3(x + to, y, z)]
+              : [P3(x, y + from, z), P3(x, y + to, z)],
+          r,
+          color,
+          group,
+          reference: horizontal ? const P3(0, 1, 0) : const P3(1, 0, 0),
+        );
       }
       tube(
-          horizontal
-              ? [P3(x - length / 2 - 1, y, z), P3(x + length / 2 + 1, y, z)]
-              : [P3(x, y - length / 2 - 1, z), P3(x, y + length / 2 + 1, z)],
-          2,
-          const Color(0xffbfcbd6),
-          group,
-          reference: horizontal ? const P3(0, 1, 0) : const P3(1, 0, 0));
+        horizontal
+            ? [P3(x - length / 2 - 1, y, z), P3(x + length / 2 + 1, y, z)]
+            : [P3(x, y - length / 2 - 1, z), P3(x, y + length / 2 + 1, z)],
+        2,
+        const Color(0xffbfcbd6),
+        group,
+        reference: horizontal ? const P3(0, 1, 0) : const P3(1, 0, 0),
+      );
       if (horizontal) {
         screwHead(x - 15, y + 10, z - 8, group);
         screwHead(x + 15, y + 10, z - 8, group);
@@ -968,47 +1368,181 @@ class WindowModel {
     });
   }
 
-  void pullWindowHandle(double x, double y, double z, List<double> bounds,
-      String owner, bool right, int locks) {
+  /// Locate a fixed fastener on actual frame/mullion stock, rather than
+  /// copying the sash handle's coordinates into empty opening space.
+  (V, double) frameMount(V target) {
+    final frameWidth = (recipe['frameFace'] as num).toDouble();
+    final centerline = inset(layout.outer, frameWidth / 2);
+    final candidates = <(V, V, double)>[
+      for (var i = 0; i < centerline.length; i++)
+        (centerline[i], centerline[(i + 1) % centerline.length], frameWidth),
+      for (final s in layout.splits)
+        (s.a, s.b, (recipe['mullionFace'] as num).toDouble()),
+    ];
+    var nearest = target, distance = double.infinity, width = frameWidth;
+    for (final (a, b, face) in candidates) {
+      final dx = b.x - a.x, dy = b.y - a.y, squared = dx * dx + dy * dy;
+      if (squared < .001) continue;
+      final t = (((target.x - a.x) * dx + (target.y - a.y) * dy) / squared)
+          .clamp(0.0, 1.0);
+      final point = V(a.x + dx * t, a.y + dy * t), d = (target - point).length;
+      if (d < distance) {
+        nearest = point;
+        distance = d;
+        width = face;
+      }
+    }
+    final foot = math.min(14.0, width * .4);
+    if (distance > .001 && distance.isFinite) {
+      final toward = target - nearest;
+      nearest = nearest +
+          toward *
+              (math.min(distance, math.max(0.0, width / 2 - foot * .8)) /
+                  distance);
+    }
+    return (nearest, foot);
+  }
+
+  void pullWindowHandle(
+    double x,
+    double y,
+    double z,
+    List<double> bounds,
+    String owner,
+    bool right,
+    int locks, {
+    bool dolphin = false,
+  }) {
     final handleMotion = '$owner-pull',
         rodMotion = '$owner-rod',
         group = groups[owner]!;
-    motions[handleMotion] =
-        HardwareMotion(owner, group, 'pull', P3(x, y - 18, z + 10));
+    motions[handleMotion] = HardwareMotion(
+      owner,
+      group,
+      'pull',
+      P3(x, y - 18, z + 10),
+    );
     motions[rodMotion] = HardwareMotion(owner, group, 'rod', P3(x, y, z));
     final color = recipe['hardwareFinish'] == 'silver'
         ? const Color(0xffb8c3ce)
         : const Color(0xff38434f);
     material('handle');
-    component('Deraza tutqichi • asos qutisi', owner, () {
-      plate(x - 13, y - 33, z, 26, 68, 7, 7, color, owner);
-      screwHead(x, y - 24, z + 7, owner);
-      screwHead(x, y + 25, z + 7, owner);
-    });
-    component('Deraza tutqichi • tortma dasta', handleMotion, () {
-      tube([P3(x - 10, y - 18, z + 10), P3(x + 10, y - 18, z + 10)], 4, color,
-          handleMotion);
-      tube([
-        P3(x, y - 18, z + 10),
-        P3(x, y - 5, z + 16),
-        P3(x, y + 16, z + 21),
-        P3(x, y + 45, z + 23),
-        P3(x, y + 68, z + 20)
-      ], 6.5, color, handleMotion, reference: const P3(1, 0, 0), oval: .8);
-    });
-    final barX = x + (right ? -13 : 13),
+    component(
+      dolphin ? 'Delfin tutqich • asos' : 'Deraza tutqichi • asos qutisi',
+      owner,
+      () {
+        if (dolphin) {
+          plate(
+            x - 14.4,
+            y - 35.4,
+            z - .7,
+            28.8,
+            81,
+            .7,
+            8.4,
+            const Color(0xff9a655d),
+            owner,
+          );
+          plate(x - 14, y - 35, z, 28, 80, 7, 8, color, owner);
+        } else {
+          plate(x - 13, y - 33, z, 26, 68, 7, 7, color, owner);
+        }
+        screwHead(x, y - 24, z + 7, owner);
+        screwHead(x, y + 25, z + 7, owner);
+      },
+    );
+    component(
+      dolphin
+          ? 'Delfin tutqich • tortma dasta'
+          : 'Deraza tutqichi • tortma dasta',
+      handleMotion,
+      () {
+        tube(
+          [P3(x - 10, y - 18, z + 10), P3(x + 10, y - 18, z + 10)],
+          4,
+          color,
+          handleMotion,
+        );
+        tube(
+          [
+            P3(x, y - 18, z + 10),
+            P3(x, y - 5, z + 16),
+            P3(x, y + 16, z + 21),
+            P3(x, y + 45, z + 23),
+            P3(x, y + (dolphin ? 87 : 68), z + 20),
+          ],
+          dolphin ? 7 : 6.5,
+          color,
+          handleMotion,
+          reference: const P3(1, 0, 0),
+          oval: .8,
+        );
+      },
+    );
+    // The locking rod belongs in the sash edge channel, not beside the
+    // handle on the open pane. Its cams meet low-profile fixed keeps.
+    final barX = right ? bounds[0] + 1 : bounds[2] - 1,
+        lockBack = (recipe['frameDepth'] as num).toDouble() + 1,
         top = bounds[1] + 80,
         bottom = bounds[3] - 80;
     material('windowLock');
+    if (dolphin) {
+      component(
+        'Delfin mexanizmi • ikki tishli pastga tushuvchi vilka',
+        rodMotion,
+        () {
+          final side = right ? -1.0 : 1.0;
+          final start = x + side * 11;
+          const forkColor = Color(0xffaeb8c0);
+          for (final dy in [-5.0, 5.0]) {
+            // Two flat parallel prongs emerge beside the backplate and drive
+            // a carriage in the sash edge. They translate; they do not spin.
+            box(
+              math.min(start, barX),
+              y + dy - 1.6,
+              z - 3,
+              math.max(4, (barX - start).abs()),
+              3.2,
+              3,
+              forkColor,
+              rodMotion,
+            );
+          }
+          box(
+            barX - 2,
+            y - 8,
+            lockBack + 2,
+            4,
+            16,
+            math.max(3, z - lockBack - 2),
+            forkColor,
+            rodMotion,
+          );
+        },
+      );
+    }
     component('Deraza zapori • pastga suriluvchi temir tyaga', rodMotion, () {
-      box(barX - 3, top, z - 5, 6, math.max(60, bottom - top), 3,
-          const Color(0xffa0adba), rodMotion);
+      box(
+        barX - 2,
+        top,
+        lockBack,
+        4,
+        math.max(60, bottom - top),
+        2,
+        const Color(0xffa0adba),
+        rodMotion,
+      );
       for (var k = 0; k < math.max(2, locks); k++) {
         final cy = top +
             (bottom - top) *
                 (.16 + .68 * k / math.max(1, math.max(2, locks) - 1));
         cylinder(
-            P3(barX, cy - 7, z - 2), 4, 7, const Color(0xffb9c6d1), rodMotion);
+          P3(barX, cy - 7, lockBack + 2),
+          3,
+          2,
+          const Color(0xffb9c6d1),
+          rodMotion,
+        );
       }
     });
     for (var k = 0; k < math.max(2, locks); k++) {
@@ -1016,127 +1550,74 @@ class WindowModel {
           (bottom - top) *
               (.16 + .68 * k / math.max(1, math.max(2, locks) - 1));
       component('Yelma • ramadagi qiya ushlagich', null, () {
-        prism([
-          V(barX - 8, cy - 3),
-          V(barX + 10, cy - 9),
-          V(barX + 10, cy + 10),
-          V(barX - 8, cy + 10)
-        ], z - 1, 9, const Color(0xff707e8d), null);
-        screwHead(barX + 6, cy + 5, z + 8, null);
+        final target = V(barX, cy);
+        final (mount, width) = frameMount(target);
+        final delta = target - mount;
+        final toward =
+            delta.length > .001 ? delta * (1 / delta.length) : const V(1, 0);
+        final along = V(-toward.y, toward.x);
+        final front = (recipe['frameDepth'] as num).toDouble();
+        const finish = Color(0xff929da7);
+        // A thin screwed keep sits directly on the stock. No tall pedestal
+        // or transverse arm bridges the empty opening.
+        final a = mount - toward * (width / 2) - along * 16;
+        final b = mount + toward * (width / 2) + along * 16;
+        plate(
+          math.min(a.x, b.x),
+          math.min(a.y, b.y),
+          front,
+          (a.x - b.x).abs(),
+          (a.y - b.y).abs(),
+          2,
+          2,
+          finish,
+          null,
+        );
+        final heel = mount + toward * (width / 2 - 2);
+        final tip = mount + toward * (width / 2 + 1.5);
+        prism(
+          [
+            heel - along * 6,
+            tip - along * 3,
+            tip + along * 3,
+            heel + along * 6,
+          ],
+          front + 2,
+          2,
+          finish,
+          null,
+        );
+        for (final offset in [-10.0, 10.0]) {
+          final screw = mount + along * offset;
+          screwHead(screw.x, screw.y, front + 2, null);
+        }
       });
     }
   }
 
-  /// "Delfin" handle of simple aluminium casements: a rosette, a lever
-  /// arched like a dolphin's back, and a hook behind it that catches a
-  /// strike on the frame. The lever turns 90° to free the hook, then the
-  /// sash swings.
-  void dolphinHandle(double x, double y, double front, List<double> b,
-      String owner, String type, bool right, int locks) {
-    final turnMotion = '$owner-turn',
-        horizontal = type == 'top' || type == 'bottom',
-        along = horizontal ? const V(1, 0) : const V(0, 1),
-        across = horizontal ? const V(0, 1) : const V(1, 0),
-        pivot = V(x, y) - along * 16;
-    // The lever turns into the sash, the hook out of the strike.
-    final turn = math.pi /
-        2 *
-        (horizontal ? (type == 'top' ? -1 : 1) : (right ? -1 : 1));
-    final hookDir =
-        horizontal ? V(0, type == 'top' ? 1 : -1) : V(right ? -1 : 1, 0);
-    motions[turnMotion] = HardwareMotion(
-        owner, groups[owner]!, 'turn', P3(pivot.x, pivot.y, front),
-        turn: turn);
-    final color = recipe['hardwareFinish'] == 'silver'
-        ? const Color(0xffc3ccd5)
-        : recipe['hardwareFinish'] == 'gold'
-            ? const Color(0xffbc9d50)
-            : const Color(0xff2f363e);
-    P3 at(double s, double c, double h) {
-      final v = pivot + along * s + across * c;
-      return P3(v.x, v.y, front + h);
-    }
-
-    V flat(double s, double c) => pivot + along * s + across * c;
-    final reference = P3(across.x, across.y, 0);
-    material('handle');
-    component('Delfin tutqich • asos', owner, () {
-      final a = flat(-14, -11), z = flat(50, 11);
-      plate(math.min(a.x, z.x), math.min(a.y, z.y), front, (a.x - z.x).abs(),
-          (a.y - z.y).abs(), 6, 9, color, owner);
-      for (final s in [-5.0, 42.0]) {
-        final v = flat(s, 0);
-        screwHead(v.x, v.y, front + 6, owner);
-      }
-    });
-    component('Delfin tutqich • egri dasta', turnMotion, () {
-      cylinder(P3(pivot.x, pivot.y, front + 6), 8.5, 8, color, turnMotion);
-      // Arched body from the head at the pivot to the tail.
-      tube([
-        at(0, 0, 10),
-        at(7, 0, 16),
-        at(19, 0, 21),
-        at(37, 0, 23),
-        at(57, 0, 21),
-        at(72, 0, 16),
-        at(80, 0, 13)
-      ], 6.5, color, turnMotion, reference: reference, oval: .72);
-      // Snout ahead of the pivot and a small dorsal fin.
-      tube([at(0, 0, 10), at(-9, 0, 12), at(-15, 0, 11)], 4, color, turnMotion,
-          reference: reference);
-      tube(
-          [at(30, 0, 26), at(36, 0, 31), at(40, 0, 29)], 2.4, color, turnMotion,
-          reference: reference);
-      // Tail flukes.
-      for (final side in [-1.0, 1.0]) {
-        prism([
-          flat(77, -2 * side),
-          flat(87, -11 * side),
-          flat(92, -8 * side),
-          flat(84, 0)
-        ], front + 11, 4, color, turnMotion);
-      }
-      box(pivot.x - 3.5, pivot.y - 3.5, front - 22, 7, 7, 22,
-          const Color(0xff79858f), turnMotion);
-    });
-    // Hook tongue behind the rosette; it reaches over the frame lip.
-    final reach = (recipe['sashFace'] as num).toDouble() * .5 + 12,
-        tip = pivot + hookDir * reach;
-    material('windowLock');
-    component('Delfin tutqich • ilgak tili', turnMotion, () {
-      beam(pivot, tip, 9, 4, front - 6, const Color(0xff9aa6b2), turnMotion);
-      box(tip.x - 4.5, tip.y - 4.5, front - 12, 9, 9, 6,
-          const Color(0xff9aa6b2), turnMotion);
-    });
-    final frameFront = (recipe['frameDepth'] as num?)?.toDouble() ?? 60,
-        strike = pivot + hookDir * (reach - 10);
-    component('Ilgak tutgichi • ramadagi qarshi plastina', null, () {
-      final lo = math.max(1.0, front - 12 - frameFront);
-      box(strike.x - 9, strike.y - 9, frameFront, 18, 18, lo,
-          const Color(0xff7d8b99), null);
-      screwHead(strike.x, strike.y, frameFront + lo, null);
-    });
-    // Extra latches along the same edge when more locks are counted.
-    const spots = [.18, .82, .32, .68, .1, .9, .42, .58, .05];
-    for (var k = 0; k < locks - 1; k++) {
-      final t = spots[k % spots.length],
-          edge = horizontal
-              ? V(b[0] + (b[2] - b[0]) * t, y)
-              : V(x, b[1] + (b[3] - b[1]) * t);
-      if ((edge - V(x, y)).length < 120) continue;
-      component('Zashchelka • prujinali tilcha', owner, () {
-        final a = edge - along * 18 - across * 6,
-            z = edge + along * 18 + across * 6;
-        plate(math.min(a.x, z.x), math.min(a.y, z.y), front, (a.x - z.x).abs(),
-            (a.y - z.y).abs(), 5, 4, color, owner);
-        final tongue = edge + hookDir * (reach - 4);
-        beam(edge, tongue, 8, 4, front - 6, const Color(0xff9aa6b2), owner);
-      });
-    }
+  /// Pull-type dolphin hardware from the user's product reference. First
+  /// the lever pulls out and its fork/rod drops; only then the sash swings.
+  /// Stroke and dimensions are visual approximations, not machining data.
+  void dolphinHandle(
+    double x,
+    double y,
+    double front,
+    List<double> b,
+    String owner,
+    String type,
+    bool right,
+    int locks,
+  ) {
+    pullWindowHandle(x, y, front, b, owner, right, locks, dolphin: true);
   }
 
   void euroCylinder(
-      double x, double y, double back, double front, String? group) {
+    double x,
+    double y,
+    double back,
+    double front,
+    String? group,
+  ) {
     material('cylinder');
     component('Qulf silindri • kalit teshigi', group, () {
       final color = const Color(0xffb4a56b);
@@ -1164,7 +1645,9 @@ class WindowModel {
         metal = Color(0xff7d91a4),
         // Clear float glass: a faint blue-green; reflections come from the
         // renderer.
-        glass = Color(0x4a5b93ad),
+        glass = Color(
+          0x4a5b93ad,
+        ),
         wood = Color(0xffc5a27b);
     final frameDepth = (recipe['frameDepth'] ?? 60 as num).toDouble(),
         sashDepth = (recipe['sashDepth'] ?? 65 as num).toDouble(),
@@ -1192,8 +1675,15 @@ class WindowModel {
     }
     material('mullion');
     for (final s in layout.splits) {
-      beam(s.a, s.b, (recipe['mullionFace'] as num).toDouble(), frameDepth, 0,
-          frame, null);
+      beam(
+        s.a,
+        s.b,
+        (recipe['mullionFace'] as num).toDouble(),
+        frameDepth,
+        0,
+        frame,
+        null,
+      );
     }
     for (final side in cornerJoins(drawing)) {
       cornerJoint(side, frame);
@@ -1217,8 +1707,12 @@ class WindowModel {
       final hingeX = right ? b[2] : b[0],
           hingeY = type == 'bottom' ? b[3] : b[1];
       if (group != null) {
-        groups[group] =
-            ModelGroup(c, hingeX, hingeY, frameDepth * .25 + sashDepth + 10);
+        groups[group] = ModelGroup(
+          c,
+          hingeX,
+          hingeY,
+          frameDepth * .25 + sashDepth + 10,
+        );
       }
       final z = active ? frameDepth * .25 : 0.0,
           depth = active ? sashDepth : frameDepth;
@@ -1230,28 +1724,48 @@ class WindowModel {
         // Two separate sash seal lines.
         material('sealOuter');
         if ((recipe['outerLoops'] as num) > 0) {
-          ring(simplify(inset(c.polygon, 3)), 3, 2, z + depth + 1, rubber,
-              group);
+          ring(
+            simplify(inset(c.polygon, 3)),
+            3,
+            2,
+            z + depth + 1,
+            rubber,
+            group,
+          );
         }
         material('sealInner');
         if ((recipe['innerLoops'] as num) > 0 &&
             inset(c.polygon, sashFace - 4).length > 2) {
-          ring(simplify(inset(c.polygon, sashFace - 4)), 2, 2, z + depth + 1,
-              rubber, group);
+          ring(
+            simplify(inset(c.polygon, sashFace - 4)),
+            2,
+            2,
+            z + depth + 1,
+            rubber,
+            group,
+          );
         }
       }
       final fillings = layoutInfill(c, recipe);
       material('sashMullion');
       for (final split in fillings.splits) {
-        beam(split.a, split.b, (recipe['mullionFace'] as num).toDouble(), depth,
-            z, sash, group);
+        beam(
+          split.a,
+          split.b,
+          (recipe['mullionFace'] as num).toDouble(),
+          depth,
+          z,
+          sash,
+          group,
+        );
       }
       for (final fill in fillings.cells) {
         // The pane or panel as ordered (it may reach under the profile lip)
         // and the visible opening it shows through.
         final poly = simplify(glassOutline(fill.polygon, recipe)),
             visible = simplify(
-                inset(fill.polygon, (recipe['glassGap'] as num).toDouble())),
+              inset(fill.polygon, (recipe['glassGap'] as num).toDouble()),
+            ),
             kind = fill.node['fill'];
         if (poly.length < 3 || kind == 'empty') continue;
         final gb = bounds(visible), panel = kind != 'glass';
@@ -1263,13 +1777,24 @@ class WindowModel {
           // Two actual panes and the hollow metallic edge spacer between them.
           explosionLayer = -.24;
           partLabel = '1-shisha • tashqi';
-          prism(poly, glassZ, thickness, glass.withValues(alpha: .18), group,
-              glass: true);
+          prism(
+            poly,
+            glassZ,
+            thickness,
+            glass.withValues(alpha: .18),
+            group,
+            glass: true,
+          );
           explosionLayer = .24;
           partLabel = '2-shisha • ichki';
-          prism(poly, glassZ + thickness + glazing.gapMm, thickness,
-              glass.withValues(alpha: .18), group,
-              glass: true);
+          prism(
+            poly,
+            glassZ + thickness + glazing.gapMm,
+            thickness,
+            glass.withValues(alpha: .18),
+            group,
+            glass: true,
+          );
           explosionLayer = 0;
           final spacer = inset(poly, glazing.insetMm);
           material('spacer');
@@ -1280,54 +1805,100 @@ class WindowModel {
           material('shpros');
           for (final bar in bars) {
             beam(
-                bar.a, bar.b, 8, 4, middle - 2, const Color(0xffc8ab59), group);
+              bar.a,
+              bar.b,
+              8,
+              4,
+              middle - 2,
+              const Color(0xffc8ab59),
+              group,
+            );
           }
           material('shprosJoint');
           for (final at in joints) {
-            box(at.x - 5, at.y - 5, middle - 2, 10, 10, 4,
-                const Color(0xffd8bf73), group);
+            box(
+              at.x - 5,
+              at.y - 5,
+              middle - 2,
+              10,
+              10,
+              4,
+              const Color(0xffd8bf73),
+              group,
+            );
           }
           if (n['rosettes'] == true) {
             material('shprosRosette');
             for (final at in joints) {
               final previous = sharedPart;
               sharedPart = registerPart(
-                      [V(at.x - 24, at.y - 24), V(at.x + 24, at.y + 24)],
-                      middle - 2,
-                      4,
-                      group)
-                  .id;
+                [V(at.x - 24, at.y - 24), V(at.x + 24, at.y + 24)],
+                middle - 2,
+                4,
+                group,
+              ).id;
               for (var petal = 0; petal < 8; petal++) {
                 final angle = petal * math.pi / 4;
                 cylinder(
-                    P3(at.x + 16 * math.cos(angle), at.y + 16 * math.sin(angle),
-                        middle - 1),
-                    7,
-                    2,
-                    const Color(0xffc8ab59),
-                    group);
+                  P3(
+                    at.x + 16 * math.cos(angle),
+                    at.y + 16 * math.sin(angle),
+                    middle - 1,
+                  ),
+                  7,
+                  2,
+                  const Color(0xffc8ab59),
+                  group,
+                );
               }
-              cylinder(P3(at.x, at.y, middle - 2), 10, 4,
-                  const Color(0xffdec784), group);
+              cylinder(
+                P3(at.x, at.y, middle - 2),
+                10,
+                4,
+                const Color(0xffdec784),
+                group,
+              );
               sharedPart = previous;
             }
           }
           material('butyl');
           ring(spacer, 1.3, .6, glassZ + thickness - .3, rubber, group);
-          ring(spacer, 1.3, .6, glassZ + thickness + glazing.gapMm - .3, rubber,
-              group);
+          ring(
+            spacer,
+            1.3,
+            .6,
+            glassZ + thickness + glazing.gapMm - .3,
+            rubber,
+            group,
+          );
           material('iguSeal');
-          ring(poly, glazing.insetMm, glazing.gapMm, glassZ + thickness, rubber,
-              group);
+          ring(
+            poly,
+            glazing.insetMm,
+            glazing.gapMm,
+            glassZ + thickness,
+            rubber,
+            group,
+          );
         } else if (simpleAluminium) {
           // Panels sit in the same rebate as the glass, e.g. 4 mm composite.
-          prism(poly, glassZ, panel ? math.max(glazing.totalMm, 4) : thickness,
-              panel ? wood : glass, group,
-              glass: !panel);
+          prism(
+            poly,
+            glassZ,
+            panel ? math.max(glazing.totalMm, 4) : thickness,
+            panel ? wood : glass,
+            group,
+            glass: !panel,
+          );
         } else {
-          prism(poly, panel ? z + depth * .5 : glassZ, panel ? 20 : thickness,
-              panel ? wood : glass, group,
-              glass: !panel);
+          prism(
+            poly,
+            panel ? z + depth * .5 : glassZ,
+            panel ? 20 : thickness,
+            panel ? wood : glass,
+            group,
+            glass: !panel,
+          );
         }
         material('bead');
         final beadFace = (recipe['beadFaceMm'] as num?)?.toDouble() ?? 18,
@@ -1336,16 +1907,23 @@ class WindowModel {
           // U bead clipped onto the profile box wall, pressing the pane.
           partLabel = 'Shtapik • U shaklidagi qisqich profil';
           ring(
-              simplify(outset(fill.polygon, rebateZone)),
-              beadFace,
-              beadDepth,
-              glassZ + math.max(glazing.totalMm, panel ? 4 : 0) - 1,
-              sash,
-              group);
+            simplify(outset(fill.polygon, rebateZone)),
+            beadFace,
+            beadDepth,
+            glassZ + math.max(glazing.totalMm, panel ? 4 : 0) - 1,
+            sash,
+            group,
+          );
         } else {
           partLabel = 'Shtapik • pog‘onali profil va ilashuvchi lab';
-          ring(poly, beadFace, beadDepth, glassZ + glazing.totalMm - 2, bead,
-              group);
+          ring(
+            poly,
+            beadFace,
+            beadDepth,
+            glassZ + glazing.totalMm - 2,
+            bead,
+            group,
+          );
         }
         partLabel = null;
         material('uGasket');
@@ -1353,11 +1931,23 @@ class WindowModel {
           if (simpleAluminium) {
             // Gasket on the lip, between the lip and the outer pane face.
             final wall = (recipe['profileWallMm'] as num?)?.toDouble() ?? 1.8;
-            ring(simplify(outset(fill.polygon, wall + 1)), wall + 3, 2,
-                glassZ - 2, rubber, group);
+            ring(
+              simplify(outset(fill.polygon, wall + 1)),
+              wall + 3,
+              2,
+              glassZ - 2,
+              rubber,
+              group,
+            );
           } else {
-            ring(simplify(inset(poly, 5)), 2, 2, z + depth * .65 + 2, rubber,
-                group);
+            ring(
+              simplify(inset(poly, 5)),
+              2,
+              2,
+              z + depth * .65 + 2,
+              rubber,
+              group,
+            );
           }
         }
         if (kind == 'lambris') {
@@ -1367,13 +1957,14 @@ class WindowModel {
             final narrow = rectClip(poly, [x - 1, gb[1], x + 1, gb[3]]);
             if (narrow.length > 2) {
               prism(
-                  narrow,
-                  simpleAluminium
-                      ? glassZ + math.max(glazing.totalMm, 4)
-                      : z + depth * .5 + 20,
-                  1,
-                  const Color(0xff9f7a53),
-                  group);
+                narrow,
+                simpleAluminium
+                    ? glassZ + math.max(glazing.totalMm, 4)
+                    : z + depth * .5 + 20,
+                1,
+                const Color(0xff9f7a53),
+                group,
+              );
             }
           }
         }
@@ -1414,8 +2005,15 @@ class WindowModel {
             final x = topHinge
                 ? b[0] + (b[2] - b[0]) * (.15 + .7 * j / math.max(1, count - 1))
                 : hingeX;
-            barrelHinge(x, y, z + depth + 10, topHinge, door, group,
-                right: right);
+            barrelHinge(
+              x,
+              y,
+              z + depth + 10,
+              topHinge,
+              door,
+              group,
+              right: right,
+            );
           }
         }
         final hx = topHinge
@@ -1429,19 +2027,36 @@ class WindowModel {
         // Each primitive is selectable; purchase quantities come from the estimator,
         // never from the number of tessellated 3D surfaces or decorative screws.
         if (type != 'passive') {
-          material(sliding
-              ? 'slideLock'
-              : door
-                  ? 'doorHandle'
-                  : 'handle');
+          material(
+            sliding
+                ? 'slideLock'
+                : door
+                    ? 'doorHandle'
+                    : 'handle',
+          );
           final hinged =
               !door && !sliding && group != null && type != 'tiltTurn';
           if (hinged && recipe['windowHandle'] == 'dolphin') {
-            dolphinHandle(hx, hy, z + depth, b, group, type, right,
-                (n['locks'] as num? ?? 1).toInt().clamp(0, 10));
+            dolphinHandle(
+              hx,
+              hy,
+              z + depth,
+              b,
+              group,
+              type,
+              right,
+              (n['locks'] as num? ?? 1).toInt().clamp(0, 10),
+            );
           } else if (hinged && recipe['windowHandle'] != 'lever') {
-            pullWindowHandle(hx, hy, z + depth, b, group, right,
-                (n['locks'] as num? ?? 1).toInt().clamp(0, 10));
+            pullWindowHandle(
+              hx,
+              hy,
+              z + depth,
+              b,
+              group,
+              right,
+              (n['locks'] as num? ?? 1).toInt().clamp(0, 10),
+            );
           } else {
             leverHandle(hx, hy, z, z + depth, door, right, group);
           }
@@ -1453,23 +2068,53 @@ class WindowModel {
               material('doorLock');
               component('Qulf korpusi • til va yuz plastinasi', group, () {
                 final edge = hx + (right ? -sashFace * .5 : sashFace * .5);
-                box(edge + (right ? 1 : -35), ly - 55, z + 8, 34, 150,
-                    depth - 16, metal, group);
+                box(
+                  edge + (right ? 1 : -35),
+                  ly - 55,
+                  z + 8,
+                  34,
+                  150,
+                  depth - 16,
+                  metal,
+                  group,
+                );
                 box(edge - 1, ly - 65, z + 3, 2, 180, depth - 6, metal, group);
-                box(edge - 12, ly - 12, z + depth * .45, 24, 22, 12,
-                    const Color(0xffb9c3cd), group);
+                box(
+                  edge - 12,
+                  ly - 12,
+                  z + depth * .45,
+                  24,
+                  22,
+                  12,
+                  const Color(0xffb9c3cd),
+                  group,
+                );
                 screwHead(edge, ly - 55, z + depth + 4, group);
                 screwHead(edge, ly + 102, z + depth + 4, group);
               });
             } else if (sliding || type == 'tiltTurn') {
               material(sliding ? 'slideLock' : 'windowLock');
               component('Deraza zapori • ilgak', group, () {
-                plate(hx - 7, ly - 18, z + depth * .5, 14, 36, 7, 4, metal,
-                    group);
-                tube([
-                  P3(hx, ly, z + depth * .5 + 7),
-                  P3(hx, ly, z + depth * .5 + 18)
-                ], 4, metal, group);
+                plate(
+                  hx - 7,
+                  ly - 18,
+                  z + depth * .5,
+                  14,
+                  36,
+                  7,
+                  4,
+                  metal,
+                  group,
+                );
+                tube(
+                  [
+                    P3(hx, ly, z + depth * .5 + 7),
+                    P3(hx, ly, z + depth * .5 + 18),
+                  ],
+                  4,
+                  metal,
+                  group,
+                );
               });
             }
           }
@@ -1494,8 +2139,15 @@ class WindowModel {
         if (door && n['closer'] == true) {
           material('closer');
           box(b[2] - 170, b[1] + 8, z + depth + 2, 110, 30, 25, metal, group);
-          beam(V(b[2] - 120, b[1] + 24), V(b[2] - 20, b[1] + 70), 8, 8,
-              z + depth + 30, metal, group);
+          beam(
+            V(b[2] - 120, b[1] + 24),
+            V(b[2] - 20, b[1] + 70),
+            8,
+            8,
+            z + depth + 30,
+            metal,
+            group,
+          );
         }
       }
     }
@@ -1547,8 +2199,17 @@ class _Live3DState extends State<Live3D> {
             : CustomPaint(
                 key: const ValueKey('live-3d'),
                 size: Size.infinite,
-                painter: ModelPainter(m, yaw, pitch, 1, 0, 'all', false,
-                    moving: moving)),
+                painter: ModelPainter(
+                  m,
+                  yaw,
+                  pitch,
+                  1,
+                  0,
+                  'all',
+                  false,
+                  moving: moving,
+                ),
+              ),
       ),
     );
   }
@@ -1561,18 +2222,33 @@ class View3D extends StatefulWidget {
 
   /// The workshop's Claude key, for finding the opening on a photo.
   final String aiKey;
-  const View3D(
-      {super.key,
-      required this.drawing,
-      required this.recipe,
-      this.calculation,
-      this.returnToEditor = false,
-      this.aiKey = ''});
+  const View3D({
+    super.key,
+    required this.drawing,
+    required this.recipe,
+    this.calculation,
+    this.returnToEditor = false,
+    this.aiKey = '',
+  });
   @override
   State<View3D> createState() => _View3DState();
 }
 
-class _View3DState extends State<View3D> with TickerProviderStateMixin {
+class _View3DState extends State<View3D>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
+  final textures = ModelTextures();
+  ModelQuality quality = ModelQuality.balanced;
+  Timer? qualityTimer;
+  bool pressureLimited = false;
+  Future<void> refreshQuality() async {
+    final next = await ModelDeviceQuality.read();
+    if (!mounted || pressureLimited || next == quality) return;
+    textures.setCinematic(next == ModelQuality.studio4K);
+    setState(() => quality = next);
+    if (next == ModelQuality.balanced) textures.trim();
+  }
+
+  bool exporting4K = false, sharing = false;
   late final WindowModel model;
   late final AnimationController animation, explode;
   DMap? bill;
@@ -1590,7 +2266,9 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
       spinning = false,
       dragging = false;
   late final AnimationController camera;
-  late final Ticker spin;
+  late final Ticker spin, orbitTicker;
+  final orbit = ModelOrbit(-.35, .15);
+  Duration? lastOrbit;
   Duration? lastSpin;
   double fromYaw = 0, fromPitch = 0, fromZoom = 1;
   double toYaw = 0, toPitch = 0, toZoom = 1;
@@ -1601,9 +2279,19 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     model = WindowModel(widget.drawing, widget.recipe);
+    WidgetsBinding.instance.addObserver(this);
+    textures.addListener(redraw);
+    unawaited(refreshQuality());
+    qualityTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        unawaited(refreshQuality());
+      }
+    });
+    unawaited(textures.request(128));
     camera = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 550))
-      ..addListener(() {
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    )..addListener(() {
         final t = Curves.easeInOut.transform(camera.value);
         setState(() {
           yaw = fromYaw + (toYaw - fromYaw) * t;
@@ -1611,27 +2299,38 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
           zoom = fromZoom + (toZoom - fromZoom) * t;
         });
       });
+    orbitTicker = createTicker((elapsed) {
+      final dt = lastOrbit == null
+          ? 1 / 60
+          : (elapsed - lastOrbit!).inMicroseconds / 1e6;
+      lastOrbit = elapsed;
+      final settled = orbit.step(dt);
+      setState(() {
+        yaw = orbit.yaw;
+        pitch = orbit.pitch;
+      });
+      if (settled && !dragging) orbitTicker.stop();
+    });
     spin = createTicker((elapsed) {
       final dt =
           lastSpin == null ? 0.0 : (elapsed - lastSpin!).inMicroseconds / 1e6;
       lastSpin = elapsed;
-      setState(() => yaw += dt * .45);
+      setState(() => yaw += dt.clamp(0, .05) * .45);
     });
     animation = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 2400))
-      ..addListener(redraw);
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..addListener(redraw);
     explode = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1800))
-      ..addListener(redraw);
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..addListener(redraw);
     try {
       bill = widget.calculation ??
-          calculateDrawing({
-            'drawing': widget.drawing,
-            'recipe': widget.recipe,
-            'quantity': 1
-          }, {
-            'name': 'Joriy chizma'
-          });
+          calculateDrawing(
+            {'drawing': widget.drawing, 'recipe': widget.recipe, 'quantity': 1},
+            {'name': 'Joriy chizma'},
+          );
     } catch (e) {
       calculationError = '$e';
     }
@@ -1642,17 +2341,48 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
   }
 
   @override
+  void didHaveMemoryPressure() {
+    pressureLimited = true;
+    textures.setCinematic(false);
+    setState(() => quality = ModelQuality.balanced);
+    textures.trim(memoryPressure: true);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(refreshQuality());
+      return;
+    }
+    spin.stop();
+    orbitTicker.stop();
+    animation.stop();
+    explode.stop();
+    camera.stop();
+    spinning = false;
+    dragging = false;
+    lastSpin = lastOrbit = null;
+    textures.trim();
+  }
+
+  @override
   void dispose() {
+    qualityTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    textures.removeListener(redraw);
+    textures.dispose();
     animation.dispose();
     explode.dispose();
     camera.dispose();
     spin.dispose();
+    orbitTicker.dispose();
     super.dispose();
   }
 
   /// Smoothly moves the camera to a preset view.
   void look(double y, double p, [double z = 1]) {
     stopSpin();
+    orbitTicker.stop();
     fromYaw = yaw;
     fromPitch = pitch;
     fromZoom = zoom;
@@ -1664,6 +2394,7 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
   }
 
   void toggleSpin() => setState(() {
+        orbitTicker.stop();
         spinning = !spinning;
         if (spinning) {
           lastSpin = null;
@@ -1693,28 +2424,60 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
     animation.animateTo(animation.value > .5 ? 0 : 1);
   }
 
-  Future<void> shareImage() async {
+  Future<void> shareImage({bool export4K = false}) async {
+    if (sharing || !mounted) return;
+    setState(() => sharing = true);
+    stopSpin();
+    orbitTicker.stop();
+    animation.stop();
+    explode.stop();
+    camera.stop();
     try {
+      if (export4K) {
+        setState(() => exporting4K = true);
+        await textures.request(4096);
+        if (!mounted) return;
+        setState(() {});
+        await SchedulerBinding.instance.endOfFrame;
+      }
+      await SchedulerBinding.instance.endOfFrame;
+      if (!mounted) return;
       final boundary =
           shotKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) return;
-      final image = await boundary.toImage(pixelRatio: 2);
+      final longest = math.max(boundary.size.width, boundary.size.height);
+      if (longest <= 0) return;
+      final image = await boundary.toImage(
+        pixelRatio: export4K ? 4096 / longest : 2,
+      );
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
       image.dispose();
       if (data == null) return;
       final note = await shareFile(
-          'RomFlow-3D-${DateTime.now().millisecondsSinceEpoch}.png',
-          'image/png',
-          data.buffer.asUint8List(),
-          text: 'RomFlow • 3D ko‘rinish');
+        'RomFlow-3D-${DateTime.now().millisecondsSinceEpoch}.png',
+        'image/png',
+        data.buffer.asUint8List(),
+        text: 'RomFlow • 3D ko‘rinish',
+      );
       if (note != null && mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(note)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(note)));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Rasmni ulashib bo‘lmadi: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Rasmni ulashib bo‘lmadi: $e')));
+      }
+    } finally {
+      sharing = false;
+      if (mounted) {
+        if (export4K) {
+          exporting4K = false;
+          textures.trim();
+        }
+        setState(() {});
       }
     }
   }
@@ -1739,21 +2502,31 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
 
   Future<void> componentList() async {
     final id = await showGlassSheet<String>(
-        context: context,
-        isScrollControlled: true,
-        builder: (c) => SafeArea(
-            child: SizedBox(
-                height: MediaQuery.sizeOf(c).height * .75,
-                child: ListView(children: [
-                  const ListTile(title: Text('3D detallar • alohida ko‘rish')),
-                  for (final p in model.parts.values)
-                    ListTile(
-                        title: Text(p.title),
-                        subtitle: Text(
-                            '${materialNames[p.materialKey] ?? p.materialKey} · ${p.extent.x.round()} × ${p.extent.y.round()} × ${p.extent.z.round()} mm'),
-                        trailing: const Icon(Icons.zoom_in),
-                        onTap: () => Navigator.pop(c, p.id))
-                ]))));
+      context: context,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: SizedBox(
+          height: MediaQuery.sizeOf(c).height * .75,
+          child: ListView(
+            children: [
+              const GlassControl(
+                  child:
+                      ListTile(title: Text('3D detallar • alohida ko‘rish'))),
+              for (final p in model.parts.values)
+                GlassControl(
+                    child: ListTile(
+                  title: Text(p.title),
+                  subtitle: Text(
+                    '${materialNames[p.materialKey] ?? p.materialKey} · ${p.extent.x.round()} × ${p.extent.y.round()} × ${p.extent.z.round()} mm',
+                  ),
+                  trailing: const Icon(Icons.zoom_in),
+                  onTap: () => Navigator.pop(c, p.id),
+                )),
+            ],
+          ),
+        ),
+      ),
+    );
     if (id == null || !mounted) return;
     setState(() {
       selectedPart = id;
@@ -1791,307 +2564,554 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
     final controller = explodeMode ? explode : animation,
         part = model.parts[selectedPart],
         line = selectedLine;
-    final renderer = ModelPainter(model, yaw, pitch, zoom,
-        Curves.easeInOut.transform(animation.value), active, wires,
-        explosion: Curves.easeInOut.transform(explode.value),
-        selectedPart: selectedPart,
-        selectedMaterial: selectedMaterial,
-        labels: labels && explodeMode,
-        mechanism: mechanism,
-        isolate: isolate,
-        moving: dragging || spinning,
-        rightInset: 50,
-        focusPart: focused ? selectedPart : null);
+    final inMotion = dragging ||
+        spinning ||
+        animation.isAnimating ||
+        explode.isAnimating ||
+        camera.isAnimating ||
+        orbitTicker.isActive;
     return Theme(
-        data: romFlowTheme(Brightness.dark),
-        child: Scaffold(
-            backgroundColor: const Color(0xff101d30),
-            appBar: GlassAppBar(
-                backgroundColor: const Color(0xff101d30),
-                foregroundColor: Colors.white,
-                glassBrightness: Brightness.dark,
-                title: Text(explodeMode ? 'Detallar' : '3D'),
-                actions: [
-                  IconButton(
-                      tooltip: 'Detallar',
-                      icon: const Icon(Icons.list_alt),
-                      onPressed: componentList),
-                  if (widget.returnToEditor)
-                    IconButton(
-                        tooltip: 'Chizmani qo‘lda o‘zgartirish',
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.edit_outlined)),
-                  IconButton(
-                      tooltip: 'Rasmini ulashish',
-                      onPressed: shareImage,
-                      icon: const Icon(Icons.ios_share)),
-                  IconButton(
-                      tooltip: 'Materiallar tarkibi',
-                      onPressed: inventory,
-                      icon: const Icon(Icons.inventory_2_outlined)),
-                ]),
-            body: SafeArea(
-                child: Column(children: [
-              SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  child: Row(children: [
-                    tool(
-                        const ValueKey('mode-open'),
-                        Icons.sensor_door_outlined,
-                        'Ochilish',
-                        !explodeMode,
-                        () => switchMode(false)),
-                    tool(
-                        const ValueKey('mode-explode'),
-                        Icons.dashboard_customize_outlined,
-                        'Sochish / yig‘ish',
-                        explodeMode, () {
-                      switchMode(true);
-                      if (explode.value == 0) explode.forward();
-                    }),
-                    tool(
-                        const ValueKey('mode-mechanism'),
-                        Icons.settings_suggest_outlined,
-                        'Mexanizm',
-                        mechanism,
-                        () => setState(() {
-                              mechanism = !mechanism;
-                              focused = false;
-                              selectedPart = null;
-                              selectedMaterial = null;
-                              zoom = 1;
-                            })),
-                    tool(
-                        const ValueKey('profile-sections'),
-                        Icons.view_column_outlined,
-                        'Kesimlar',
-                        false,
-                        () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => ProfileSections(
-                                    drawing: widget.drawing,
-                                    recipe: widget.recipe)))),
-                    // On a photo or the live camera of the real opening, in
-                    // place of a drawn wall.
-                    tool(
-                        const ValueKey('in-place'),
-                        Icons.add_a_photo_outlined,
-                        'Joyida',
-                        false,
-                        () => openInPlace(context,
-                            drawing: widget.drawing,
-                            recipe: widget.recipe,
-                            aiKey: widget.aiKey)),
-                    tool(const ValueKey('mode-spin'), Icons.threesixty,
-                        'Aylanish', spinning, toggleSpin),
-                    tool(
-                        const ValueKey('mode-wires'),
-                        Icons.polyline_outlined,
-                        'Qirralar',
-                        wires,
-                        () => setState(() => wires = !wires)),
-                  ])),
+      data: romFlowTheme(Brightness.dark),
+      child: Scaffold(
+        backgroundColor: const Color(0xff101d30),
+        appBar: GlassAppBar(
+          backgroundColor: const Color(0xff101d30),
+          foregroundColor: Colors.white,
+          glassBrightness: Brightness.dark,
+          title: Text(explodeMode ? 'Detallar' : '3D'),
+          actions: [
+            IconButton(
+              tooltip: 'Detallar',
+              icon: const Icon(Icons.list_alt),
+              onPressed: componentList,
+            ),
+            if (widget.returnToEditor)
+              IconButton(
+                tooltip: 'Chizmani qo‘lda o‘zgartirish',
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.edit_outlined),
+              ),
+            PopupMenuButton<bool>(
+              tooltip: 'Rasmini ulashish',
+              enabled: !sharing,
+              icon: sharing
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.ios_share),
+              onSelected: (high) => shareImage(export4K: high),
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: false, child: Text('Rasmni ulashish')),
+                PopupMenuItem(value: true, child: Text('4K rasm · 4096 px')),
+              ],
+            ),
+            IconButton(
+              tooltip: 'Materiallar tarkibi',
+              onPressed: inventory,
+              icon: const Icon(Icons.inventory_2_outlined),
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              modeBar(),
               Expanded(
-                  child: Stack(children: [
-                Positioned.fill(
-                    child: RepaintBoundary(
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: RepaintBoundary(
                         key: shotKey,
-                        child: LayoutBuilder(builder: (context, cs) {
-                          canvasSize = Size(cs.maxWidth, cs.maxHeight);
-                          return GestureDetector(
-                            onTapUp: (d) => selectPart(
-                                renderer.pick(d.localPosition, canvasSize)),
-                            onScaleStart: (d) {
-                              stopSpin();
-                              camera.stop();
-                              last = d.focalPoint;
-                              initialZoom = zoom;
-                              dragging = true;
-                            },
-                            onScaleEnd: (_) => setState(() => dragging = false),
-                            onScaleUpdate: (d) {
-                              setState(() {
-                                if (d.pointerCount > 1) {
-                                  zoom = (initialZoom * d.scale).clamp(.45, 12);
-                                } else {
-                                  final delta =
-                                      d.focalPoint - (last ?? d.focalPoint);
-                                  yaw += delta.dx * .008;
-                                  pitch -= delta.dy * .008;
-                                }
+                        child: LayoutBuilder(
+                          builder: (context, cs) {
+                            canvasSize = Size(cs.maxWidth, cs.maxHeight);
+                            final pixels =
+                                math.max(canvasSize.width, canvasSize.height) *
+                                    MediaQuery.devicePixelRatioOf(context);
+                            final textureSize = ModelTexturePolicy.resolution(
+                              pixels,
+                              moving: inMotion,
+                              export4K: exporting4K,
+                              quality: quality,
+                            );
+                            unawaited(textures.request(textureSize));
+                            final renderer = ModelPainter(
+                              model,
+                              yaw,
+                              pitch,
+                              zoom,
+                              Curves.easeInOut.transform(animation.value),
+                              active,
+                              wires,
+                              explosion: Curves.easeInOut.transform(
+                                explode.value,
+                              ),
+                              selectedPart: selectedPart,
+                              selectedMaterial: selectedMaterial,
+                              labels: labels && explodeMode,
+                              mechanism: mechanism,
+                              isolate: isolate,
+                              moving: inMotion,
+                              quality: quality,
+                              pixelRatio: MediaQuery.devicePixelRatioOf(
+                                context,
+                              ),
+                              texture: textures.best(textureSize),
+                              rightInset: 50,
+                              focusPart: focused ? selectedPart : null,
+                            );
+                            return GestureDetector(
+                              onTapUp: (d) => selectPart(
+                                renderer.pick(d.localPosition, canvasSize),
+                              ),
+                              onScaleStart: (d) {
+                                stopSpin();
+                                camera.stop();
                                 last = d.focalPoint;
-                              });
-                            },
-                            child: CustomPaint(
-                                size: Size.infinite, painter: renderer),
-                          );
-                        }))),
-                Positioned(
-                  right: 10,
-                  top: 10,
-                  child: Column(children: [
-                    for (final (key, icon, tip, y, p) in const [
-                      ('view-front', Icons.crop_portrait, 'Old', 0.0, 0.0),
-                      ('view-left', Icons.rotate_left, 'Chap', -1.05, .08),
-                      ('view-right', Icons.rotate_right, 'O‘ng', 1.05, .08),
-                      ('view-top', Icons.vertical_align_top, 'Tepa', -.2, -.95),
-                      ('view-iso', Icons.view_in_ar, '3D', -.35, .15),
-                    ])
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: usesIOSGlass
-                            ? GlassIconButton(
-                                key: ValueKey(key),
-                                icon: icon,
-                                tooltip: tip,
-                                onPressed: () => look(y, p),
-                                size: 40,
-                                brightness: Brightness.dark)
-                            : IconButton(
-                                key: ValueKey(key),
-                                tooltip: tip,
-                                onPressed: () => look(y, p),
-                                style: IconButton.styleFrom(
-                                    backgroundColor: Colors.black26,
-                                    minimumSize: const Size(38, 38),
-                                    padding: EdgeInsets.zero),
-                                icon: Icon(icon,
-                                    size: 19, color: Colors.white70)),
+                                initialZoom = zoom;
+                                orbit.reset(yaw, pitch);
+                                dragging = true;
+                              },
+                              onScaleEnd: (_) =>
+                                  setState(() => dragging = false),
+                              onScaleUpdate: (d) {
+                                setState(() {
+                                  if (d.pointerCount > 1) {
+                                    orbitTicker.stop();
+                                    orbit.reset(yaw, pitch);
+                                    zoom = (initialZoom * d.scale).clamp(
+                                      .45,
+                                      12,
+                                    );
+                                  } else {
+                                    final delta =
+                                        d.focalPoint - (last ?? d.focalPoint);
+                                    orbit.drag(delta.dx, delta.dy);
+                                    if (!orbitTicker.isActive) {
+                                      lastOrbit = null;
+                                      orbitTicker.start();
+                                    }
+                                  }
+                                  last = d.focalPoint;
+                                });
+                              },
+                              child: CustomPaint(
+                                size: Size.infinite,
+                                painter: renderer,
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                  ]),
+                    ),
+                    Positioned(
+                      right: 10,
+                      top: 10,
+                      child: NativeGlassButtons(
+                        vertical: true,
+                        dark: true,
+                        width: 40,
+                        height: 5 * 40 + 4 * 6,
+                        spacing: 6,
+                        items: [
+                          for (final (key, symbol, tip, _, _) in const [
+                            (
+                              'view-front',
+                              'rectangle.portrait',
+                              'Old',
+                              0.0,
+                              0.0,
+                            ),
+                            ('view-left', 'rotate.left', 'Chap', -1.05, .08),
+                            ('view-right', 'rotate.right', 'O‘ng', 1.05, .08),
+                            ('view-top', 'arrow.up.to.line', 'Tepa', -.2, -.95),
+                            ('view-iso', 'cube', '3D', -.35, .15),
+                          ])
+                            GlassButton(
+                              key,
+                              symbol: symbol,
+                              label: tip,
+                              size: 40,
+                              iconSize: 16,
+                            ),
+                        ],
+                        onTap: (id) {
+                          for (final (key, _, _, y, p) in const [
+                            (
+                              'view-front',
+                              'rectangle.portrait',
+                              'Old',
+                              0.0,
+                              0.0,
+                            ),
+                            ('view-left', 'rotate.left', 'Chap', -1.05, .08),
+                            ('view-right', 'rotate.right', 'O‘ng', 1.05, .08),
+                            ('view-top', 'arrow.up.to.line', 'Tepa', -.2, -.95),
+                            ('view-iso', 'cube', '3D', -.35, .15),
+                          ]) {
+                            if (key == id) look(y, p);
+                          }
+                        },
+                        fallback: Column(
+                          children: [
+                            for (final (key, icon, tip, y, p) in const [
+                              (
+                                'view-front',
+                                Icons.crop_portrait,
+                                'Old',
+                                0.0,
+                                0.0,
+                              ),
+                              (
+                                'view-left',
+                                Icons.rotate_left,
+                                'Chap',
+                                -1.05,
+                                .08,
+                              ),
+                              (
+                                'view-right',
+                                Icons.rotate_right,
+                                'O‘ng',
+                                1.05,
+                                .08,
+                              ),
+                              (
+                                'view-top',
+                                Icons.vertical_align_top,
+                                'Tepa',
+                                -.2,
+                                -.95,
+                              ),
+                              ('view-iso', Icons.view_in_ar, '3D', -.35, .15),
+                            ])
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: usesIOSGlass
+                                    ? GlassIconButton(
+                                        key: ValueKey(key),
+                                        icon: icon,
+                                        tooltip: tip,
+                                        onPressed: () => look(y, p),
+                                        size: 40,
+                                        brightness: Brightness.dark,
+                                      )
+                                    : IconButton(
+                                        key: ValueKey(key),
+                                        tooltip: tip,
+                                        onPressed: () => look(y, p),
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: Colors.black26,
+                                          minimumSize: const Size(38, 38),
+                                          padding: EdgeInsets.zero,
+                                        ),
+                                        icon: Icon(
+                                          icon,
+                                          size: 19,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ])),
+              ),
               if (selectedMaterial != null)
                 Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-                    color: const Color(0xff203951),
-                    child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                Text(
-                                    part?.title ??
-                                        materialNames[selectedMaterial] ??
-                                        'Yordamchi 3D detal',
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold)),
-                                if (part != null)
-                                  Text(
-                                      '3D gabarit: ${part.extent.x.toStringAsFixed(0)} × ${part.extent.y.toStringAsFixed(0)} × ${part.extent.z.toStringAsFixed(0)} mm',
-                                      style: const TextStyle(
-                                          color: Colors.white70, fontSize: 11)),
-                                if (line != null) ...[
-                                  Text(
-                                      '${bill!['quantity']} ta konstruksiya: sof ${(line['net'] as num).toStringAsFixed(3)} ${line['unit']} · xarid ${(line['quantity'] as num).toStringAsFixed(3)} ${line['unit']}',
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 12)),
-                                  Text(
-                                      (line['price'] as num? ?? 0) <= 0
-                                          ? 'Narx kiritilmagan — katalogda belgilang'
-                                          : 'Xarid summasi: ${money(line['cost'])}',
-                                      style: const TextStyle(
-                                          color: Colors.lightBlueAccent,
-                                          fontSize: 12)),
-                                ] else
-                                  const Text(
-                                      'Ko‘rgazmali detal; alohida sarf qatori yo‘q.',
-                                      style: TextStyle(
-                                          color: Colors.white70, fontSize: 11)),
-                              ])),
-                          if (sashOf(selectedPart) != null)
-                            IconButton(
-                                tooltip: 'Shu qanotni ochish / yopish',
-                                onPressed: () =>
-                                    toggleSash(sashOf(selectedPart)!),
-                                icon: const Icon(Icons.door_sliding_outlined,
-                                    color: Colors.white70)),
-                          if (part != null)
-                            IconButton(
-                                tooltip: 'Detalni alohida ko‘rish',
-                                onPressed: () => setState(() {
-                                      focused = !focused;
-                                      zoom = 1;
-                                    }),
-                                icon: Icon(Icons.center_focus_strong,
-                                    color: focused
-                                        ? Colors.lightBlueAccent
-                                        : Colors.white70)),
-                          IconButton(
-                              tooltip: 'Tanlovni olish',
-                              onPressed: () => setState(() {
-                                    selectedPart = null;
-                                    focused = false;
-                                    selectedMaterial = null;
-                                    isolate = false;
-                                  }),
-                              icon: const Icon(Icons.close,
-                                  color: Colors.white70))
-                        ])),
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                  color: const Color(0xff203951),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              part?.title ??
+                                  materialNames[selectedMaterial] ??
+                                  'Yordamchi 3D detal',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (part != null)
+                              Text(
+                                '3D gabarit: ${part.extent.x.toStringAsFixed(0)} × ${part.extent.y.toStringAsFixed(0)} × ${part.extent.z.toStringAsFixed(0)} mm',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            if (line != null) ...[
+                              Text(
+                                '${bill!['quantity']} ta konstruksiya: sof ${(line['net'] as num).toStringAsFixed(3)} ${line['unit']} · xarid ${(line['quantity'] as num).toStringAsFixed(3)} ${line['unit']}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(
+                                (line['price'] as num? ?? 0) <= 0
+                                    ? 'Narx kiritilmagan — katalogda belgilang'
+                                    : 'Xarid summasi: ${money(line['cost'])}',
+                                style: const TextStyle(
+                                  color: Colors.lightBlueAccent,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ] else
+                              const Text(
+                                'Ko‘rgazmali detal; alohida sarf qatori yo‘q.',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (sashOf(selectedPart) != null)
+                        IconButton(
+                          tooltip: 'Shu qanotni ochish / yopish',
+                          onPressed: () => toggleSash(sashOf(selectedPart)!),
+                          icon: const Icon(
+                            Icons.door_sliding_outlined,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      if (part != null)
+                        IconButton(
+                          tooltip: 'Detalni alohida ko‘rish',
+                          onPressed: () => setState(() {
+                            focused = !focused;
+                            zoom = 1;
+                          }),
+                          icon: Icon(
+                            Icons.center_focus_strong,
+                            color: focused
+                                ? Colors.lightBlueAccent
+                                : Colors.white70,
+                          ),
+                        ),
+                      IconButton(
+                        tooltip: 'Tanlovni olish',
+                        onPressed: () => setState(() {
+                          selectedPart = null;
+                          focused = false;
+                          selectedMaterial = null;
+                          isolate = false;
+                        }),
+                        icon: const Icon(Icons.close, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
               glassPanel(
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Row(children: [
-                  IconButton(
-                      tooltip: controller.isAnimating
-                          ? 'To‘xtatish'
-                          : explodeMode
-                              ? 'Sochish / yig‘ish animatsiyasi'
-                              : 'Ochish / yopish',
-                      onPressed: !explodeMode && model.groups.isEmpty
-                          ? null
-                          : togglePlayback,
-                      icon: Icon(
-                          controller.isAnimating
-                              ? Icons.pause_circle_filled
-                              : Icons.play_circle_fill,
-                          color: Colors.lightBlueAccent,
-                          size: 38)),
-                  Expanded(
-                      child: Slider(
-                          key: ValueKey(explodeMode
-                              ? 'explode-slider'
-                              : 'opening-slider'),
-                          value: controller.value,
-                          onChanged: !explodeMode && model.groups.isEmpty
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          tooltip: controller.isAnimating
+                              ? 'To‘xtatish'
+                              : explodeMode
+                                  ? 'Sochish / yig‘ish animatsiyasi'
+                                  : 'Ochish / yopish',
+                          onPressed: !explodeMode && model.groups.isEmpty
                               ? null
-                              : (v) {
-                                  controller.stop();
-                                  controller.value = v;
-                                })),
-                  if (explodeMode) ...[
-                    tool(
-                        const ValueKey('explode-labels'),
-                        Icons.tag,
-                        'Raqamlar',
-                        labels,
-                        () => setState(() => labels = !labels)),
-                    tool(
-                        const ValueKey('explode-isolate'),
-                        Icons.filter_center_focus,
-                        'Faqat tanlangan',
-                        isolate,
-                        selectedMaterial == null
-                            ? null
-                            : () => setState(() => isolate = !isolate)),
+                              : togglePlayback,
+                          icon: Icon(
+                            controller.isAnimating
+                                ? Icons.pause_circle_filled
+                                : Icons.play_circle_fill,
+                            color: Colors.lightBlueAccent,
+                            size: 38,
+                          ),
+                        ),
+                        Expanded(
+                          child: GlassControl(
+                            child: Slider(
+                              key: ValueKey(
+                                explodeMode
+                                    ? 'explode-slider'
+                                    : 'opening-slider',
+                              ),
+                              value: controller.value,
+                              onChanged: !explodeMode && model.groups.isEmpty
+                                  ? null
+                                  : (v) {
+                                      controller.stop();
+                                      controller.value = v;
+                                    },
+                            ),
+                          ),
+                        ),
+                        if (explodeMode) ...[
+                          tool(
+                            const ValueKey('explode-labels'),
+                            Icons.tag,
+                            'Raqamlar',
+                            labels,
+                            () => setState(() => labels = !labels),
+                          ),
+                          tool(
+                            const ValueKey('explode-isolate'),
+                            Icons.filter_center_focus,
+                            'Faqat tanlangan',
+                            isolate,
+                            selectedMaterial == null
+                                ? null
+                                : () => setState(() => isolate = !isolate),
+                          ),
+                        ],
+                      ],
+                    ),
+                    if (calculationError != null)
+                      Text(
+                        'Hisob uchun me’yorni tekshiring: $calculationError',
+                        maxLines: 2,
+                        style: const TextStyle(
+                          color: Colors.orangeAccent,
+                          fontSize: 11,
+                        ),
+                      ),
                   ],
-                ]),
-                if (calculationError != null)
-                  Text('Hisob uchun me’yorni tekshiring: $calculationError',
-                      maxLines: 2,
-                      style: const TextStyle(
-                          color: Colors.orangeAccent, fontSize: 11)),
-              ])),
-            ]))));
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   /// A round icon with its name as a tooltip, lit when [on].
+  /// The mode buttons above the model: key, icon, SF Symbol, name, on, tap.
+  List<(String, IconData, String, String, bool, VoidCallback?)> modes() => [
+        (
+          'mode-open',
+          Icons.sensor_door_outlined,
+          'door.left.hand.open',
+          'Ochilish',
+          !explodeMode,
+          () => switchMode(false),
+        ),
+        (
+          'mode-explode',
+          Icons.dashboard_customize_outlined,
+          'square.3.layers.3d',
+          'Sochish / yig‘ish',
+          explodeMode,
+          () {
+            switchMode(true);
+            if (explode.value == 0) explode.forward();
+          },
+        ),
+        (
+          'mode-mechanism',
+          Icons.settings_suggest_outlined,
+          'gearshape.2',
+          'Mexanizm',
+          mechanism,
+          () => setState(() {
+                mechanism = !mechanism;
+                focused = false;
+                selectedPart = null;
+                selectedMaterial = null;
+                zoom = 1;
+              }),
+        ),
+        (
+          'profile-sections',
+          Icons.view_column_outlined,
+          'rectangle.split.3x1',
+          'Kesimlar',
+          false,
+          () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProfileSections(
+                      drawing: widget.drawing, recipe: widget.recipe),
+                ),
+              ),
+        ),
+        // On a photo or the live camera of the real opening, in place of a
+        // drawn wall.
+        (
+          'in-place',
+          Icons.add_a_photo_outlined,
+          'camera.viewfinder',
+          'Joyida',
+          false,
+          () => openInPlace(
+                context,
+                drawing: widget.drawing,
+                recipe: widget.recipe,
+                aiKey: widget.aiKey,
+              ),
+        ),
+        (
+          'mode-spin',
+          Icons.threesixty,
+          'arrow.triangle.2.circlepath',
+          'Aylanish',
+          spinning,
+          toggleSpin,
+        ),
+        (
+          'mode-wires',
+          Icons.polyline_outlined,
+          'point.3.connected.trianglepath.dotted',
+          'Qirralar',
+          wires,
+          () => setState(() => wires = !wires),
+        ),
+      ];
+
+  /// Apple's glass buttons on iPhone, the usual round buttons elsewhere.
+  Widget modeBar() {
+    final all = modes();
+    final row = Row(
+      children: [
+        for (final (key, icon, _, name, on, tap) in all)
+          tool(ValueKey(key), icon, name, on, tap),
+      ],
+    );
+    const size = 42.0, gap = 8.0;
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      child: NativeGlassButtons(
+        height: size + 4,
+        width: all.length * size + (all.length - 1) * gap,
+        spacing: gap,
+        dark: true,
+        items: [
+          for (final (key, _, symbol, name, on, tap) in all)
+            GlassButton(
+              key,
+              symbol: symbol,
+              label: name,
+              selected: on,
+              enabled: tap != null,
+              size: size,
+              iconSize: 17,
+            ),
+        ],
+        onTap: (id) => all.firstWhere((m) => m.$1 == id).$6?.call(),
+        fallback: row,
+      ),
+    );
+  }
+
   /// The play bar under the model: dark glass, or the plain dark panel.
   Widget glassPanel({required Widget child}) {
     const radius = BorderRadius.vertical(top: Radius.circular(18));
@@ -2101,16 +3121,25 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
             radius: radius,
             brightness: Brightness.dark,
             shadow: false,
-            child: Padding(padding: padding, child: child))
+            child: Padding(padding: padding, child: child),
+          )
         : Container(
             padding: padding,
             decoration: const BoxDecoration(
-                color: Color(0xff16263a), borderRadius: radius),
-            child: child);
+              color: Color(0xff16263a),
+              borderRadius: radius,
+            ),
+            child: child,
+          );
   }
 
   Widget tool(
-          Key key, IconData icon, String name, bool on, VoidCallback? onTap) =>
+    Key key,
+    IconData icon,
+    String name,
+    bool on,
+    VoidCallback? onTap,
+  ) =>
       Padding(
         padding: const EdgeInsets.only(right: 6),
         child: usesIOSGlass
@@ -2121,63 +3150,80 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
                 selected: on,
                 onPressed: onTap,
                 size: 42,
-                brightness: Brightness.dark)
+                brightness: Brightness.dark,
+              )
             : IconButton(
                 key: key,
                 tooltip: name,
                 isSelected: on,
                 onPressed: onTap,
                 style: IconButton.styleFrom(
-                    backgroundColor: on
-                        ? const Color(0xff2f7fd8)
-                        : Colors.white.withValues(alpha: .08),
-                    minimumSize: const Size(42, 42)),
-                icon: Icon(icon,
-                    size: 21, color: on ? Colors.white : Colors.white70),
+                  backgroundColor: on
+                      ? const Color(0xff2f7fd8)
+                      : Colors.white.withValues(alpha: .08),
+                  minimumSize: const Size(42, 42),
+                ),
+                icon: Icon(
+                  icon,
+                  size: 21,
+                  color: on ? Colors.white : Colors.white70,
+                ),
               ),
       );
 
   Future<void> inventory() async {
     await showGlassSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        builder: (context) => SafeArea(
-            child: SizedBox(
-                height: MediaQuery.sizeOf(context).height * .78,
-                child: Column(children: [
-                  Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                          'Ichida nima bor? • ${bill?['quantity'] ?? 1} ta konstruksiya',
-                          style: const TextStyle(
-                              fontSize: 19, fontWeight: FontWeight.bold))),
-                  const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                          'Sof sarf → butun tayoq/list bilan xarid. Materialni tanlab 3D’da ajrating.')),
-                  if (bill == null)
-                    Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(calculationError ?? 'Hisob yo‘q'))
-                  else
-                    Expanded(
-                        child: ListView(children: [
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (context) => SafeArea(
+        child: SizedBox(
+          height: MediaQuery.sizeOf(context).height * .78,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Ichida nima bor? • ${bill?['quantity'] ?? 1} ta konstruksiya',
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'Sof sarf → butun tayoq/list bilan xarid. Materialni tanlab 3D’da ajrating.',
+                ),
+              ),
+              if (bill == null)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(calculationError ?? 'Hisob yo‘q'),
+                )
+              else
+                Expanded(
+                  child: ListView(
+                    children: [
                       for (final raw in bill!['parts'] as List)
-                        Builder(builder: (context) {
-                          final p = Map<String, dynamic>.from(raw),
-                              key = p['key'] as String;
-                          final visible = model.parts.values
-                              .any((part) => part.materialKey == key);
-                          return ListTile(
+                        Builder(
+                          builder: (context) {
+                            final p = Map<String, dynamic>.from(raw),
+                                key = p['key'] as String;
+                            final visible = model.parts.values.any(
+                              (part) => part.materialKey == key,
+                            );
+                            return GlassControl(
+                                child: ListTile(
                               leading: Icon(
-                                  visible
-                                      ? Icons.view_in_ar
-                                      : Icons.receipt_long,
-                                  color: const Color(0xff206bc4)),
+                                visible ? Icons.view_in_ar : Icons.receipt_long,
+                                color: const Color(0xff206bc4),
+                              ),
                               title: Text(p['name']),
                               subtitle: Text(
-                                  '${(p['net'] as num).toStringAsFixed(3)} → ${(p['quantity'] as num).toStringAsFixed(3)} ${p['unit']}\n${visible ? '3D’da ko‘rsatish' : 'Hisobda bor; 3D shakli modellashtirilmagan'}'),
+                                '${(p['net'] as num).toStringAsFixed(3)} → ${(p['quantity'] as num).toStringAsFixed(3)} ${p['unit']}\n${visible ? '3D’da ko‘rsatish' : 'Hisobda bor; 3D shakli modellashtirilmagan'}',
+                              ),
                               trailing: Text(money(p['cost'])),
                               onTap: () {
                                 Navigator.pop(context);
@@ -2187,10 +3233,18 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
                                   focused = false;
                                   isolate = false;
                                 });
-                              });
-                        })
-                    ])),
-                ]))));
+                              },
+                            ));
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -2198,8 +3252,11 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
 /// compared with the real bars.
 class ProfileSections extends StatefulWidget {
   final DMap drawing, recipe;
-  const ProfileSections(
-      {super.key, required this.drawing, required this.recipe});
+  const ProfileSections({
+    super.key,
+    required this.drawing,
+    required this.recipe,
+  });
   @override
   State<ProfileSections> createState() => _ProfileSectionsState();
 }
@@ -2213,7 +3270,7 @@ class _ProfileSectionsState extends State<ProfileSections> {
 
   void show(int i) => setState(() {
         index = i;
-        final view = pieces[i].$1.startsWith('Qayt') ? _cornerView : _view;
+        final view = pieces[i].$1.startsWith('90°') ? _cornerView : _view;
         yaw = view.yaw;
         pitch = view.pitch;
       });
@@ -2241,14 +3298,20 @@ class _ProfileSectionsState extends State<ProfileSections> {
       ('bead', 'Shtapik', v('beadFaceMm', 18), v('beadDepthMm', 16)),
     ]) {
       final m = empty()..material(key);
-      m.profileBar([V(0, 0), V(0, 90), V(face, 90), V(face, 0)], face, depth, 0,
-          color, null);
+      m.profileBar(
+        [V(0, 0), V(0, 90), V(face, 90), V(face, 0)],
+        face,
+        depth,
+        0,
+        color,
+        null,
+      );
       out.add((name, '${mm(face)} × ${mm(depth)} mm', m));
     }
     final m = empty();
     if (m.simpleAluminium) {
       m.cornerJoint('left', color, height: 36);
-      out.add(('Qayt 90°', 'burchak ulash', m));
+      out.add(('90° ulagich', 'burchak ulash profili', m));
     }
     return out;
   }();
@@ -2259,47 +3322,62 @@ class _ProfileSectionsState extends State<ProfileSections> {
     return Scaffold(
       backgroundColor: const Color(0xff101d30),
       appBar: GlassAppBar(
-          backgroundColor: const Color(0xff101d30),
-          foregroundColor: Colors.white,
-          glassBrightness: Brightness.dark,
-          title: const Text('Profil kesimlari')),
+        backgroundColor: const Color(0xff101d30),
+        foregroundColor: Colors.white,
+        glassBrightness: Brightness.dark,
+        title: const Text('Profil kesimlari'),
+      ),
       body: SafeArea(
-        child: Column(children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            child: Wrap(spacing: 6, runSpacing: 6, children: [
-              for (var i = 0; i < pieces.length; i++)
-                ChoiceChip(
-                    label: Text(pieces[i].$1),
-                    selected: index == i,
-                    onSelected: (_) => show(i)),
-            ]),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onPanUpdate: (d) => setState(() {
-                yaw += d.delta.dx * .01;
-                pitch = (pitch - d.delta.dy * .01).clamp(-1.5, 1.5);
-              }),
-              child: CustomPaint(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (var i = 0; i < pieces.length; i++)
+                    GlassControl(
+                      child: ChoiceChip(
+                        label: Text(pieces[i].$1),
+                        selected: index == i,
+                        onSelected: (_) => show(i),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: GestureDetector(
+                onPanUpdate: (d) => setState(() {
+                  yaw += d.delta.dx * .01;
+                  pitch = (pitch - d.delta.dy * .01).clamp(-1.5, 1.5);
+                }),
+                child: CustomPaint(
                   key: const ValueKey('profile-sections-canvas'),
                   size: Size.infinite,
-                  painter: ModelPainter(model, yaw, pitch, .8, 0, 'all', true)),
+                  painter: ModelPainter(model, yaw, pitch, .8, 0, 'all', true),
+                ),
+              ),
             ),
-          ),
-          Text(size,
+            Text(
+              size,
               style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700)),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 4, 16, 14),
-            child: Text(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 4, 16, 14),
+              child: Text(
                 'Yuz eni × chuqurlik. Barmoq bilan aylantiring. O‘lchamlar “Materiallar va narxlar”da o‘zgaradi.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white60, fontSize: 12)),
-          ),
-        ]),
+                style: TextStyle(color: Colors.white60, fontSize: 12),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -2310,70 +3388,136 @@ class _ProjectedFace {
 
   /// [light] scales the colour; [spec] is the highlight towards white;
   /// [fresnel] how much a glass face reflects (more at a slant).
-  final double depth, light, spec, fresnel;
+  final double depth, light, spec, fresnel, viewCos;
   final ModelFace face;
-  _ProjectedFace(this.p, this.depth, this.light, this.face,
-      {this.spec = 0, this.fresnel = 0});
-  Path get path {
+  final List<P3> cameraPoints;
+  final int order;
+  _ProjectedFace(
+    this.p,
+    this.depth,
+    this.light,
+    this.face,
+    this.cameraPoints,
+    this.order, {
+    this.spec = 0,
+    this.fresnel = 0,
+    this.viewCos = 1,
+  });
+  late final Path path = () {
     final result = Path()..moveTo(p.first.dx, p.first.dy);
     for (final v in p.skip(1)) {
       result.lineTo(v.dx, v.dy);
     }
     return result..close();
-  }
+  }();
+  late final Rect bounds = path.getBounds();
+  late final P3 normal = (cameraPoints[1] - cameraPoints[0]).cross(
+    cameraPoints[2] - cameraPoints[0],
+  );
+  late final double planeD = normal.dot(cameraPoints[0]);
 }
 
 class ModelPainter extends CustomPainter {
   final WindowModel model;
+  final ModelTexture? texture;
+  final ModelQuality quality;
   final double yaw, pitch, zoom, progress, explosion;
   final String active;
   final bool wires, labels, isolate, mechanism, wall;
 
-  /// While a finger turns the model: tiny details are left out so every
-  /// frame stays quick.
+  /// Motion keeps geometry and texture detail; optional labels are deferred.
   final bool moving;
 
   /// Room kept free on the right for buttons over the picture.
   final double rightInset;
+  final double pixelRatio;
   final String? selectedPart, selectedMaterial, focusPart;
-  ModelPainter(this.model, this.yaw, this.pitch, this.zoom, this.progress,
-      this.active, this.wires,
-      {this.explosion = 0,
-      this.selectedPart,
-      this.selectedMaterial,
-      this.focusPart,
-      this.labels = false,
-      this.isolate = false,
-      this.mechanism = false,
-      this.wall = false,
-      this.moving = false,
-      this.rightInset = 0});
+  ModelPainter(
+    this.model,
+    this.yaw,
+    this.pitch,
+    this.zoom,
+    this.progress,
+    this.active,
+    this.wires, {
+    this.explosion = 0,
+    this.texture,
+    this.quality = ModelQuality.balanced,
+    this.selectedPart,
+    this.selectedMaterial,
+    this.focusPart,
+    this.labels = false,
+    this.isolate = false,
+    this.mechanism = false,
+    this.wall = false,
+    this.moving = false,
+    this.rightInset = 0,
+    this.pixelRatio = 1,
+  });
   P3 rotate(P3 p) {
     final x = p.x * _cy + p.z * _sy, z = -p.x * _sy + p.z * _cy;
     return P3(x, p.y * _cp - z * _sp, p.y * _sp + z * _cp);
   }
 
-  P3 world(P3 p, String? groupId, ModelPart? part) {
+  P3 world(
+    P3 p,
+    String? groupId,
+    ModelPart? part, {
+    double? atProgress,
+    double? atExplosion,
+  }) {
+    final pose = atProgress ?? progress;
     final group = model.groups[groupId], w = _w, h = _h;
     final motion = model.motions[groupId];
     final moved = motion != null
         ? motion.transform(
-            p, active == 'all' || active == motion.ownerId ? progress : 0)
+            p,
+            atProgress != null || active == 'all' || active == motion.ownerId
+                ? pose
+                : 0,
+          )
         : group == null
             ? p
             : group.transform(
-                p, active == 'all' || active == groupId ? progress : 0);
+                p,
+                atProgress != null || active == 'all' || active == groupId
+                    ? pose
+                    : 0,
+              );
     return moved +
-        (part?.explosionOffset(explosion, math.max(w, h), w, h) ??
+        (part?.explosionOffset(
+              atExplosion ?? explosion,
+              math.max(w, h),
+              w,
+              h,
+            ) ??
             const P3(0, 0, 0));
   }
 
   late final P3 _center = () {
     final focus = model.parts[focusPart];
-    return focus == null
-        ? P3((model.drawing['widthMm'] as num).toDouble() / 2,
-            (model.drawing['heightMm'] as num).toDouble() / 2, 30)
-        : world(focus.center, focus.group, focus);
+    if (focus != null) return world(focus.center, focus.group, focus);
+    return model.orbitCenter ??= () {
+      var minX = double.infinity,
+          minY = double.infinity,
+          minZ = double.infinity;
+      var maxX = -double.infinity,
+          maxY = -double.infinity,
+          maxZ = -double.infinity;
+      for (final face in model.faces) {
+        for (final p in face.vertices) {
+          minX = math.min(minX, p.x);
+          minY = math.min(minY, p.y);
+          minZ = math.min(minZ, p.z);
+          maxX = math.max(maxX, p.x);
+          maxY = math.max(maxY, p.y);
+          maxZ = math.max(maxZ, p.z);
+        }
+      }
+      return minX.isFinite
+          ? P3((minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2)
+          : P3(_w / 2, _h / 2, 30);
+    }();
   }();
   late final double _cy = math.cos(yaw),
       _sy = math.sin(yaw),
@@ -2387,9 +3531,10 @@ class ModelPainter extends CustomPainter {
 
   late final List<(ModelFace, List<P3>)> transformed = () {
     final key = '$progress|$explosion|$active|$mechanism|$focusPart|'
-        '$isolate|$selectedMaterial|$wall|$moving';
+        '$isolate|$selectedMaterial|$wall';
     var placed = model.world;
     if (model.worldKey != key || placed == null) {
+      final worldVertices = <(P3, String?, String?), P3>{};
       placed = [
         if (wall && !mechanism && focusPart == null && explosion < .05)
           for (final face in model.wallFaces) (face, face.vertices),
@@ -2399,9 +3544,13 @@ class ModelPainter extends CustomPainter {
               face,
               [
                 for (final p in face.vertices)
-                  world(p, face.group, model.parts[face.partId])
-              ]
-            )
+                  worldVertices.putIfAbsent((
+                    p,
+                    face.group,
+                    face.partId,
+                  ), () => world(p, face.group, model.parts[face.partId])),
+              ],
+            ),
       ];
       model
         ..world = placed
@@ -2410,7 +3559,7 @@ class ModelPainter extends CustomPainter {
     final c = _center;
     return [
       for (final (face, points) in placed)
-        (face, [for (final p in points) rotate(p - c)])
+        (face, [for (final p in points) rotate(p - c)]),
     ];
   }();
 
@@ -2422,12 +3571,7 @@ class ModelPainter extends CustomPainter {
     if (isolate && selectedMaterial != null && key != selectedMaterial) {
       return false;
     }
-    // Screws and caps are a few pixels across; they come back at rest.
-    if (moving &&
-        focusPart == null &&
-        (key == 'screw' || key == 'decoration')) {
-      return false;
-    }
+    // Camera motion preserves every part; visibility is a user choice.
     return true;
   }
 
@@ -2443,7 +3587,7 @@ class ModelPainter extends CustomPainter {
     'roller',
     'slideLock',
     'closer',
-    'screw'
+    'screw',
   };
 
   /// How strongly and how tightly each material shines: polished metal
@@ -2485,32 +3629,76 @@ class ModelPainter extends CustomPainter {
     final w = (model.drawing['widthMm'] as num).toDouble(),
         h = (model.drawing['heightMm'] as num).toDouble(),
         camera = math.max(w, h) * 3.3;
-    var minX = double.infinity,
-        minY = double.infinity,
-        maxX = double.negativeInfinity,
-        maxY = double.negativeInfinity;
-    for (final entry in transformed) {
-      for (final p in entry.$2) {
-        if (camera - p.z <= math.max(w, h) * .15) continue;
-        final x = p.x * camera / (camera - p.z),
-            y = p.y * camera / (camera - p.z);
-        minX = math.min(minX, x);
-        maxX = math.max(maxX, x);
-        minY = math.min(minY, y);
-        maxY = math.max(maxY, y);
+    if (wall) {
+      var minX = double.infinity,
+          minY = double.infinity,
+          maxX = double.negativeInfinity,
+          maxY = double.negativeInfinity;
+      for (final entry in transformed) {
+        for (final p in entry.$2) {
+          if (camera - p.z <= math.max(w, h) * .15) continue;
+          final x = p.x * camera / (camera - p.z),
+              y = p.y * camera / (camera - p.z);
+          minX = math.min(minX, x);
+          maxX = math.max(maxX, x);
+          minY = math.min(minY, y);
+          maxY = math.max(maxY, y);
+        }
       }
-    }
-    if (!minX.isFinite) {
-      minX = -w / 2;
-      maxX = w / 2;
-      minY = -h / 2;
-      maxY = h / 2;
-    }
-    fitX = (minX + maxX) / 2;
-    fitY = (minY + maxY) / 2;
-    fitScale = math.min(
+      if (!minX.isFinite) {
+        minX = -w / 2;
+        maxX = w / 2;
+        minY = -h / 2;
+        maxY = h / 2;
+      }
+      fitX = (minX + maxX) / 2;
+      fitY = (minY + maxY) / 2;
+      fitScale = math.min(
             (size.width - 50 - rightInset) / math.max(1, maxX - minX),
-            (size.height - 50) / math.max(1, maxY - minY)) *
+            (size.height - 50) / math.max(1, maxY - minY),
+          ) *
+          zoom;
+      return;
+    }
+    // A rotation-invariant orbit envelope keeps camera scale and centre
+    // fixed. Fitting projected bounds every frame made the model breathe.
+    final focus = model.parts[focusPart];
+    final radius = focus != null
+        ? math.max(1.0, focus.extent.length / 2)
+        : (model.orbitRadius ??= () {
+            var r = 1.0;
+            final center = _center;
+            for (final face in model.faces) {
+              final part = model.parts[face.partId];
+              // Opening is piecewise: release, then swing/slide. Sampling
+              // the swept envelope covers intermediate hinge positions.
+              for (final pose in const [0.0, .22, .4, .6, .8, 1.0]) {
+                for (final p in face.vertices) {
+                  final placed = world(
+                    p,
+                    face.group,
+                    part,
+                    atProgress: pose,
+                    atExplosion: 0,
+                  );
+                  r = math.max(r, (placed - center).length);
+                }
+              }
+            }
+            return r * 1.025;
+          }());
+    final extent = math.min(
+      camera * .9,
+      radius + math.max(w, h) * explosion * 1.6,
+    );
+    final projectedRadius =
+        extent * camera / math.sqrt(camera * camera - extent * extent);
+    fitX = fitY = 0;
+    fitScale = math.max(
+          1.0,
+          math.min(size.width - 50 - rightInset, size.height - 50),
+        ) /
+        (2 * projectedRadius) *
         zoom;
   }
 
@@ -2519,9 +3707,10 @@ class ModelPainter extends CustomPainter {
     fit(size);
     final camera = _camera;
     return Offset(
-        (size.width - rightInset) / 2 +
-            (p.x * camera / (camera - p.z) - fitX) * fitScale,
-        size.height / 2 + (p.y * camera / (camera - p.z) - fitY) * fitScale);
+      (size.width - rightInset) / 2 +
+          (p.x * camera / (camera - p.z) - fitX) * fitScale,
+      size.height / 2 + (p.y * camera / (camera - p.z) - fitY) * fitScale,
+    );
   }
 
   static P3 _unit(P3 p) => p * (1 / p.length);
@@ -2530,7 +3719,8 @@ class ModelPainter extends CustomPainter {
   /// half-way vector for the highlight seen from the camera.
   static final _key = _unit(const P3(-.38, -.55, .74)),
       _fill = _unit(const P3(.62, -.18, .5)),
-      _half = _unit(_key + const P3(0, 0, 1));
+      _half = _unit(_key + const P3(0, 0, 1)),
+      _rim = _unit(const P3(.7, -.4, -.6));
 
   /// Corner and impost connectors sit inside the profile chambers: show them
   /// only when the model is taken apart or the part is asked for.
@@ -2540,14 +3730,37 @@ class ModelPainter extends CustomPainter {
       focusPart == null &&
       selectedMaterial != key;
 
+  Size? _sceneSize;
+  List<_ProjectedFace>? _sceneCache;
+  int sceneBuilds = 0;
+  int tessellatedFaces = 0;
   List<_ProjectedFace> _scene(Size size) {
+    if (_sceneSize == size && _sceneCache != null) return _sceneCache!;
+    sceneBuilds++;
+    if (size.isEmpty) return const [];
     final result = <_ProjectedFace>[],
-        span = math.max((model.drawing['widthMm'] as num).toDouble(),
-            (model.drawing['heightMm'] as num).toDouble());
+        span = math.max(
+          (model.drawing['widthMm'] as num).toDouble(),
+          (model.drawing['heightMm'] as num).toDouble(),
+        );
     for (final entry in transformed) {
       final face = entry.$1, points = entry.$2;
       if (points.any((p) => span * 3.3 - p.z <= span * .15)) continue;
       final screen = [for (final p in points) project(p, size)];
+      var minX = double.infinity, minY = double.infinity;
+      var maxX = double.negativeInfinity, maxY = double.negativeInfinity;
+      for (final p in screen) {
+        minX = math.min(minX, p.dx);
+        minY = math.min(minY, p.dy);
+        maxX = math.max(maxX, p.dx);
+        maxY = math.max(maxY, p.dy);
+      }
+      if (maxX < -8 ||
+          maxY < -8 ||
+          minX > size.width + 8 ||
+          minY > size.height + 8) {
+        continue;
+      }
       if (face.closed) {
         // Closed solids are wound consistently: a face turned away from
         // the camera is hidden behind the solid's own front faces.
@@ -2558,18 +3771,9 @@ class ModelPainter extends CustomPainter {
         }
         if (area <= 0) continue;
       }
-      if (moving && screen.length > 2) {
-        // Faces smaller than a pixel are not worth a triangle mid-turn.
-        double area = 0;
-        for (var j = 0; j < screen.length; j++) {
-          final a = screen[j], b = screen[(j + 1) % screen.length];
-          area += a.dx * b.dy - a.dy * b.dx;
-        }
-        if (area.abs() < 1.2) continue;
-      }
       final normal = (points[1] - points[0]).cross(points[2] - points[0]),
           length = normal.length;
-      var light = .78, spec = 0.0, fresnel = .3;
+      var light = .78, spec = 0.0, fresnel = .3, viewCos = 1.0;
       if (length > .001) {
         final n = normal * (1 / length);
         light = .3 + .62 * n.dot(_key).abs() + .2 * n.dot(_fill).abs();
@@ -2578,19 +3782,119 @@ class ModelPainter extends CustomPainter {
         spec = face.glass
             ? .5 * math.pow(n.dot(_half).abs(), 40).toDouble()
             : strength * math.pow(n.dot(_half).abs(), power).toDouble();
-        final facing = 1 - n.z.abs();
-        fresnel = facing * facing;
+        viewCos = n.z.abs();
+        final facing = 1 - viewCos;
+        fresnel = .04 + .96 * math.pow(facing, 5).toDouble();
+        if (!face.glass) spec += .07 * math.pow(facing, 3).toDouble();
+        if (quality == ModelQuality.studio4K) {
+          final finish = ModelFinish.forMaterial(
+            face.glass ? 'glass' : model.parts[face.partId]?.materialKey,
+          );
+          // Three studio lights use the visible side's normal. Signed light
+          // response prevents the back side glowing as brightly as the front.
+          final front = n.z < 0 ? n * -1 : n;
+          light = .29 +
+              .66 * math.max(0, front.dot(_key)) +
+              .22 * math.max(0, front.dot(_fill)) +
+              .2 * math.max(0, front.dot(_rim)) +
+              .06 * (1 - front.y);
+          spec = finish.highlight(front.dot(_half).abs(), front.z.abs());
+        }
       }
-      result.add(_ProjectedFace(
+      result.add(
+        _ProjectedFace(
           screen,
           points.fold<double>(0, (s, p) => s + p.z) / points.length,
           light,
           face,
+          points,
+          result.length,
           spec: spec,
-          fresnel: fresnel));
+          fresnel: fresnel,
+          viewCos: viewCos,
+        ),
+      );
     }
-    result.sort((a, b) => a.depth.compareTo(b.depth));
-    return result;
+    result.sort((a, b) {
+      final depth = a.depth.compareTo(b.depth);
+      return depth != 0 ? depth : a.order.compareTo(b.order);
+    });
+    final ordered = _orderFixedKeeps(result, size);
+    _sceneSize = size;
+    _sceneCache = ordered;
+    return ordered;
+  }
+
+  /// A long frame face's average depth may be in front of a small mounted
+  /// keep even though the keep is physically on its front. Order those
+  /// overlaps using ray/plane depth at the shared pixel, not face centres.
+  List<_ProjectedFace> _orderFixedKeeps(List<_ProjectedFace> faces, Size size) {
+    bool keep(_ProjectedFace f) {
+      final p = model.parts[f.face.partId];
+      return p?.group == null &&
+          (p?.title.startsWith('Yelma') == true ||
+              p?.title.startsWith('Ilgak tutgichi') == true);
+    }
+
+    final keeps = [
+      for (var i = 0; i < faces.length; i++)
+        if (keep(faces[i])) i,
+    ];
+    if (keeps.isEmpty) return faces;
+    final stock = [
+      for (var i = 0; i < faces.length; i++)
+        if (const {
+          'frame',
+          'mullion',
+          'sash',
+          'sashMullion',
+        }.contains(model.parts[faces[i].face.partId]?.materialKey))
+          i,
+    ];
+    double? depth(_ProjectedFace f, Offset at) {
+      final x = (at.dx - (size.width - rightInset) / 2) / fitScale + fitX;
+      final y = (at.dy - size.height / 2) / fitScale + fitY;
+      final denominator = f.normal.dot(P3(x, y, -_camera));
+      if (denominator.abs() < 1e-8) return null;
+      final t = (f.planeD - f.normal.z * _camera) / denominator;
+      return _camera * (1 - t);
+    }
+
+    final after = <int, Set<int>>{}, incoming = <int, int>{};
+    for (final h in keeps) {
+      final hardware = faces[h];
+      for (final b in stock) {
+        final base = faces[b];
+        if (!hardware.bounds.overlaps(base.bounds)) continue;
+        final at = hardware.bounds.intersect(base.bounds).center;
+        if (!hardware.path.contains(at) || !base.path.contains(at)) continue;
+        final hz = depth(hardware, at), bz = depth(base, at);
+        if (hz == null || bz == null || (hz - bz).abs() < 1e-6) continue;
+        final from = hz > bz ? b : h, to = hz > bz ? h : b;
+        if ((after[from] ??= <int>{}).add(to)) {
+          incoming[to] = (incoming[to] ?? 0) + 1;
+        }
+      }
+    }
+    if (after.isEmpty) return faces;
+    final ready = SplayTreeSet<int>();
+    for (var i = 0; i < faces.length; i++) {
+      if (!incoming.containsKey(i)) ready.add(i);
+    }
+    final result = <_ProjectedFace>[];
+    while (ready.isNotEmpty) {
+      final index = ready.first;
+      ready.remove(index);
+      result.add(faces[index]);
+      for (final next in after[index] ?? const <int>{}) {
+        final count = incoming[next]! - 1;
+        incoming[next] = count;
+        if (count == 0) ready.add(next);
+      }
+    }
+    // Intersecting polygons need splitting; retain the original order if a
+    // cyclic overlap cannot be resolved without changing geometry.
+    return result.length == faces.length ? result : faces;
   }
 
   String? pick(Offset tap, Size size) {
@@ -2602,23 +3906,24 @@ class ModelPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
     final paint = Paint()..isAntiAlias = true,
         background = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.save();
+    canvas.clipRect(background);
     // A studio backdrop: lit from above, falling off to the corners.
     canvas.drawRect(
-        background,
-        paint
-          ..shader = const RadialGradient(colors: [
-            Color(0xff3a6286),
-            Color(0xff1a2d44),
-            Color(0xff0b1420)
-          ], stops: [
-            0,
-            .55,
-            1
-          ], radius: 1.05, center: Alignment(0, -.4))
-              .createShader(background));
+      background,
+      paint
+        ..shader = const RadialGradient(
+          colors: [Color(0xff3a6286), Color(0xff1a2d44), Color(0xff0b1420)],
+          stops: [0, .55, 1],
+          radius: 1.05,
+          center: Alignment(0, -.4),
+        ).createShader(background),
+    );
     paint.shader = null;
+    tessellatedFaces = 0;
     final projected = _scene(size);
     if (projected.isNotEmpty && focusPart == null) {
       // A soft contact shadow right under the construction.
@@ -2632,94 +3937,208 @@ class ModelPainter extends CustomPainter {
       }
       final width = (maxX - minX).clamp(40.0, size.width);
       canvas.drawOval(
+        Rect.fromCenter(
+          center: Offset(
+            (minX + maxX) / 2,
+            math.min(maxY + 10, size.height - 8),
+          ),
+          width: width * .92,
+          height: math.max(12, width * .07),
+        ),
+        paint
+          ..color = Colors.black.withValues(alpha: .42)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 11),
+      );
+      if (quality == ModelQuality.studio4K) {
+        canvas.drawOval(
           Rect.fromCenter(
-              center: Offset(
-                  (minX + maxX) / 2, math.min(maxY + 10, size.height - 8)),
-              width: width * .92,
-              height: math.max(12, width * .07)),
+            center: Offset(
+              (minX + maxX) / 2,
+              math.min(maxY + 3, size.height - 8),
+            ),
+            width: width * .65,
+            height: math.max(3, width * .018),
+          ),
           paint
-            ..color = Colors.black.withValues(alpha: .42)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 11));
+            ..color = Colors.black.withValues(alpha: .3)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+        );
+      }
       paint.maskFilter = null;
     }
     // Faces are drawn back to front as batched triangles; one draw call per
     // batch instead of one path per face keeps phones responsive.
-    final positions = <Offset>[], colors = <Color>[], indices = <int>[];
-    final triangles = Paint();
+    final buffers = model._mesh;
+    buffers.reserve(
+      math.min(60000, projected.fold<int>(0, (n, f) => n + f.p.length)),
+    );
+    buffers.reset();
+    final triangles = Paint()..isAntiAlias = true;
+    final shader = texture?.shader;
+    bool texturedBatch = false;
     void flush() {
-      if (positions.isEmpty) return;
+      if (buffers.vertices == 0) return;
+      final mesh = ui.Vertices.raw(
+        ui.VertexMode.triangles,
+        Float32List.sublistView(buffers.positions, 0, buffers.vertices * 2),
+        textureCoordinates: texturedBatch
+            ? Float32List.sublistView(buffers.uv, 0, buffers.vertices * 2)
+            : null,
+        colors: Int32List.sublistView(buffers.colors, 0, buffers.vertices),
+        indices: Uint16List.sublistView(buffers.indices, 0, buffers.indexCount),
+      );
+      triangles.shader = texturedBatch ? shader : null;
       canvas.drawVertices(
-          ui.Vertices(ui.VertexMode.triangles, positions,
-              colors: colors, indices: indices),
-          BlendMode.dst,
-          triangles);
-      positions.clear();
-      colors.clear();
-      indices.clear();
+        mesh,
+        texturedBatch ? BlendMode.modulate : BlendMode.dst,
+        triangles,
+      );
+      mesh.dispose();
+      buffers.reset();
     }
 
     // Lit colour, then the highlight mixed in towards white.
-    Color shade(Color color, double light, double spec, double scale) {
+    int shadeBits(
+      Color color,
+      double light,
+      double spec,
+      double scale, {
+      double metalness = 0,
+    }) {
       int channel(double c) {
+        if (quality == ModelQuality.studio4K) {
+          return (255 *
+                  ModelFinish.filmicChannel(
+                    c,
+                    light * scale,
+                    spec,
+                    metalness: metalness,
+                  ))
+              .round()
+              .clamp(0, 255);
+        }
         final lit = c * light * scale;
-        return (255 * (lit + (1 - lit).clamp(0.0, 1.0) * spec))
-            .round()
-            .clamp(0, 255);
+        return (255 * (lit + (1 - lit).clamp(0.0, 1.0) * spec)).round().clamp(
+              0,
+              255,
+            );
       }
 
-      return Color.fromARGB((color.a * 255).round(), channel(color.r),
-          channel(color.g), channel(color.b));
+      return ((color.a * 255).round() << 24) |
+          (channel(color.r) << 16) |
+          (channel(color.g) << 8) |
+          channel(color.b);
     }
 
+    Color shade(Color color, double light, double spec, double scale) =>
+        Color(shadeBits(color, light, spec, scale));
     const sky = Color(0xffe3f0fb);
     // Two soft diagonal reflections across a big pane facing the camera;
     // they slide over the glass as the model turns, like real ones.
     final streak = Paint()..isAntiAlias = true;
     void streaks(_ProjectedFace f) {
-      if (f.fresnel > .5) return;
-      final box = f.path.getBounds();
-      if (box.width < 26 || box.height < 26) return;
+      // Fade reflection continuously instead of dropping an entire pass
+      // as soon as a pane crosses a hard Fresnel/size threshold.
+      final reflection = ModelMotionQuality.reflectionOpacity(
+        f.fresnel,
+        f.bounds.shortestSide,
+      );
+      if (reflection <= 0) return;
+      final box = f.bounds;
+
       flush();
       canvas.save();
       canvas.clipPath(f.path);
+      if (quality == ModelQuality.studio4K) {
+        final shift = math.sin(yaw) * .7;
+        // One environment across all panes, instead of a separate painted
+        // stripe per pane; reflection moves continuously with the camera.
+        canvas.drawRect(
+          box,
+          streak
+            ..shader = LinearGradient(
+              begin: Alignment(-1 + shift, -.8 + math.sin(pitch) * .3),
+              end: Alignment(1 + shift, .5),
+              colors: [
+                const Color(0xffb5d8f4).withValues(alpha: (.025) * reflection),
+                Colors.white.withValues(alpha: (.06) * reflection),
+                Colors.white.withValues(
+                  alpha: (.24 + .22 * f.fresnel) * reflection,
+                ),
+                Colors.white.withValues(alpha: (.055) * reflection),
+                const Color(0xff293849).withValues(alpha: (.07) * reflection),
+              ],
+              stops: const [0, .27, .45, .62, 1],
+            ).createShader(background),
+        );
+        canvas.restore();
+        return;
+      }
       final d = box.shortestSide;
-      for (final (at, wide, alpha) in const [
-        (.32, .16, .13),
-        (.5, .06, .1),
-      ]) {
+      for (final (at, wide, alpha) in const [(.32, .16, .13), (.5, .06, .1)]) {
         final x = box.left + box.width * at;
         canvas.drawPath(
-            Path()
-              ..moveTo(x - d * .55, box.bottom)
-              ..lineTo(x - d * .55 + d * wide, box.bottom)
-              ..lineTo(x + d * .55 + d * wide, box.top)
-              ..lineTo(x + d * .55, box.top)
-              ..close(),
-            streak
-              ..shader = LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.white.withValues(alpha: 0),
-                    Colors.white.withValues(alpha: alpha),
-                    Colors.white.withValues(alpha: alpha * .4),
-                  ]).createShader(box));
+          Path()
+            ..moveTo(x - d * .55, box.bottom)
+            ..lineTo(x - d * .55 + d * wide, box.bottom)
+            ..lineTo(x + d * .55 + d * wide, box.top)
+            ..lineTo(x + d * .55, box.top)
+            ..close(),
+          streak
+            ..shader = LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [
+                Colors.white.withValues(alpha: 0),
+                Colors.white.withValues(alpha: alpha * reflection),
+                Colors.white.withValues(alpha: alpha * .4 * reflection),
+              ],
+            ).createShader(box),
+        );
       }
       canvas.restore();
     }
 
     for (final f in projected) {
       final part = model.parts[f.face.partId];
+      // One neutral micro-surface map keeps all opaque faces in the same
+      // GPU batch; dark rubber remains dark through vertex modulation.
+      final textured = shader != null && !f.face.glass;
+      if (textured != texturedBatch) {
+        flush();
+        texturedBatch = textured;
+      }
       final selected = selectedPart != null
           ? f.face.partId == selectedPart
           : selectedMaterial != null && part?.materialKey == selectedMaterial;
       final color = selected && focusPart == null
           ? Color.lerp(f.face.color, Colors.lightBlueAccent, .25)!
           : f.face.color;
-      if (positions.length + f.p.length > 60000) flush();
-      final base = positions.length;
-      positions.addAll(f.p);
-      for (final v in f.p) {
+      final tex = textured
+          ? model.textureUV(
+              f.face,
+              texture!.size,
+              cinematic: texture!.cinematic,
+            )
+          : null;
+      var steps = 1;
+      if (quality == ModelQuality.studio4K && textured && f.p.length == 4) {
+        final distances = [for (final p in f.cameraPoints) _camera - p.z];
+        steps = ModelMotionQuality.perspectiveSteps(
+          distances.reduce(math.min),
+          distances.reduce(math.max),
+          f.bounds.longestSide,
+        );
+      }
+      final edgeAA = quality == ModelQuality.studio4K && !f.face.glass;
+      final needed = (steps == 1 ? f.p.length : steps * steps * 4) +
+          (edgeAA ? f.p.length * 4 : 0);
+      if (buffers.vertices + needed > 60000) flush();
+      if (buffers.colors.length < buffers.vertices + needed) {
+        flush();
+        buffers.reserve(needed);
+      }
+      void emit(Offset v, Offset? uv, {double coverage = 1}) {
         // Studio light: brightest at the upper left, falling off softly
         // towards the floor and the right.
         final up = (1 - v.dy / size.height).clamp(0.0, 1.0),
@@ -2727,23 +4146,89 @@ class ModelPainter extends CustomPainter {
         if (f.face.glass) {
           // Glass mirrors the sky: more at a slant and higher up.
           final base = shade(color, f.light, f.spec, 1),
-              mirror =
-                  ((.16 + .62 * f.fresnel) * (.5 + .5 * up)).clamp(0.0, .85);
-          final mixed = Color.lerp(base, sky, mirror)!;
-          colors.add(mixed.withValues(
-              alpha: (base.a + mirror * .55 + f.spec * .4).clamp(0.0, .92)));
+              mirror = ((.16 + .62 * f.fresnel) * (.5 + .5 * up)).clamp(
+                0.0,
+                .85,
+              );
+          var mixed = Color.lerp(base, sky, mirror)!;
+          var alpha = (base.a + mirror * .55 + f.spec * .4).clamp(0.0, .92);
+          if (quality == ModelQuality.studio4K) {
+            final thickness =
+                (model.recipe['glassThickness'] as num?)?.toDouble() ?? 6;
+            final transmission = ModelFinish.glassTransmission(
+              thickness,
+              f.viewCos,
+            );
+            final absorption = 1 - transmission;
+            mixed = Color.lerp(sky, const Color(0xff4f817c), absorption * .7)!;
+            alpha = (.045 + absorption * .65 + f.fresnel * .7 + f.spec * .12)
+                .clamp(.04, .92);
+          }
+          buffers.vertex(v, mixed.withValues(alpha: alpha).toARGB32(), null);
         } else {
-          colors
-              .add(shade(color, f.light, f.spec, .86 + .16 * up + .08 * left));
+          final bits = shadeBits(
+            color,
+            f.light,
+            f.spec,
+            .86 + .16 * up + .08 * left,
+            metalness: ModelFinish.forMaterial(part?.materialKey).metalness,
+          );
+          final alpha = (((bits >> 24) & 255) * coverage).round();
+          buffers.vertex(v, (bits & 0xffffff) | (alpha << 24), uv);
         }
       }
-      for (var j = 1; j < f.p.length - 1; j++) {
-        indices
-          ..add(base)
-          ..add(base + j)
-          ..add(base + j + 1);
+
+      if (steps == 1) {
+        final base = buffers.vertices;
+        for (var i = 0; i < f.p.length; i++) {
+          emit(f.p[i], tex?[i]);
+        }
+        for (var j = 1; j < f.p.length - 1; j++) {
+          buffers.triangle(base, base + j, base + j + 1);
+        }
+      } else {
+        tessellatedFaces++;
+        // Reproject points on the camera-space surface, rather than linearly
+        // interpolating screen coordinates. UVs follow the same surface patch.
+        final p = f.cameraPoints;
+        for (var y = 0; y < steps; y++) {
+          for (var x = 0; x < steps; x++) {
+            final base = buffers.vertices;
+            for (final (cx, cy) in [
+              (x, y),
+              (x + 1, y),
+              (x + 1, y + 1),
+              (x, y + 1),
+            ]) {
+              final u = cx / steps, v = cy / steps;
+              final point = p[0] * ((1 - u) * (1 - v)) +
+                  p[1] * (u * (1 - v)) +
+                  p[2] * (u * v) +
+                  p[3] * ((1 - u) * v);
+              final uv = tex![0] * ((1 - u) * (1 - v)) +
+                  tex[1] * (u * (1 - v)) +
+                  tex[2] * (u * v) +
+                  tex[3] * ((1 - u) * v);
+              emit(project(point, size), uv);
+            }
+            buffers.triangle(base, base + 1, base + 2);
+            buffers.triangle(base, base + 2, base + 3);
+          }
+        }
       }
-      if (f.face.glass && !moving) streaks(f);
+      if (edgeAA) {
+        final outer = ModelEdgeCoverage.outer(f.p, 1 / math.max(1, pixelRatio));
+        for (var i = 0; i < f.p.length; i++) {
+          final j = (i + 1) % f.p.length, base = buffers.vertices;
+          emit(f.p[i], tex?[i]);
+          emit(f.p[j], tex?[j]);
+          emit(outer[j], tex?[j], coverage: 0);
+          emit(outer[i], tex?[i], coverage: 0);
+          buffers.triangle(base, base + 1, base + 2);
+          buffers.triangle(base, base + 2, base + 3);
+        }
+      }
+      if (f.face.glass) streaks(f);
       if (wires || selected) {
         flush();
         paint
@@ -2761,6 +4246,7 @@ class ModelPainter extends CustomPainter {
     for (final part in model.parts.values) {
       if (!visibleIds.contains(part.id)) continue;
       final selected = selectedPart == part.id;
+      if (moving && !selected) continue;
       if (!selected &&
           (!labels ||
               explosion < .1 ||
@@ -2786,47 +4272,77 @@ class ModelPainter extends CustomPainter {
       count++;
       final caption = selected ? '${part.id} · ${part.title}' : part.id;
       final text = TextPainter(
-          text: TextSpan(
-              text: caption,
-              style: TextStyle(
-                  fontSize: selected ? 11 : 9,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600)),
-          textDirection: TextDirection.ltr)
-        ..layout(maxWidth: size.width * .75);
+        text: TextSpan(
+          text: caption,
+          style: TextStyle(
+            fontSize: selected ? 11 : 9,
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout(maxWidth: size.width * .75);
       final box = Rect.fromLTWH(
-          (at.dx + 9).clamp(2, size.width - text.width - 10),
-          at.dy - 11,
-          text.width + 10,
-          text.height + 7);
+        (at.dx + 9).clamp(2, size.width - text.width - 10),
+        at.dy - 11,
+        text.width + 10,
+        text.height + 7,
+      );
       if (selected) {
-        final original =
-            project(positioned(part.center, part.group, null), size);
+        final original = project(
+          positioned(part.center, part.group, null),
+          size,
+        );
         canvas.drawLine(
-            original,
-            at,
-            paint
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 1
-              ..color = Colors.lightBlueAccent.withValues(alpha: .6));
-      }
-      canvas.drawLine(
+          original,
           at,
-          Offset(box.left, box.center.dy),
           paint
             ..style = PaintingStyle.stroke
-            ..strokeWidth = .7
-            ..color = Colors.white54);
+            ..strokeWidth = 1
+            ..color = Colors.lightBlueAccent.withValues(alpha: .6),
+        );
+      }
+      canvas.drawLine(
+        at,
+        Offset(box.left, box.center.dy),
+        paint
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = .7
+          ..color = Colors.white54,
+      );
       canvas.drawRRect(
-          RRect.fromRectAndRadius(box, const Radius.circular(5)),
-          paint
-            ..style = PaintingStyle.fill
-            ..color =
-                selected ? const Color(0xff1567ad) : const Color(0xdd172b43));
+        RRect.fromRectAndRadius(box, const Radius.circular(5)),
+        paint
+          ..style = PaintingStyle.fill
+          ..color =
+              selected ? const Color(0xff1567ad) : const Color(0xdd172b43),
+      );
       text.paint(canvas, box.topLeft + const Offset(5, 3));
+      text.dispose();
     }
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant ModelPainter old) => true;
+  bool shouldRepaint(covariant ModelPainter old) =>
+      quality != old.quality ||
+      !identical(model, old.model) ||
+      yaw != old.yaw ||
+      pitch != old.pitch ||
+      zoom != old.zoom ||
+      progress != old.progress ||
+      explosion != old.explosion ||
+      active != old.active ||
+      wires != old.wires ||
+      labels != old.labels ||
+      isolate != old.isolate ||
+      mechanism != old.mechanism ||
+      wall != old.wall ||
+      moving != old.moving ||
+      rightInset != old.rightInset ||
+      pixelRatio != old.pixelRatio ||
+      selectedPart != old.selectedPart ||
+      selectedMaterial != old.selectedMaterial ||
+      focusPart != old.focusPart ||
+      !identical(texture, old.texture);
 }
