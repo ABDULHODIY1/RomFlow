@@ -20,6 +20,10 @@ class DraftTool extends StatelessWidget {
   final VoidCallback onTap;
   final DraftPayload? dragData;
   final VoidCallback? onDragStarted, onDragFinished;
+
+  /// Icon only, on a 44 pt lens: the toolbar of the drawing desk. The name
+  /// stays in the tooltip and for screen readers.
+  final bool compact;
   const DraftTool({
     super.key,
     required this.label,
@@ -32,18 +36,20 @@ class DraftTool extends StatelessWidget {
     this.dragData,
     this.onDragStarted,
     this.onDragFinished,
+    this.compact = false,
   });
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final color = selected ? colors.primary : colors.onSurfaceVariant;
     final tile = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 3),
+      padding: EdgeInsets.symmetric(horizontal: compact ? 2 : 3),
       child: Semantics(
         button: true,
         selected: selected,
+        label: compact ? tr(label) : null,
         child: Tooltip(
-          message: label,
+          message: tr(label),
           // On the toolbar's glass: the chosen tool on a tinted lens, the
           // rest bare, as the tab bar's items.
           child: Material(
@@ -57,40 +63,52 @@ class DraftTool extends StatelessWidget {
               onTap: onTap,
               borderRadius: BorderRadius.circular(10),
               child: SizedBox(
-                width: width,
-                height: 58,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (preview != null)
-                      SizedBox(width: 30, height: 27, child: preview)
-                    else if (opening != null)
-                      CustomPaint(
-                        size: const Size(27, 27),
-                        painter: OpeningSymbol(opening!, color),
+                width: compact ? 44 : width,
+                height: compact ? 44 : 58,
+                child: compact
+                    ? Center(
+                        child: preview != null
+                            ? SizedBox(width: 28, height: 26, child: preview)
+                            : opening != null
+                                ? CustomPaint(
+                                    size: const Size(25, 25),
+                                    painter: OpeningSymbol(opening!, color),
+                                  )
+                                : Icon(icon, size: 23, color: color),
                       )
-                    else
-                      Icon(icon, size: 24, color: color),
-                    const SizedBox(height: 4),
-                    Padding(
-                      // The label shrinks before it touches the tile's edge.
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Tx(
-                          label,
-                          maxLines: 1,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: color,
-                            fontWeight:
-                                selected ? FontWeight.w600 : FontWeight.w400,
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (preview != null)
+                            SizedBox(width: 30, height: 27, child: preview)
+                          else if (opening != null)
+                            CustomPaint(
+                              size: const Size(27, 27),
+                              painter: OpeningSymbol(opening!, color),
+                            )
+                          else
+                            Icon(icon, size: 24, color: color),
+                          const SizedBox(height: 4),
+                          Padding(
+                            // The label shrinks before it touches the tile's edge.
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Tx(
+                                label,
+                                maxLines: 1,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: color,
+                                  fontWeight: selected
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             )),
           ),

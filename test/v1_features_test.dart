@@ -248,23 +248,23 @@ void main() {
         (w) => w is CustomPaint && w.painter is DrawingPainter);
     DrawingPainter painter() =>
         tester.widget<CustomPaint>(canvas).painter! as DrawingPainter;
-    await tester.tap(find.text('Andoza'));
+    await tester.tap(find.byTooltip('Andoza'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('2 tabaqali'));
+    await tester.tap(find.byTooltip('2 tabaqali'));
     await tester.pumpAndSettle();
     expect(layoutDrawing(painter().drawing, painter().recipe).cells.length, 2);
     // The design keeps the size already on the desk.
     expect(painter().drawing['widthMm'], 1500);
     final before = jsonEncode(painter().drawing);
     // Drop a ready three-part window into the right-hand section.
-    await tester.ensureVisible(find.text('3 bo‘limli'));
+    await tester.ensureVisible(find.byTooltip('3 bo‘limli'));
     await tester.pumpAndSettle();
     final rect = tester.getRect(canvas);
     final target = rect.topLeft +
         CanvasTransform(rect.size, painter().drawing, sectionDimensions: true)
             .to(const V(1050, 700));
     final gesture =
-        await tester.startGesture(tester.getCenter(find.text('3 bo‘limli')));
+        await tester.startGesture(tester.getCenter(find.byTooltip('3 bo‘limli')));
     await gesture.moveBy(const Offset(0, 28));
     await tester.pump();
     await gesture.moveTo(target);
@@ -276,10 +276,10 @@ void main() {
     expect(cells.length, 4);
     expect(cells.first.node['opening'], 'left');
     // A closer is a door part: a window without a door does not offer it.
-    await tester.tap(find.text('Furnitura'));
+    await tester.tap(find.byTooltip('Furnitura'));
     await tester.pumpAndSettle();
-    expect(find.text('Dovodchik'), findsNothing);
-    expect(find.text('Setka'), findsOneWidget);
+    expect(find.byTooltip('Dovodchik'), findsNothing);
+    expect(find.byTooltip('Setka'), findsOneWidget);
     await tester.tap(find.byTooltip('Orqaga'));
     await tester.pumpAndSettle();
     expect(jsonEncode(painter().drawing), before);

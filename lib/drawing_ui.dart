@@ -109,6 +109,10 @@ class _DrawingEditorState extends State<DrawingEditor> {
 
   /// The canvas shows a live 3D picture instead of the drawing.
   bool show3d = false;
+
+  /// The drawing over the whole screen: tool rows and the bottom panel
+  /// hidden until switched back.
+  bool fullDesk = false;
   @override
   void initState() {
     super.initState();
@@ -1747,13 +1751,20 @@ class _DrawingEditorState extends State<DrawingEditor> {
     );
   }
 
-  Widget drawingCanvas(DrawingLayout? layout, {double? height = 360}) =>
+  Widget drawingCanvas(
+    DrawingLayout? layout, {
+    double? height = 360,
+    bool bare = false,
+  }) =>
       Container(
         height: height,
-        decoration: BoxDecoration(
-          color: const Color(0xffedf4fb),
-          borderRadius: BorderRadius.circular(18),
-        ),
+        // Bare on the desk: the paper is the whole screen, not a card.
+        decoration: bare
+            ? null
+            : BoxDecoration(
+                color: paperColor,
+                borderRadius: BorderRadius.circular(18),
+              ),
         child: layout == null
             ? Center(child: Tx(error ?? 'Chizma xato'))
             : LayoutBuilder(
@@ -1809,6 +1820,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                             painter: DrawingPainter(
                               drawing,
                               recipe,
+                              paper: !bare,
                               selected: selected,
                               points: points,
                               editVertices: tool == 'vertices',
@@ -2333,15 +2345,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Tx(
-                  'Sozlash',
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.primary,
-                  ),
-                ),
+                // The whole bar opens the settings; the arrow says so.
+
                 Icon(Icons.chevron_right, size: 20, color: scheme.primary),
               ],
             ),
@@ -2362,10 +2367,15 @@ class _DrawingEditorState extends State<DrawingEditor> {
   Widget glassBar(ColorScheme scheme, Widget child) => Padding(
         padding: const EdgeInsets.fromLTRB(12, 2, 12, 0),
         child: usesIOSGlass
-            // A floating toolbar: one capsule of Apple's glass, its tools on
-            // it, as the tab bar.
-            ? GlassSurface(
-                radius: BorderRadius.circular(26), blur: true, child: child)
+            // A floating toolbar over the paper: one capsule of Apple's
+            // glass, as wide as its tools, the drawing showing through.
+            ? Center(
+                child: GlassSurface(
+                  radius: BorderRadius.circular(25),
+                  blur: true,
+                  child: child,
+                ),
+              )
             : DecoratedBox(
                 decoration: BoxDecoration(
                   color: scheme.surface,
@@ -2814,7 +2824,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
               builder: (context, accepted, rejected) => Stack(
                 fit: StackFit.expand,
                 children: [
-                  drawingCanvas(layout, height: null),
+                  drawingCanvas(layout, height: null, bare: true),
                   if (hoverPayload != null)
                     IgnorePointer(
                       child: Stack(
@@ -3533,7 +3543,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
   Widget visualWorkspace(DrawingLayout? layout, DMap? leaf) {
     Widget tools(List<Widget> children) => SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
           child: Row(children: children),
         );
     void selectTool(String value) => setState(() {
@@ -3555,6 +3565,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
       required VoidCallback onTap,
     }) =>
         DraftTool(
+          compact: true,
           label: label,
           width: width,
           icon: icon,
@@ -3592,7 +3603,23 @@ class _DrawingEditorState extends State<DrawingEditor> {
     final price = livePriceText();
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
+      // The whole screen is the drawing paper; the bars float over it.
+      backgroundColor: paperColor,
+      extendBodyBehindAppBar: true,
       appBar: GlassAppBar(
+        // Ink on the paper in both themes, the paper fading under it.
+        foregroundColor: const Color(0xff1c293b),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        flexibleSpace: const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [paperColor, Color(0x00edf4fb)],
+              stops: [.6, 1],
+            ),
+          ),
+        ),
         titleSpacing: 0,
         // Three tools share the bar: a compact title stays whole.
         title: Column(
@@ -3611,7 +3638,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   : '$label • ${drawing['widthMm']}×${drawing['heightMm']}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: const TextStyle(fontSize: 12, color: Color(0xff526981)),
             ),
           ],
         ),
@@ -3627,380 +3654,408 @@ class _DrawingEditorState extends State<DrawingEditor> {
             icon: const Icon(Icons.redo),
           ),
           IconButton(
+            key: const ValueKey('full-desk'),
+            tooltip: tr(fullDesk ? 'Asboblarni ko‘rsatish' : 'To‘liq ekran'),
+            onPressed: () => setState(() => fullDesk = !fullDesk),
+            icon: Icon(fullDesk ? Icons.fullscreen_exit : Icons.fullscreen),
+          ),
+          IconButton(
             tooltip: tr('Batafsil sozlash'),
             onPressed: () => setState(() => visualMode = false),
             icon: const Icon(Icons.tune),
           ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            LayoutBuilder(
-              builder: (context, box) {
-                // All six groups stay visible on a phone without scrolling.
-                final width = math.min(72.0, (box.maxWidth - 42) / 6 - 6);
-                return glassBar(
-                  scheme,
-                  tools([
-                    for (final entry in <(String, String, IconData)>[
-                      ('split', 'Bo‘lish', Icons.grid_view_outlined),
-                      ('window', 'Deraza', Icons.window_outlined),
-                      ('door', 'Eshik', Icons.door_front_door_outlined),
-                      ('fill', 'To‘ldirma', Icons.layers_outlined),
-                      ('hardware', 'Furnitura', Icons.handyman_outlined),
-                      ('preset', 'Andoza', Icons.dashboard_customize_outlined),
-                    ])
-                      DraftTool(
-                        label: entry.$2,
-                        icon: entry.$3,
-                        width: width,
-                        selected: palette == entry.$1,
-                        dragData: switch (entry.$1) {
-                          'split' => const DraftPayload(
-                              'split',
-                              'v',
-                              'Tik impost',
+      body: Stack(
+        children: [
+          const Positioned.fill(child: CustomPaint(painter: PaperPainter())),
+          SafeArea(
+            child: Column(
+              children: [
+                if (!fullDesk) ...[
+                  LayoutBuilder(
+                    builder: (context, box) {
+                      // All six groups stay visible on a phone without scrolling.
+                      final width = math.min(72.0, (box.maxWidth - 42) / 6 - 6);
+                      return glassBar(
+                        scheme,
+                        tools([
+                          for (final entry in <(String, String, IconData)>[
+                            ('split', 'Bo‘lish', Icons.grid_view_outlined),
+                            ('window', 'Deraza', Icons.window_outlined),
+                            ('door', 'Eshik', Icons.door_front_door_outlined),
+                            ('fill', 'To‘ldirma', Icons.layers_outlined),
+                            ('hardware', 'Furnitura', Icons.handyman_outlined),
+                            (
+                              'preset',
+                              'Andoza',
+                              Icons.dashboard_customize_outlined
                             ),
-                          'window' => const DraftPayload(
-                              'opening',
-                              'tiltTurn',
-                              'Deraza qanoti',
+                          ])
+                            DraftTool(
+                              compact: true,
+                              label: entry.$2,
+                              icon: entry.$3,
+                              width: width,
+                              selected: palette == entry.$1,
+                              dragData: switch (entry.$1) {
+                                'split' => const DraftPayload(
+                                    'split',
+                                    'v',
+                                    'Tik impost',
+                                  ),
+                                'window' => const DraftPayload(
+                                    'opening',
+                                    'tiltTurn',
+                                    'Deraza qanoti',
+                                  ),
+                                'door' => const DraftPayload(
+                                    'opening',
+                                    'doorLeft',
+                                    'Chap eshik',
+                                  ),
+                                'fill' =>
+                                  DraftPayload('fill', fillTool, 'To‘ldirma'),
+                                'hardware' => const DraftPayload(
+                                    'hardware',
+                                    'mesh',
+                                    'Setka',
+                                  ),
+                                _ => null,
+                              },
+                              onDragStarted: startPartDrag,
+                              onDragFinished: finishPartDrag,
+                              onTap: () => setState(() {
+                                show3d = false;
+                                palette = entry.$1;
+                                tool = 'select';
+                                error = null;
+                              }),
                             ),
-                          'door' => const DraftPayload(
-                              'opening',
-                              'doorLeft',
-                              'Chap eshik',
-                            ),
-                          'fill' => DraftPayload('fill', fillTool, 'To‘ldirma'),
-                          'hardware' => const DraftPayload(
-                              'hardware',
-                              'mesh',
-                              'Setka',
-                            ),
-                          _ => null,
-                        },
-                        onDragStarted: startPartDrag,
-                        onDragFinished: finishPartDrag,
-                        onTap: () => setState(() {
-                          show3d = false;
-                          palette = entry.$1;
-                          tool = 'select';
-                          error = null;
-                        }),
-                      ),
-                  ]),
-                );
-              },
-            ),
-            const SizedBox(height: 6),
-            glassBar(
-              scheme,
-              tools([
-                if (palette == 'split') ...[
-                  DraftTool(
-                    label: 'Tanlash',
-                    icon: Icons.touch_app_outlined,
-                    width: fit,
-                    selected: tool == 'select',
-                    onTap: () => selectTool('select'),
-                  ),
-                  part(
-                    'Tik bo‘lish',
-                    const DraftPayload('split', 'v', 'Tik impost'),
-                    icon: Icons.vertical_split_outlined,
-                    width: fit,
-                    selected: tool == 'v',
-                    onTap: () => selectTool('v'),
-                  ),
-                  part(
-                    'Yotiq bo‘lish',
-                    const DraftPayload('split', 'h', 'Yotiq impost'),
-                    icon: Icons.horizontal_split_outlined,
-                    width: fit,
-                    selected: tool == 'h',
-                    onTap: () => selectTool('h'),
-                  ),
-                  DraftTool(
-                    label: 'Tenglash',
-                    icon: Icons.view_column_outlined,
-                    width: fit,
-                    onTap: () => equalize(),
-                  ),
-                  DraftTool(
-                    label: 'Tortish',
-                    icon: Icons.open_in_full,
-                    width: fit,
-                    selected: tool == 'size',
-                    onTap: () => selectTool('size'),
-                  ),
-                  DraftTool(
-                    label: 'Ko‘zgu',
-                    icon: Icons.flip,
-                    width: fit,
-                    onTap: mirror,
-                  ),
-                ],
-                if (palette == 'window' || palette == 'door')
-                  for (final key in palette == 'window'
-                      ? [
-                          'fixed',
-                          'left',
-                          'right',
-                          'tiltTurn',
-                          'top',
-                          'bottom',
-                          'slideLeft',
-                          'slideRight',
-                        ]
-                      : ['doorLeft', 'doorRight', 'passive', 'fixed'])
-                    part(
-                      openingNames[key]!,
-                      DraftPayload('opening', key, openingNames[key]!),
-                      opening: key,
-                      selected: tool == 'opening' && openingTool == key,
-                      onTap: () => setState(() {
-                        openingTool = key;
-                        tool = 'opening';
-                        error = null;
-                      }),
-                    ),
-                if (palette == 'fill')
-                  for (final entry in <(String, String, IconData)>[
-                    ('glass', 'Shisha', Icons.crop_square),
-                    ('panel', 'Panel', Icons.square_outlined),
-                    ('lambris', 'Lambir', Icons.view_week_outlined),
-                    ('empty', 'Bo‘sh', Icons.check_box_outline_blank),
-                  ])
-                    part(
-                      entry.$2,
-                      DraftPayload('fill', entry.$1, entry.$2),
-                      icon: entry.$3,
-                      selected: tool == 'fill' && fillTool == entry.$1,
-                      onTap: () => setState(() {
-                        fillTool = entry.$1;
-                        tool = 'fill';
-                        error = null;
-                      }),
-                    ),
-                if (palette == 'hardware' && hardware.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 18,
-                    ),
-                    child: Tx(
-                      'Avval “Deraza” yoki “Eshik”dan ochiladigan qanot qo‘ying',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                if (palette == 'hardware')
-                  for (final (key, label, icon) in hardware)
-                    part(
-                      label,
-                      DraftPayload('hardware', key, label),
-                      icon: icon,
-                      selected: tool == 'hardware' && hardwareTool == key,
-                      onTap: () => setState(() {
-                        hardwareTool = key;
-                        tool = 'hardware';
-                        error = null;
-                      }),
-                    ),
-                if (palette == 'preset') ...[
-                  DraftTool(
-                    key: const ValueKey('open-catalog'),
-                    label: 'Katalog',
-                    icon: Icons.apps,
-                    selected: true,
-                    onTap: openCatalog,
-                  ),
-                  for (final preset in drawingPresets.where(
-                    (p) => quickPresets.contains(p.id),
-                  ))
-                    part(
-                      preset.name,
-                      DraftPayload('preset', preset.id, preset.name),
-                      preview: PresetThumb(preset: preset, recipe: recipe),
-                      onTap: () => applyPreset(preset),
-                    ),
-                  DraftTool(
-                    label: 'Saqlash',
-                    icon: Icons.bookmark_add_outlined,
-                    onTap: saveAsTemplate,
-                  ),
-                  DraftTool(
-                    label: 'Mening',
-                    icon: Icons.folder_open,
-                    onTap: loadTemplate,
-                  ),
-                ],
-              ]),
-            ),
-            SizedBox(
-              height: 38,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 2, 12, 2),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: leaf != null &&
-                          layout != null &&
-                          tool == 'select' &&
-                          !draggingPart &&
-                          !(dragged != null && dragCheckpoint)
-                      ? selectionBar(layout, leaf)
-                      : Tx(
-                          draggingPart
-                              ? 'Bo‘lim ustiga qo‘ying.'
-                              : dragged != null && dragCheckpoint
-                                  ? 'O‘chirish — pastga tashlang.'
-                                  : switch (tool) {
-                                      'opening' =>
-                                        '${openingNames[openingTool]}: bo‘limni bosing.',
-                                      'fill' => 'Bo‘limni bosing.',
-                                      'hardware' => 'Qanotni bosing.',
-                                      'v' || 'h' => 'Joyni bosing.',
-                                      'size' => 'Tutqichni torting.',
-                                      _ => palette == 'preset'
-                                          ? 'Andozani bo‘limga sudrang.'
-                                          : 'Bo‘limni bosing.',
-                                    },
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Stack(
-                  children: [
-                    // The drawing starts below the 2D | 3D switch, so the
-                    // switch never covers a grip or a size.
-                    Positioned.fill(
-                      top: 48,
-                      child: show3d && layout != null
-                          ? Live3D(drawing: drawing, recipe: recipe)
-                          : dropWorkspace(layout),
-                    ),
-                    Positioned(top: 4, right: 8, child: viewSwitch()),
-                  ],
-                ),
-              ),
-            ),
-            deskPanel(
-              scheme,
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  profileBar(),
-                  specBar(),
-                  const SizedBox(height: 6),
-                  NativeGlassButtons(
-                    height: 50,
-                    items: [
-                      const GlassButton(
-                        '3d',
-                        symbol: 'cube',
-                        title: '3D',
-                        height: 50,
-                      ),
-                      const GlassButton(
-                        'sarf',
-                        symbol: 'list.bullet.rectangle',
-                        title: 'Sarf',
-                        height: 50,
-                      ),
-                      GlassButton(
-                        'add',
-                        title: 'Smetaga qo‘shish',
-                        subtitle: price,
-                        style: 'prominent',
-                        expand: true,
-                        height: 50,
-                      ),
-                    ],
-                    onTap: (id) => switch (id) {
-                      '3d' => visual3D(),
-                      'sarf' => showVisualReport(),
-                      _ => addToSmeta(),
+                        ]),
+                      );
                     },
-                    fallback: Row(
+                  ),
+                  const SizedBox(height: 6),
+                  glassBar(
+                    scheme,
+                    tools([
+                      if (palette == 'split') ...[
+                        DraftTool(
+                          compact: true,
+                          label: 'Tanlash',
+                          icon: Icons.touch_app_outlined,
+                          width: fit,
+                          selected: tool == 'select',
+                          onTap: () => selectTool('select'),
+                        ),
+                        part(
+                          'Tik bo‘lish',
+                          const DraftPayload('split', 'v', 'Tik impost'),
+                          icon: Icons.vertical_split_outlined,
+                          width: fit,
+                          selected: tool == 'v',
+                          onTap: () => selectTool('v'),
+                        ),
+                        part(
+                          'Yotiq bo‘lish',
+                          const DraftPayload('split', 'h', 'Yotiq impost'),
+                          icon: Icons.horizontal_split_outlined,
+                          width: fit,
+                          selected: tool == 'h',
+                          onTap: () => selectTool('h'),
+                        ),
+                        DraftTool(
+                          compact: true,
+                          label: 'Tenglash',
+                          icon: Icons.view_column_outlined,
+                          width: fit,
+                          onTap: () => equalize(),
+                        ),
+                        DraftTool(
+                          compact: true,
+                          label: 'Tortish',
+                          icon: Icons.open_in_full,
+                          width: fit,
+                          selected: tool == 'size',
+                          onTap: () => selectTool('size'),
+                        ),
+                        DraftTool(
+                          compact: true,
+                          label: 'Ko‘zgu',
+                          icon: Icons.flip,
+                          width: fit,
+                          onTap: mirror,
+                        ),
+                      ],
+                      if (palette == 'window' || palette == 'door')
+                        for (final key in palette == 'window'
+                            ? [
+                                'fixed',
+                                'left',
+                                'right',
+                                'tiltTurn',
+                                'top',
+                                'bottom',
+                                'slideLeft',
+                                'slideRight',
+                              ]
+                            : ['doorLeft', 'doorRight', 'passive', 'fixed'])
+                          part(
+                            openingNames[key]!,
+                            DraftPayload('opening', key, openingNames[key]!),
+                            opening: key,
+                            selected: tool == 'opening' && openingTool == key,
+                            onTap: () => setState(() {
+                              openingTool = key;
+                              tool = 'opening';
+                              error = null;
+                            }),
+                          ),
+                      if (palette == 'fill')
+                        for (final entry in <(String, String, IconData)>[
+                          ('glass', 'Shisha', Icons.crop_square),
+                          ('panel', 'Panel', Icons.square_outlined),
+                          ('lambris', 'Lambir', Icons.view_week_outlined),
+                          ('empty', 'Bo‘sh', Icons.check_box_outline_blank),
+                        ])
+                          part(
+                            entry.$2,
+                            DraftPayload('fill', entry.$1, entry.$2),
+                            icon: entry.$3,
+                            selected: tool == 'fill' && fillTool == entry.$1,
+                            onTap: () => setState(() {
+                              fillTool = entry.$1;
+                              tool = 'fill';
+                              error = null;
+                            }),
+                          ),
+                      if (palette == 'hardware' && hardware.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 18,
+                          ),
+                          child: Tx(
+                            'Avval “Deraza” yoki “Eshik”dan ochiladigan qanot qo‘ying',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      if (palette == 'hardware')
+                        for (final (key, label, icon) in hardware)
+                          part(
+                            label,
+                            DraftPayload('hardware', key, label),
+                            icon: icon,
+                            selected: tool == 'hardware' && hardwareTool == key,
+                            onTap: () => setState(() {
+                              hardwareTool = key;
+                              tool = 'hardware';
+                              error = null;
+                            }),
+                          ),
+                      if (palette == 'preset') ...[
+                        DraftTool(
+                          compact: true,
+                          key: const ValueKey('open-catalog'),
+                          label: 'Katalog',
+                          icon: Icons.apps,
+                          selected: true,
+                          onTap: openCatalog,
+                        ),
+                        for (final preset in drawingPresets.where(
+                          (p) => quickPresets.contains(p.id),
+                        ))
+                          part(
+                            preset.name,
+                            DraftPayload('preset', preset.id, preset.name),
+                            preview:
+                                PresetThumb(preset: preset, recipe: recipe),
+                            onTap: () => applyPreset(preset),
+                          ),
+                        DraftTool(
+                          compact: true,
+                          label: 'Saqlash',
+                          icon: Icons.bookmark_add_outlined,
+                          onTap: saveAsTemplate,
+                        ),
+                        DraftTool(
+                          compact: true,
+                          label: 'Mening',
+                          icon: Icons.folder_open,
+                          onTap: loadTemplate,
+                        ),
+                      ],
+                    ]),
+                  ),
+                ],
+                SizedBox(
+                  height: 46,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 3, 12, 3),
+                    // The 2D | 3D switch sits beside the chosen section, so the
+                    // drawing gets the row it used to take.
+                    child: Row(
                       children: [
-                        OutlinedButton(
-                          key: const ValueKey('open-3d'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                          ),
-                          onPressed: visual3D,
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.view_in_ar, size: 20),
-                              SizedBox(width: 4),
-                              Tx('3D'),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        OutlinedButton(
-                          key: const ValueKey('calculate-drawing'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                          ),
-                          onPressed: showVisualReport,
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.receipt_long_outlined, size: 20),
-                              SizedBox(width: 4),
-                              Tx('Sarf'),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
                         Expanded(
-                          child: FilledButton(
-                            key: const ValueKey('add-to-smeta'),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 8,
-                              ),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: leaf != null &&
+                                    layout != null &&
+                                    tool == 'select' &&
+                                    !draggingPart &&
+                                    !(dragged != null && dragCheckpoint)
+                                ? selectionBar(layout, leaf)
+                                : Tx(
+                                    draggingPart
+                                        ? 'Bo‘lim ustiga qo‘ying.'
+                                        : dragged != null && dragCheckpoint
+                                            ? 'O‘chirish — pastga tashlang.'
+                                            : switch (tool) {
+                                                'opening' =>
+                                                  '${openingNames[openingTool]}: bo‘limni bosing.',
+                                                'fill' => 'Bo‘limni bosing.',
+                                                'hardware' => 'Qanotni bosing.',
+                                                'v' || 'h' => 'Joyni bosing.',
+                                                'size' => 'Tutqichni torting.',
+                                                _ => palette == 'preset'
+                                                    ? 'Andozani bo‘limga sudrang.'
+                                                    : 'Bo‘limni bosing.',
+                                              },
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+// On the paper, whatever the theme.
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Color(0xff526981)),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        viewSwitch(),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: show3d && layout != null
+                        ? Live3D(drawing: drawing, recipe: recipe)
+                        : dropWorkspace(layout),
+                  ),
+                ),
+                if (!fullDesk)
+                  deskPanel(
+                    scheme,
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        profileBar(),
+                        specBar(),
+                        const SizedBox(height: 6),
+                        NativeGlassButtons(
+                          height: 50,
+                          items: [
+                            const GlassButton(
+                              '3d',
+                              symbol: 'cube',
+// Icon buttons carry no words; the name is read out.
+                              label: '3D ko‘rish',
+                              size: 50,
+                              iconSize: 21,
                             ),
-                            onPressed: addToSmeta,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Tx('Smetaga qo‘shish'),
+                            const GlassButton(
+                              'sarf',
+                              symbol: 'list.bullet.rectangle',
+                              label: 'Materiallar va sarf',
+                              size: 50,
+                              iconSize: 21,
+                            ),
+                            GlassButton(
+                              'add',
+                              title: 'Smetaga qo‘shish',
+                              subtitle: price,
+                              style: 'prominent',
+                              expand: true,
+                              height: 50,
+                            ),
+                          ],
+                          onTap: (id) => switch (id) {
+                            '3d' => visual3D(),
+                            'sarf' => showVisualReport(),
+                            _ => addToSmeta(),
+                          },
+                          fallback: Row(
+                            children: [
+                              OutlinedButton(
+                                key: const ValueKey('open-3d'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
                                 ),
-                                if (price != null)
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Tx(
-                                      price,
-                                      style: const TextStyle(
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                onPressed: visual3D,
+                                child: Tooltip(
+                                  message: tr('3D ko‘rish'),
+                                  child: const Icon(Icons.view_in_ar, size: 22),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              OutlinedButton(
+                                key: const ValueKey('calculate-drawing'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
+                                ),
+                                onPressed: showVisualReport,
+                                child: Tooltip(
+                                  message: tr('Materiallar va sarf'),
+                                  child: const Icon(Icons.receipt_long_outlined,
+                                      size: 22),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: FilledButton(
+                                  key: const ValueKey('add-to-smeta'),
+                                  style: FilledButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 8,
                                     ),
                                   ),
-                              ],
-                            ),
+                                  onPressed: addToSmeta,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Tx('Smetaga qo‘shish'),
+                                      ),
+                                      if (price != null)
+                                        FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Tx(
+                                            price,
+                                            style: const TextStyle(
+                                              fontSize: 11.5,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -4308,14 +4363,40 @@ double distanceToSegment(V p, V a, V b) {
   return (p - (a + v * t)).length;
 }
 
+/// The drawing desk's paper, in both themes.
+const paperColor = Color(0xffedf4fb);
+
+/// The dotted paper across the whole drawing desk.
+class PaperPainter extends CustomPainter {
+  const PaperPainter();
+  @override
+  void paint(Canvas canvas, Size size) {
+    final dot = Paint()
+      ..isAntiAlias = true
+      ..color = const Color(0xffd5e2ef);
+    for (double x = 12; x < size.width; x += 18) {
+      for (double y = 12; y < size.height; y += 18) {
+        canvas.drawCircle(Offset(x, y), .7, dot);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(PaperPainter old) => false;
+}
+
 class DrawingPainter extends CustomPainter {
   final DMap drawing, recipe;
   final String? selected;
   final List<V> points;
   final bool editVertices, showResize, sectionDimensions;
+
+  /// Draws the dotted paper; off where the screen's paper is behind.
+  final bool paper;
   DrawingPainter(
     this.drawing,
     this.recipe, {
+    this.paper = true,
     this.selected,
     this.points = const [],
     this.editVertices = false,
@@ -4330,7 +4411,7 @@ class DrawingPainter extends CustomPainter {
           sectionDimensions: sectionDimensions,
         ),
         paint = Paint()..isAntiAlias = true;
-    for (double x = 12; x < size.width; x += 18) {
+    for (double x = 12; paper && x < size.width; x += 18) {
       for (double y = 12; y < size.height; y += 18) {
         canvas.drawCircle(
           Offset(x, y),

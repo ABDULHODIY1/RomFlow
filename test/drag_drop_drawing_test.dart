@@ -36,7 +36,7 @@ void main() {
 
     final before = jsonEncode(painter().drawing);
     final gesture =
-        await tester.startGesture(tester.getCenter(find.text('Tik bo‘lish')));
+        await tester.startGesture(tester.getCenter(find.byTooltip('Tik bo‘lish')));
     await gesture.moveBy(const Offset(0, 28));
     await tester.pump();
     await gesture.moveTo(at(const V(650, 750)));
@@ -57,7 +57,7 @@ void main() {
     final divided = jsonEncode(painter().drawing);
     // Releasing over canvas whitespace must not create a phantom frame part.
     final cancel =
-        await tester.startGesture(tester.getCenter(find.text('Tik bo‘lish')));
+        await tester.startGesture(tester.getCenter(find.byTooltip('Tik bo‘lish')));
     await cancel.moveBy(const Offset(0, 28));
     await tester.pump();
     await cancel.moveTo(tester.getTopLeft(canvas) + const Offset(5, 5));
@@ -113,7 +113,7 @@ void main() {
 
     Future<void> drag(String label, V position) async {
       final gesture =
-          await tester.startGesture(tester.getCenter(find.text(label).first));
+          await tester.startGesture(tester.getCenter(find.byTooltip(label).first));
       await gesture.moveBy(const Offset(0, 28));
       await tester.pump();
       await gesture.moveTo(at(position));
@@ -122,16 +122,16 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    await tester.tap(find.text('Deraza'));
+    await tester.tap(find.byTooltip('Deraza'));
     await tester.pumpAndSettle();
     await drag('Chapga', const V(350, 750));
     expect(painter().drawing['root']['a']['opening'], 'left');
     expect(painter().drawing['root']['b']['opening'], 'fixed');
-    await tester.tap(find.text('Eshik'));
+    await tester.tap(find.byTooltip('Eshik'));
     await tester.pumpAndSettle();
     await drag('Eshik: o‘ng', const V(1100, 750));
     expect(painter().drawing['root']['b']['opening'], 'doorRight');
-    await tester.tap(find.text('To‘ldirma'));
+    await tester.tap(find.byTooltip('To‘ldirma'));
     await tester.pumpAndSettle();
     await drag('Lambir', const V(1100, 750));
     expect(painter().drawing['root']['b']['fill'], 'lambris');

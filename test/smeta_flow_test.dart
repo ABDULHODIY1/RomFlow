@@ -116,16 +116,16 @@ void main() {
     expect(find.text('Oshxona • 1600×1400'), findsOneWidget);
     // The chosen section is described above the canvas.
     expect(find.byKey(const ValueKey('section-bar')), findsOneWidget);
-    await tester.tap(find.text('Ko‘zgu'));
+    await tester.tap(find.byTooltip('Ko‘zgu'));
     await tester.pumpAndSettle();
     expect(drawing()['root']['a']['opening'], 'fixed');
     expect(drawing()['root']['b']['opening'], 'tiltTurn');
     // A ready design from the desk keeps the size already entered.
-    await tester.tap(find.text('Andoza'));
+    await tester.tap(find.byTooltip('Andoza'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('3 bo‘limli'));
+    await tester.ensureVisible(find.byTooltip('3 bo‘limli'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('3 bo‘limli'));
+    await tester.tap(find.byTooltip('3 bo‘limli'));
     await tester.pumpAndSettle();
     expect(drawing()['root']['b']['axis'], 'v');
     expect(drawing()['widthMm'], 1600);
@@ -201,7 +201,7 @@ void main() {
           },
         })));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Ko‘zgu'));
+    await tester.tap(find.byTooltip('Ko‘zgu'));
     await tester.pumpAndSettle();
     final d = (tester
             .widget<CustomPaint>(find.byWidgetPredicate(

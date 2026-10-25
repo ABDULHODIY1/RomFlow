@@ -35,14 +35,14 @@ void main() {
 
     expect(find.text('Yangi smeta'), findsOneWidget);
     expect(tester.getSize(canvas).height, greaterThan(300));
-    await tester.tap(find.text('Tik bo‘lish'));
+    await tester.tap(find.byTooltip('Tik bo‘lish'));
     await tester.pumpAndSettle();
     await tester.tapAt(onDrawing(const V(750, 750)));
     await tester.pumpAndSettle();
     expect(layoutDrawing(painter().drawing, painter().recipe).cells.length, 2);
-    await tester.tap(find.text('Deraza'));
+    await tester.tap(find.byTooltip('Deraza'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Chapga'));
+    await tester.tap(find.byTooltip('Chapga'));
     await tester.pumpAndSettle();
     await tester.tapAt(onDrawing(const V(350, 750)));
     await tester.pumpAndSettle();

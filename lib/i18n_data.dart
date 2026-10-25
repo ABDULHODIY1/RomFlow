@@ -2,6 +2,8 @@
 // Generated from the Uzbek strings in lib/; edit the values freely.
 
 const i18nPlain = <String, List<String>>{
+  'To‘liq ekran': ['Во весь экран', 'Full screen'],
+  'Asboblarni ko‘rsatish': ['Показать инструменты', 'Show the tools'],
   'Yangi versiya chiqdi': ['Вышла новая версия', 'A new version is out'],
   'Yangilash uchun App Store ochiladi.': [
     'Для обновления откроется App Store.',
