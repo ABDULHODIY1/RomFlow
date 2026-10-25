@@ -90,32 +90,41 @@ void main() {
     }
   });
 
-  test('dolphin handle is the aluminium default and turns before the swing',
-      () {
+  test('dolphin handle pulls out and fork drops before the sash swings', () {
     final r = simpleRecipe();
     expect(r['windowHandle'], 'dolphin');
     expect(defaultRecipe({'material': 'pvc'})['windowHandle'], 'pull');
     final m = WindowModel(twoSections(), r);
-    final turn = m.motions.values.singleWhere((x) => x.mode == 'turn');
-    expect(turn.ownerId, 'b');
-    expect(turn.turn.abs(), closeTo(math.pi / 2, 1e-9));
+    final pull = m.motions.values.singleWhere((x) => x.mode == 'pull');
+    final rod = m.motions.values.singleWhere((x) => x.mode == 'rod');
+    expect(pull.ownerId, 'b');
+    expect(rod.ownerId, 'b');
+    expect(m.motions.values.any((x) => x.mode == 'turn'), isFalse);
     final lever = m.parts.values
-        .singleWhere((p) => p.title == 'Delfin tutqich • egri dasta');
-    expect(lever.group, 'b-turn');
-    expect(m.parts.values.any((p) => p.title == 'Delfin tutqich • ilgak tili'),
+        .singleWhere((p) => p.title == 'Delfin tutqich • tortma dasta');
+    final fork =
+        m.parts.values.singleWhere((p) => p.title.contains('ikki tishli'));
+    expect(lever.group, 'b-pull');
+    expect(fork.group, 'b-rod');
+    final tip = pull.pivot + const P3(0, 70, 10);
+    final moved = pull.transform(tip, .22);
+    expect(moved.z, greaterThan(tip.z)); // Toward the user.
+    expect(moved.x, closeTo(tip.x, 1e-9)); // No 90-degree planar rotation.
+    final dropped = rod.transform(fork.center, .22);
+    expect(dropped.y, closeTo(fork.center.y + 24, 1e-9));
+    expect(dropped.x, closeTo(fork.center.x, 1e-9));
+    expect(m.groups['b']!.transform(tip, .22).x, closeTo(tip.x, 1e-9));
+    expect((pull.transform(tip, 0) - tip).length, closeTo(0, 1e-9));
+    expect(
+        (rod.transform(fork.center, 1) -
+                rod.owner.transform(fork.center + const P3(0, 24, 0), 1))
+            .length,
+        lessThan(1e-8));
+    expect(
+        m.parts.values
+            .where((p) => p.title.startsWith('Yelma'))
+            .every((p) => p.group == null),
         isTrue);
-    final strike =
-        m.parts.values.singleWhere((p) => p.title.startsWith('Ilgak tutgichi'));
-    expect(strike.group, isNull);
-    // A point on the lever below the pivot ends up beside it after the turn,
-    // while the sash itself has not moved yet.
-    final below = turn.pivot + const P3(0, 60, 0);
-    final turned = turn.transform(below, .22);
-    expect((turned - turn.pivot).length, closeTo(60, 1e-6));
-    expect(turned.y, closeTo(turn.pivot.y, 1e-6));
-    expect(m.groups['b']!.transform(below, .22).x, closeTo(below.x, 1e-9));
-    expect(turn.transform(below, 0).y, closeTo(below.y, 1e-9));
-    // Pull and lever handles stay available.
     expect(
         WindowModel(twoSections(), {...r, 'windowHandle': 'pull'})
             .motions
