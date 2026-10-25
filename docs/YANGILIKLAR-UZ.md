@@ -1,3 +1,25 @@
+# RomFlow 1.0.0 — birinchi reliz
+
+Eshik va rom ustaxonalari uchun smeta, chizma, 3D va buyurtmalar.
+Android, iPhone, iPad, Windows, macOS va Linux. Internetsiz ishlaydi.
+
+## Asosiy imkoniyatlar
+- **Chizma stoli**: 59 ta tayyor dizayn (deraza, eshik, arka, boshqa shakllar) yoki bo‘sh rom; bo‘lish, sudrash, chetidan tortish, zinapoya rama, ochilish turlari, shisha/panel, furnitura.
+- **Zavodlar narxi**: O‘zbekistondagi 10 ta ishlab chiqaruvchining 14 ta profil tizimi (AKFA, ENGELBERG, IMZO/REHAU, Alubest, ALUTEX…); smetadagi “Zavodlar narxi ›” bilan bitta rom barcha tizimlarda solishtiriladi.
+- **Aniq sarf**: profil, shisha, rezina, furnitura, raskroy va chiqindi.
+- **3D**: jonli model, ochilish animatsiyasi, detallarni sochish, profil kesimlari.
+- **AI kamera va “Joyida”**: rasmdan chizma; jonli kamerada rom haqiqiy darchaga qo‘yiladi.
+- **Buyurtmalar**: smeta → PDF → bosqichlar, to‘lov, qarz, bo‘lib to‘lash, razmer, eslatma, ombor, xodimlar, moliya.
+- **Narxlar**: Markaziy bank dollar kursi har kuni; diler jadvalidan narx yuklash.
+- **iPhone va iPad**: Liquid Glass dizayn; iPhone SE’dan Pro Max’gacha va iPad’larda tekshirilgan.
+
+## O‘rnatish
+- Android: `RomFlow-1.0.0-27-arm64.apk` (ko‘p telefonlar), `…-armv7.apk` (eski), `RomFlow-1.0.0-27.apk` (hammasi). Oldingi sinov versiyalari ustiga o‘rnatiladi, ma’lumotlar saqlanadi.
+- iPhone / iPad: `RomFlow-1.0.0-27-ios-unsigned.ipa` — qo‘llanma: IOS-Qollanma.md.
+
+# Sinov versiyalari tarixi
+Quyida 1.0.0 dan oldingi ichki sinov (pilot) versiyalari.
+
 # RomFlow 2.2.0 — Liquid Glass
 
 ## iPhone va iPad’da Liquid Glass dizayn

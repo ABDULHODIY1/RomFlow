@@ -35,7 +35,7 @@ import 'installments.dart';
 import 'reminder_service.dart';
 import 'demo_overlay.dart';
 
-const appVersion = '2.2.0';
+const appVersion = '1.0.0';
 
 const ink = Color(0xff172b4d),
     blue = Color(0xff206bc4),

@@ -119,7 +119,7 @@ jobs:
           version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | sed 's/+.*//')
           tag="v$version"
           # The newest section of the changelog is the release note.
-          awk 'NR > 1 && /^# RomFlow /{exit} {print}' docs/YANGILIKLAR-UZ.md > notes.md
+          awk 'NR > 1 && /^# (RomFlow|Sinov) /{exit} {print}' docs/YANGILIKLAR-UZ.md > notes.md
           if [ "$SIGNED" = debug ]; then
             printf '\n> Android: test imzosi — bu APK avvalgi versiya ustiga o‘rnatilmaydi.\n' >> notes.md
           fi

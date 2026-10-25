@@ -10,7 +10,7 @@ o‘zida yangilanib turadi.
 - **Apple ID** (bepul). Ikki bosqichli tasdiqlash yoqilgan bo‘lsin: kod
   iPhone’ga chiqadi. SMS orqali kod ba’zan ishlamaydi — shuning uchun shu
   iPhone’da kirilgan Apple ID qulayroq.
-- **RomFlow IPA**: `RomFlow-2.1.0-25-ios-unsigned.ipa`
+- **RomFlow IPA**: `RomFlow-1.0.0-27-ios-unsigned.ipa`
   (GitHub → z3wax/RomFlow → **Releases** → eng yangi versiya → *Assets*).
 
 > Dasturlarni faqat rasmiy joydan oling: **iloader.app** (yoki
