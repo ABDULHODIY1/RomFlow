@@ -83,7 +83,11 @@ extension Billing on Store {
 
 /// Opens [page] if the plan includes [feature], otherwise the tariffs.
 Future<void> openWithPlan(
-    BuildContext context, Store store, String feature, Widget Function() page) {
+  BuildContext context,
+  Store store,
+  String feature,
+  Widget Function() page,
+) {
   final target = store.allows(feature) ? page() : TariffPage(store: store);
   return Navigator.push(context, MaterialPageRoute(builder: (_) => target));
 }
@@ -111,143 +115,194 @@ class TariffPage extends StatelessWidget {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 760),
-          child: ListView(padding: const EdgeInsets.all(16), children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(22),
-                gradient: const LinearGradient(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  gradient: const LinearGradient(
                     colors: [Color(0xff1659b8), Color(0xff2f86ea)],
                     begin: Alignment.topLeft,
-                    end: Alignment.bottomRight),
-              ),
-              child: Column(
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Wrap(
-                        spacing: 10,
-                        runSpacing: 6,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          const Icon(Icons.workspace_premium,
-                              color: Colors.white, size: 28),
-                          Text(current.name,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w800)),
-                          if (free)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                  color: const Color(0xff4cc36b),
-                                  borderRadius: BorderRadius.circular(20)),
-                              child: const Text('Hozircha bepul',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 12)),
+                      spacing: 10,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.workspace_premium,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        Text(
+                          current.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        if (free)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
                             ),
-                        ]),
+                            decoration: BoxDecoration(
+                              color: const Color(0xff4cc36b),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'Hozircha bepul',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                     const SizedBox(height: 10),
                     Text(
-                        free
-                            ? 'Barcha imkoniyatlar ochiq. To‘lov tizimi tayyor, lekin hozircha pul olinmaydi — tariflar ishga tushishidan oldin xabar beramiz.'
-                            : current.tagline,
-                        style: const TextStyle(
-                            color: Colors.white, height: 1.4, fontSize: 14)),
-                  ]),
-            ),
-            const SizedBox(height: 18),
-            Text('Tariflar', style: text.titleLarge),
-            const SizedBox(height: 10),
-            for (final p in plans)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
+                      free
+                          ? 'Barcha imkoniyatlar ochiq. To‘lov tizimi tayyor, lekin hozircha pul olinmaydi — tariflar ishga tushishidan oldin xabar beramiz.'
+                          : current.tagline,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        height: 1.4,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text('Tariflar', style: text.titleLarge),
+              const SizedBox(height: 10),
+              for (final p in plans)
+                GlassCard(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(children: [
-                          Expanded(
-                              child: Text(p.name,
-                                  style: text.titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.w800))),
-                          if (p.id == current.id)
-                            Chip(
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                p.name,
+                                style: text.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                            if (p.id == current.id)
+                              Chip(
                                 label: const Text('Joriy'),
-                                avatar: Icon(Icons.check_circle,
-                                    size: 18, color: scheme.primary)),
-                        ]),
+                                avatar: Icon(
+                                  Icons.check_circle,
+                                  size: 18,
+                                  color: scheme.primary,
+                                ),
+                              ),
+                          ],
+                        ),
                         Text(p.tagline, style: text.bodySmall),
                         const SizedBox(height: 8),
                         for (final f in p.features)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 3),
                             child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Icon(Icons.check,
-                                      size: 18, color: scheme.primary),
-                                  const SizedBox(width: 8),
-                                  Expanded(child: Text(f)),
-                                ]),
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.check,
+                                  size: 18,
+                                  color: scheme.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(child: Text(f)),
+                              ],
+                            ),
                           ),
                         const SizedBox(height: 8),
-                        Text(planPrice(p),
-                            style: text.titleSmall
-                                ?.copyWith(color: scheme.primary)),
-                      ]),
-                ),
-              ),
-            const SizedBox(height: 8),
-            Text('To‘lov usullari', style: text.titleLarge),
-            const SizedBox(height: 10),
-            Wrap(spacing: 10, runSpacing: 10, children: [
-              for (final m in paymentMethods)
-                Container(
-                  width: 168,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                      color: scheme.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: scheme.outlineVariant)),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(m.icon, color: scheme.primary),
-                        const SizedBox(height: 8),
-                        Text(m.name,
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w700)),
                         Text(
+                          planPrice(p),
+                          style: text.titleSmall?.copyWith(
+                            color: scheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 8),
+              Text('To‘lov usullari', style: text.titleLarge),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final m in paymentMethods)
+                    Container(
+                      width: 168,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: scheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: scheme.outlineVariant),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(m.icon, color: scheme.primary),
+                          const SizedBox(height: 8),
+                          Text(
+                            m.name,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          Text(
                             BillingConfig.paymentsEnabled
                                 ? 'Mavjud'
                                 : 'Tez orada',
-                            style: text.bodySmall),
-                      ]),
-                ),
-            ]),
-            const SizedBox(height: 14),
-            Text(
+                            style: text.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
                 apple
                     ? 'App Store orqali o‘rnatilgan iPhone, iPad va Mac versiyalarida obuna Apple orqali to‘lanadi.'
                     : 'To‘lovlar Click, Payme, Uzum Bank yoki bank kartasi orqali qabul qilinadi.',
-                style: text.bodySmall),
-            const SizedBox(height: 18),
-            Text('To‘lovlar tarixi', style: text.titleLarge),
-            const SizedBox(height: 6),
-            if ((store.subscription['payments'] as List? ?? const []).isEmpty)
-              Text('Hali to‘lov yo‘q.', style: text.bodySmall)
-            else
-              for (final p in store.subscription['payments'] as List)
-                ListTile(
+                style: text.bodySmall,
+              ),
+              const SizedBox(height: 18),
+              Text('To‘lovlar tarixi', style: text.titleLarge),
+              const SizedBox(height: 6),
+              if ((store.subscription['payments'] as List? ?? const []).isEmpty)
+                Text('Hali to‘lov yo‘q.', style: text.bodySmall)
+              else
+                for (final p in store.subscription['payments'] as List)
+                  GlassControl(
+                      child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.receipt_outlined),
                     title: Text('${p['plan']} • ${p['amount']} so‘m'),
-                    subtitle: Text('${p['date']} • ${p['method']}')),
-          ]),
+                    subtitle: Text('${p['date']} • ${p['method']}'),
+                  )),
+            ],
+          ),
         ),
       ),
     );

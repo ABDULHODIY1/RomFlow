@@ -31,8 +31,11 @@ Pick the one that matches the bars that cross the whole frame.
 
   /// The window in [image] (PNG bytes) as a grid. Throws with a message
   /// the workshop can act on.
-  static Future<WindowGrid> read(Uint8List image,
-          {required String apiKey, HttpClient? client}) async =>
+  static Future<WindowGrid> read(
+    Uint8List image, {
+    required String apiKey,
+    HttpClient? client,
+  }) async =>
       _grid(await _ask(body(image), apiKey, client));
 
   static const _openingSystem =
@@ -47,12 +50,16 @@ Find the opening in this photo where a new window or door will be installed: the
 
   /// The four corners (top-left first, as fractions of the photo) of the
   /// opening a window or door goes into.
-  static Future<List<(double, double)>> findOpening(Uint8List image,
-      {required String apiKey, HttpClient? client}) async {
+  static Future<List<(double, double)>> findOpening(
+    Uint8List image, {
+    required String apiKey,
+    HttpClient? client,
+  }) async {
     final answer = await _ask(
-        _request(image, _openingSystem, _openingPrompt, openingSchema),
-        apiKey,
-        client);
+      _request(image, _openingSystem, _openingPrompt, openingSchema),
+      apiKey,
+      client,
+    );
     return openingCorners(answer);
   }
 
@@ -66,16 +73,16 @@ Find the opening in this photo where a new window or door will be installed: the
           'type': 'object',
           'properties': {
             'x': {'type': 'number'},
-            'y': {'type': 'number'}
+            'y': {'type': 'number'},
           },
           'required': ['x', 'y'],
-          'additionalProperties': false
-        }
+          'additionalProperties': false,
+        },
       },
-      'notes': {'type': 'string'}
+      'notes': {'type': 'string'},
     },
     'required': ['found', 'corners', 'notes'],
-    'additionalProperties': false
+    'additionalProperties': false,
   };
 
   static List<(double, double)> openingCorners(Map answer) {
@@ -83,19 +90,23 @@ Find the opening in this photo where a new window or door will be installed: the
     if (answer['found'] == false || corners is! List || corners.length != 4) {
       final notes = answer['notes'];
       throw AiException(
-          'Rasmda o‘rin topilmadi${notes is String && notes.isNotEmpty ? ': $notes' : ''}');
+        'Rasmda o‘rin topilmadi${notes is String && notes.isNotEmpty ? ': $notes' : ''}',
+      );
     }
     return [
       for (final c in corners)
         (
           ((c as Map)['x'] as num).toDouble().clamp(0.0, 1.0),
-          (c['y'] as num).toDouble().clamp(0.0, 1.0)
-        )
+          (c['y'] as num).toDouble().clamp(0.0, 1.0),
+        ),
     ];
   }
 
   static Future<Map> _ask(
-      Map<String, dynamic> body, String apiKey, HttpClient? client) async {
+    Map<String, dynamic> body,
+    String apiKey,
+    HttpClient? client,
+  ) async {
     if (apiKey.trim().isEmpty) {
       throw const AiException('AI kaliti kiritilmagan: Sozlamalar → AI kamera');
     }
@@ -111,8 +122,9 @@ Find the opening in this photo where a new window or door will be installed: the
         // recommended fallback model.
         ..set('anthropic-beta', 'server-side-fallback-2026-07-01');
       request.add(utf8.encode(jsonEncode(body)));
-      final response =
-          await request.close().timeout(const Duration(seconds: 150));
+      final response = await request.close().timeout(
+            const Duration(seconds: 150),
+          );
       final text = await utf8.decodeStream(response);
       return parseAnswer(response.statusCode, text);
     } on SocketException {
@@ -128,7 +140,11 @@ Find the opening in this photo where a new window or door will be installed: the
       _request(image, _system, _prompt, windowGridSchema);
 
   static Map<String, dynamic> _request(
-          Uint8List image, String system, String prompt, Map schema) =>
+    Uint8List image,
+    String system,
+    String prompt,
+    Map schema,
+  ) =>
       {
         'model': model,
         'max_tokens': 16000,
@@ -152,7 +168,7 @@ Find the opening in this photo where a new window or door will be installed: the
               },
               {'type': 'text', 'text': prompt},
             ],
-          }
+          },
         ],
       };
 
@@ -163,7 +179,8 @@ Find the opening in this photo where a new window or door will be installed: the
   static WindowGrid _grid(Map answer) {
     if (answer['isWindow'] == false) {
       throw AiException(
-          'Rasmda rom topilmadi${answer['notes'] is String && (answer['notes'] as String).isNotEmpty ? ': ${answer['notes']}' : ''}');
+        'Rasmda rom topilmadi${answer['notes'] is String && (answer['notes'] as String).isNotEmpty ? ': ${answer['notes']}' : ''}',
+      );
     }
     return WindowGrid.fromJson(answer);
   }
@@ -176,11 +193,13 @@ Find the opening in this photo where a new window or door will be installed: the
     }
     if (status == 429) {
       throw const AiException(
-          'So‘rovlar ko‘p: bir daqiqadan keyin qayta urinib ko‘ring');
+        'So‘rovlar ko‘p: bir daqiqadan keyin qayta urinib ko‘ring',
+      );
     }
     if (status >= 500) {
       throw const AiException(
-          'AI xizmati band: birozdan keyin qayta urinib ko‘ring');
+        'AI xizmati band: birozdan keyin qayta urinib ko‘ring',
+      );
     }
     final Map data;
     try {
@@ -191,19 +210,22 @@ Find the opening in this photo where a new window or door will be installed: the
     if (status != 200) {
       final message = (data['error'] as Map?)?['message'];
       throw AiException(
-          'AI xatosi ($status)${message == null ? '' : ': $message'}');
+        'AI xatosi ($status)${message == null ? '' : ': $message'}',
+      );
     }
     switch (data['stop_reason']) {
       case 'refusal':
         throw const AiException(
-            'AI bu rasmni o‘qimadi. Boshqa rasm bilan urinib ko‘ring');
+          'AI bu rasmni o‘qimadi. Boshqa rasm bilan urinib ko‘ring',
+        );
       case 'max_tokens':
         throw const AiException(
-            'AI javobi to‘liq kelmadi. Qayta urinib ko‘ring');
+          'AI javobi to‘liq kelmadi. Qayta urinib ko‘ring',
+        );
     }
     final blocks = [
       for (final b in data['content'] as List? ?? const [])
-        if (b is Map && b['type'] == 'text') b['text'] as String
+        if (b is Map && b['type'] == 'text') b['text'] as String,
     ];
     if (blocks.isEmpty) throw const AiException('AI javob bermadi');
     try {

@@ -38,8 +38,9 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
   bool busy = false;
   final _m2 = <String, num?>{};
 
-  void say(Object text) => ScaffoldMessenger.of(context)
-      .showSnackBar(SnackBar(content: Text(_clean(text))));
+  void say(Object text) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_clean(text))));
 
   /// The profile a system is priced with: the workshop's own, if it has one.
   Json profileOf(ManufacturerCatalog c, ProfileSystem system) {
@@ -107,14 +108,17 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                   ? const Padding(
                       padding: EdgeInsets.all(14),
                       child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2)))
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
                   : IconButton(
                       key: const ValueKey('catalog-refresh'),
                       tooltip: 'Katalogni yangilash',
                       onPressed: refresh,
-                      icon: const Icon(Icons.sync)),
+                      icon: const Icon(Icons.sync),
+                    ),
             ],
           ),
           body: c == null
@@ -148,112 +152,144 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
     final scheme = Theme.of(context).colorScheme,
         text = Theme.of(context).textTheme;
     final rate = s.usdRate > 0 ? s.usdRate : c.referenceUsdRate;
-    return Card(
+    return GlassCard(
       key: const ValueKey('mf-summary'),
       color: scheme.primaryContainer,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('O‘zbekiston zavodlari narxi',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'O‘zbekiston zavodlari narxi',
               style: text.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: scheme.onPrimaryContainer)),
-          const SizedBox(height: 4),
-          Text(
+                fontWeight: FontWeight.w800,
+                color: scheme.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
               '${c.manufacturers.length} ta ishlab chiqaruvchi • ${c.systems.length} ta profil tizimi',
-              style:
-                  text.bodyMedium?.copyWith(color: scheme.onPrimaryContainer)),
-          const SizedBox(height: 2),
-          Text(
+              style: text.bodyMedium?.copyWith(
+                color: scheme.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
               'Katalog ${_date(c.date)} • 1 \$ = ${money(rate)}${s.usdRate > 0 ? '' : ' (taxminiy kurs)'}',
-              style:
-                  text.bodySmall?.copyWith(color: scheme.onPrimaryContainer)),
-          const SizedBox(height: 8),
-          Text(
+              style: text.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
+            ),
+            const SizedBox(height: 8),
+            Text(
               '1 m² narxi — 1400 × 1400 mm, 2 bo‘limli, bitta ochiladigan rom; sizning ustamangiz bilan. Narxlar ochiq bozor e’lonlaridan olingan taxminiy narx: diler narxini kiritsangiz, sizniki ishlatiladi.',
-              style:
-                  text.bodySmall?.copyWith(color: scheme.onPrimaryContainer)),
-        ]),
+              style: text.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget filters() => SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Row(children: [
-          for (final (id, name) in const [
-            ('all', 'Hammasi'),
-            ('aluminium', 'Alyuminiy'),
-            ('pvc', 'PVX'),
-            ('thermal', 'Termo alyuminiy'),
-            ('sliding', 'Surilma'),
-          ])
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: ChoiceChip(
-                key: ValueKey('mf-filter-$id'),
-                label: Text(name),
-                selected: filter == id,
-                onSelected: (_) => setState(() => filter = id),
+        child: Row(
+          children: [
+            for (final (id, name) in const [
+              ('all', 'Hammasi'),
+              ('aluminium', 'Alyuminiy'),
+              ('pvc', 'PVX'),
+              ('thermal', 'Termo alyuminiy'),
+              ('sliding', 'Surilma'),
+            ])
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: GlassControl(
+                  child: ChoiceChip(
+                    key: ValueKey('mf-filter-$id'),
+                    label: Text(name),
+                    selected: filter == id,
+                    onSelected: (_) => setState(() => filter = id),
+                  ),
+                ),
               ),
-            ),
-        ]),
+          ],
+        ),
       );
 
   Widget makerCard(ManufacturerCatalog c, Manufacturer m) {
     final scheme = Theme.of(context).colorScheme,
         text = Theme.of(context).textTheme;
-    final systems = [...c.systemsOf(m.id).where(shown)]..sort((a, b) =>
-        (squareMetre(c, a) ?? double.infinity)
-            .compareTo(squareMetre(c, b) ?? double.infinity));
-    return Card(
+    final systems = [...c.systemsOf(m.id).where(shown)]..sort(
+        (a, b) => (squareMetre(c, a) ?? double.infinity).compareTo(
+          squareMetre(c, b) ?? double.infinity,
+        ),
+      );
+    return GlassCard(
       key: ValueKey('maker-${m.id}'),
       margin: const EdgeInsets.only(top: 10),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            CircleAvatar(
-                radius: 18,
-                backgroundColor: scheme.secondaryContainer,
-                child: Text(m.name.characters.first,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: scheme.secondaryContainer,
+                  child: Text(
+                    m.name.characters.first,
                     style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: scheme.onSecondaryContainer))),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(m.name,
-                        style: text.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w800)),
-                    Text(_makerLine(m),
-                        style: text.bodySmall
-                            ?.copyWith(color: scheme.onSurfaceVariant)),
-                  ]),
+                      fontWeight: FontWeight.w800,
+                      color: scheme.onSecondaryContainer,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        m.name,
+                        style: text.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        _makerLine(m),
+                        style: text.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (m.website.isNotEmpty)
+                  IconButton(
+                    tooltip: 'Sayt havolasini nusxalash',
+                    onPressed: () => copy(m.website),
+                    icon: const Icon(Icons.link),
+                  ),
+              ],
             ),
-            if (m.website.isNotEmpty)
-              IconButton(
-                  tooltip: 'Sayt havolasini nusxalash',
-                  onPressed: () => copy(m.website),
-                  icon: const Icon(Icons.link)),
-          ]),
-          if (m.about.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8, 8, 0),
-              child: Text(m.about, style: text.bodySmall),
-            ),
-          if (systems.isEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: TextButton.icon(
+            if (m.about.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 8, 8, 0),
+                child: Text(m.about, style: text.bodySmall),
+              ),
+            if (systems.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: TextButton.icon(
                   onPressed: () => openPriceSources(context, s),
                   icon: const Icon(Icons.cloud_sync_outlined),
-                  label: const Text('Diler narxini kiritish')),
-            ),
-          for (final system in systems) systemRow(c, system),
-        ]),
+                  label: const Text('Diler narxini kiritish'),
+                ),
+              ),
+            for (final system in systems) systemRow(c, system),
+          ],
+        ),
       ),
     );
   }
@@ -272,49 +308,68 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
         child: Ink(
           padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
           decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest.withValues(alpha: .5),
-              borderRadius: BorderRadius.circular(12)),
-          child: Row(children: [
-            Expanded(
-              child: Column(
+            color: scheme.surfaceContainerHighest.withValues(alpha: .5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(system.name,
-                        style: text.titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w700)),
+                    Text(
+                      system.name,
+                      style: text.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(system.specs,
-                        style: text.bodySmall
-                            ?.copyWith(color: scheme.onSurfaceVariant)),
+                    Text(
+                      system.specs,
+                      style: text.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Text(
-                        m2 == null
-                            ? 'Hisoblanmadi'
-                            : '≈ ${money((m2 / 1000).round() * 1000)}/m²',
-                        key: ValueKey('m2-${system.id}'),
-                        style: text.titleSmall?.copyWith(
-                            color: scheme.primary,
-                            fontWeight: FontWeight.w800)),
+                      m2 == null
+                          ? 'Hisoblanmadi'
+                          : '≈ ${money((m2 / 1000).round() * 1000)}/m²',
+                      key: ValueKey('m2-${system.id}'),
+                      style: text.titleSmall?.copyWith(
+                        color: scheme.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     for (final market in system.market)
-                      Text('Bozor: ${_marketText(market)} — ${market.source}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: text.bodySmall
-                              ?.copyWith(color: scheme.onSurfaceVariant)),
-                  ]),
-            ),
-            used
-                ? Tooltip(
-                    message: 'Profillar ro‘yxatida bor',
-                    child: Icon(Icons.check_circle,
+                      Text(
+                        'Bozor: ${_marketText(market)} — ${market.source}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              used
+                  ? Tooltip(
+                      message: 'Profillar ro‘yxatida bor',
+                      child: Icon(
+                        Icons.check_circle,
                         key: ValueKey('mf-used-${system.id}'),
-                        color: scheme.primary))
-                : IconButton.filledTonal(
-                    key: ValueKey('mf-add-${system.id}'),
-                    tooltip: 'Profillar ro‘yxatiga qo‘shish',
-                    onPressed: () => add(system),
-                    icon: const Icon(Icons.add)),
-          ]),
+                        color: scheme.primary,
+                      ),
+                    )
+                  : IconButton.filledTonal(
+                      key: ValueKey('mf-add-${system.id}'),
+                      tooltip: 'Profillar ro‘yxatiga qo‘shish',
+                      onPressed: () => add(system),
+                      icon: const Icon(Icons.add),
+                    ),
+            ],
+          ),
         ),
       ),
     );
@@ -325,7 +380,8 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
     final profile = profileOf(c, system);
     final prices = Map<String, dynamic>.from(recipeFor(profile)['prices']);
     final usd = Map<String, dynamic>.from(
-        profile['drawingRecipe']?['usdPrices'] ?? const {});
+      profile['drawingRecipe']?['usdPrices'] ?? const {},
+    );
     await showGlassSheet<void>(
       context: context,
       showDragHandle: true,
@@ -337,30 +393,36 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
               Text(system.name, style: text.titleLarge),
-              Text('${c.maker(system.manufacturer).name} • ${system.specs}',
-                  style: text.bodySmall),
+              Text(
+                '${c.maker(system.manufacturer).name} • ${system.specs}',
+                style: text.bodySmall,
+              ),
               if (system.note.isNotEmpty)
                 Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(system.note, style: text.bodySmall)),
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(system.note, style: text.bodySmall),
+                ),
               const SizedBox(height: 12),
               for (final k in const [
                 'frame',
                 'sash',
                 'mullion',
                 'bead',
-                'glass'
+                'glass',
               ])
-                ListTile(
+                GlassControl(
+                    child: ListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   title: Text(materialNames[k] ?? k),
                   trailing: Text(
-                      '${money(prices[k])}${k == 'glass' ? '/m²' : '/m'}${usd[k] is num ? '  (${usd[k]} \$)' : ''}'),
-                ),
+                    '${money(prices[k])}${k == 'glass' ? '/m²' : '/m'}${usd[k] is num ? '  (${usd[k]} \$)' : ''}',
+                  ),
+                )),
               const SizedBox(height: 8),
               for (final market in system.market)
-                ListTile(
+                GlassControl(
+                    child: ListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.storefront_outlined),
@@ -371,17 +433,20 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                       : IconButton(
                           tooltip: 'Havolani nusxalash',
                           onPressed: () => copy(market.url),
-                          icon: const Icon(Icons.copy, size: 20)),
-                ),
+                          icon: const Icon(Icons.copy, size: 20),
+                        ),
+                )),
               if (system.catalogUrl.isNotEmpty)
                 TextButton.icon(
-                    onPressed: () => copy(system.catalogUrl),
-                    icon: const Icon(Icons.link),
-                    label: const Text('Zavod sahifasi havolasi')),
+                  onPressed: () => copy(system.catalogUrl),
+                  icon: const Icon(Icons.link),
+                  label: const Text('Zavod sahifasi havolasi'),
+                ),
               const SizedBox(height: 8),
               Text(
-                  'Narxni o‘zgartirish: Profillar → “Narxlarni tahrirlash” yoki diler jadvalidan yuklang. Siz kiritgan narx katalog yangilanganda ham saqlanadi.',
-                  style: text.bodySmall),
+                'Narxni o‘zgartirish: Profillar → “Narxlarni tahrirlash” yoki diler jadvalidan yuklang. Siz kiritgan narx katalog yangilanganda ham saqlanadi.',
+                style: text.bodySmall,
+              ),
             ],
           ),
         ),
@@ -392,21 +457,26 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
   Widget materials(ManufacturerCatalog c) {
     if (c.materialsMarket.isEmpty) return const SizedBox.shrink();
     final text = Theme.of(context).textTheme;
-    return Card(
+    return GlassCard(
       margin: const EdgeInsets.only(top: 14),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Materiallar bozori', style: text.titleMedium),
-          for (final m in c.materialsMarket)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text('${m.what}: ${_marketText(m)} — ${m.source}',
-                  style: text.bodySmall),
-            ),
-          const SizedBox(height: 8),
-          Text(c.note, style: text.bodySmall),
-        ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Materiallar bozori', style: text.titleMedium),
+            for (final m in c.materialsMarket)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  '${m.what}: ${_marketText(m)} — ${m.source}',
+                  style: text.bodySmall,
+                ),
+              ),
+            const SizedBox(height: 8),
+            Text(c.note, style: text.bodySmall),
+          ],
+        ),
       ),
     );
   }
@@ -415,16 +485,25 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
 /// The drawing on the desk priced with every manufacturer's system,
 /// cheapest first. Returns the profile id the workshop picks, adding the
 /// system to its profiles when needed.
-Future<String?> showPriceComparison(BuildContext context, Store store,
-    {required DMap drawing,
-    required int quantity,
-    Map<String, dynamic> keep = const {},
-    String? currentProfile,
-    num? currentTotal}) async {
+Future<String?> showPriceComparison(
+  BuildContext context,
+  Store store, {
+  required DMap drawing,
+  required int quantity,
+  Map<String, dynamic> keep = const {},
+  String? currentProfile,
+  num? currentTotal,
+}) async {
   final catalog = store.catalog;
   if (catalog == null) return null;
-  final quotes = compareSystems(catalog, store.profiles, drawing, quantity,
-      keep: keep, usdRate: store.usdRate);
+  final quotes = compareSystems(
+    catalog,
+    store.profiles,
+    drawing,
+    quantity,
+    keep: keep,
+    usdRate: store.usdRate,
+  );
   final currentData =
       store.profiles.where((p) => p['id'] == currentProfile).firstOrNull;
   final current = currentData?['catalogId'];
@@ -433,8 +512,14 @@ Future<String?> showPriceComparison(BuildContext context, Store store,
     isScrollControlled: true,
     showDragHandle: true,
     builder: (context) => _ComparisonSheet(
-        catalog, quotes, drawing, quantity, current,
-        currentName: currentData?['name'], currentTotal: currentTotal),
+      catalog,
+      quotes,
+      drawing,
+      quantity,
+      current,
+      currentName: currentData?['name'],
+      currentTotal: currentTotal,
+    ),
   );
   if (picked == null) return null;
   return store.addCatalogProfile(picked.id);
@@ -451,8 +536,14 @@ class _ComparisonSheet extends StatefulWidget {
   final String? currentName;
   final num? currentTotal;
   const _ComparisonSheet(
-      this.catalog, this.quotes, this.drawing, this.quantity, this.current,
-      {this.currentName, this.currentTotal});
+    this.catalog,
+    this.quotes,
+    this.drawing,
+    this.quantity,
+    this.current, {
+    this.currentName,
+    this.currentTotal,
+  });
   @override
   State<_ComparisonSheet> createState() => _ComparisonSheetState();
 }
@@ -466,7 +557,7 @@ class _ComparisonSheetState extends State<_ComparisonSheet> {
         text = Theme.of(context).textTheme;
     final shown = [
       for (final q in widget.quotes)
-        if (filter == 'all' || q.system.material == filter) q
+        if (filter == 'all' || q.system.material == filter) q,
     ];
     final cheapest = shown
         .where((q) => q.total != null)
@@ -475,102 +566,130 @@ class _ComparisonSheetState extends State<_ComparisonSheet> {
     return SafeArea(
       child: SizedBox(
         height: MediaQuery.sizeOf(context).height * .85,
-        child: Column(children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Zavodlar narxi', style: text.titleLarge),
-              Text(
-                  '${widget.drawing['widthMm']} × ${widget.drawing['heightMm']} mm × ${widget.quantity} dona • ${widget.quotes.length} ta tizim • arzonidan',
-                  style: text.bodySmall),
-              if (widget.current == null &&
-                  widget.currentName != null &&
-                  widget.currentTotal != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
-                      'Hozirgi: ${widget.currentName} — ${money(widget.currentTotal)}',
-                      key: const ValueKey('compare-current'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.bodyMedium
-                          ?.copyWith(fontWeight: FontWeight.w700)),
-                ),
-              const SizedBox(height: 8),
-              Wrap(spacing: 8, children: [
-                for (final (id, name) in const [
-                  ('all', 'Hammasi'),
-                  ('aluminium', 'Alyuminiy'),
-                  ('pvc', 'PVX'),
-                ])
-                  ChoiceChip(
-                      key: ValueKey('compare-filter-$id'),
-                      label: Text(name),
-                      selected: filter == id,
-                      onSelected: (_) => setState(() => filter = id)),
-              ]),
-            ]),
-          ),
-          Expanded(
-            child: ListView.builder(
-              key: const ValueKey('compare-list'),
-              padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
-              itemCount: shown.length,
-              itemBuilder: (context, i) {
-                final q = shown[i];
-                final isCurrent = q.system.id == widget.current;
-                final extra =
-                    q.total == null || cheapest == null || cheapest == 0
-                        ? null
-                        : ((q.total! / cheapest - 1) * 100).round();
-                return Card(
-                  color: isCurrent ? scheme.primaryContainer : null,
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    key: ValueKey('compare-${q.system.id}'),
-                    enabled: q.total != null,
-                    onTap: () => Navigator.pop(context, q.system),
-                    leading: CircleAvatar(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Zavodlar narxi', style: text.titleLarge),
+                  Text(
+                    '${widget.drawing['widthMm']} × ${widget.drawing['heightMm']} mm × ${widget.quantity} dona • ${widget.quotes.length} ta tizim • arzonidan',
+                    style: text.bodySmall,
+                  ),
+                  if (widget.current == null &&
+                      widget.currentName != null &&
+                      widget.currentTotal != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        'Hozirgi: ${widget.currentName} — ${money(widget.currentTotal)}',
+                        key: const ValueKey('compare-current'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final (id, name) in const [
+                        ('all', 'Hammasi'),
+                        ('aluminium', 'Alyuminiy'),
+                        ('pvc', 'PVX'),
+                      ])
+                        GlassControl(
+                          child: ChoiceChip(
+                            key: ValueKey('compare-filter-$id'),
+                            label: Text(name),
+                            selected: filter == id,
+                            onSelected: (_) => setState(() => filter = id),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                key: const ValueKey('compare-list'),
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+                itemCount: shown.length,
+                itemBuilder: (context, i) {
+                  final q = shown[i];
+                  final isCurrent = q.system.id == widget.current;
+                  final extra =
+                      q.total == null || cheapest == null || cheapest == 0
+                          ? null
+                          : ((q.total! / cheapest - 1) * 100).round();
+                  return GlassCard(
+                    color: isCurrent ? scheme.primaryContainer : null,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: GlassControl(
+                        child: ListTile(
+                      key: ValueKey('compare-${q.system.id}'),
+                      enabled: q.total != null,
+                      onTap: () => Navigator.pop(context, q.system),
+                      leading: CircleAvatar(
                         radius: 15,
                         backgroundColor: i == 0 && q.total != null
                             ? Colors.green.shade600
                             : scheme.surfaceContainerHighest,
-                        child: Text('${i + 1}',
-                            style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                color: i == 0 && q.total != null
-                                    ? Colors.white
-                                    : scheme.onSurface))),
-                    title: Text(q.system.name,
-                        style: const TextStyle(fontWeight: FontWeight.w700)),
-                    subtitle: Text(
+                        child: Text(
+                          '${i + 1}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: i == 0 && q.total != null
+                                ? Colors.white
+                                : scheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        q.system.name,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle: Text(
                         q.error ??
                             '${widget.catalog.maker(q.system.manufacturer).name} • ${q.system.specs}${isCurrent ? ' • hozirgi' : ''}',
                         maxLines: 2,
-                        overflow: TextOverflow.ellipsis),
-                    trailing: q.total == null
-                        ? null
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                                Text(money(q.total),
-                                    style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800)),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: q.total == null
+                          ? null
+                          : Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  money(q.total),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
                                 if (extra != null && extra > 0)
-                                  Text('+$extra%',
-                                      style: text.bodySmall?.copyWith(
-                                          color: scheme.onSurfaceVariant)),
-                              ]),
-                  ),
-                );
-              },
+                                  Text(
+                                    '+$extra%',
+                                    style: text.bodySmall?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                    )),
+                  );
+                },
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }

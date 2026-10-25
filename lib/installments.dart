@@ -1,3 +1,4 @@
+import 'adaptive_ui.dart';
 import 'package:flutter/material.dart';
 import 'calculator.dart';
 import 'dialogs.dart';
@@ -25,9 +26,9 @@ List<(Json, InstallmentState)> installmentRows(Json q, {DateTime? now}) {
               ? InstallmentState.paid
               : DateTime.parse(row['due']).isBefore(today)
                   ? InstallmentState.late
-                  : InstallmentState.waiting
+                  : InstallmentState.waiting,
         );
-      }()
+      }(),
   ];
 }
 
@@ -42,51 +43,64 @@ class InstallmentCard extends StatelessWidget {
     final ok = await showSettledDialog<bool>(
       context: context,
       builder: (c) => StatefulBuilder(
-        builder: (c, set) => AlertDialog(
+        builder: (c, set) => GlassAlertDialog(
           title: const Text('Bo‘lib to‘lash'),
-          content: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text('Qoldiq: ${money(quote['balance'])}'),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<int>(
-              initialValue: months,
-              decoration: const InputDecoration(labelText: 'Necha oyga'),
-              items: [
-                for (final m in [2, 3, 4, 6, 9, 12, 18, 24])
-                  DropdownMenuItem(
-                      value: m,
-                      child: Text(
-                          '$m oy • oyiga ~${money((quote['balance'] as num) / m)}')),
-              ],
-              onChanged: (v) => set(() => months = v!),
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text('Birinchi to‘lov: ${uzbekDay(first)}'),
-              trailing: const Icon(Icons.edit_calendar_outlined),
-              onTap: () async {
-                final d = await showDatePicker(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Qoldiq: ${money(quote['balance'])}'),
+              const SizedBox(height: 12),
+              GlassControl(
+                child: DropdownButtonFormField<int>(
+                  initialValue: months,
+                  decoration: const InputDecoration(labelText: 'Necha oyga'),
+                  items: [
+                    for (final m in [2, 3, 4, 6, 9, 12, 18, 24])
+                      DropdownMenuItem(
+                        value: m,
+                        child: Text(
+                          '$m oy • oyiga ~${money((quote['balance'] as num) / m)}',
+                        ),
+                      ),
+                  ],
+                  onChanged: (v) => set(() => months = v!),
+                ),
+              ),
+              GlassControl(
+                  child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text('Birinchi to‘lov: ${uzbekDay(first)}'),
+                trailing: const Icon(Icons.edit_calendar_outlined),
+                onTap: () async {
+                  final d = await showDatePicker(
                     context: c,
                     initialDate: first,
                     firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 400)));
-                if (d != null) set(() => first = d);
-              },
-            ),
-          ]),
+                    lastDate: DateTime.now().add(const Duration(days: 400)),
+                  );
+                  if (d != null) set(() => first = d);
+                },
+              )),
+            ],
+          ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(c, false),
-                child: const Text('Bekor qilish')),
+              onPressed: () => Navigator.pop(c, false),
+              child: const Text('Bekor qilish'),
+            ),
             FilledButton(
-                onPressed: () => Navigator.pop(c, true),
-                child: const Text('Jadval tuzish')),
+              onPressed: () => Navigator.pop(c, true),
+              child: const Text('Jadval tuzish'),
+            ),
           ],
         ),
       ),
     );
     if (ok == true && context.mounted) {
       await guarded(
-          context, () => store.setPaymentSchedule(quote['id'], months, first));
+        context,
+        () => store.setPaymentSchedule(quote['id'], months, first),
+      );
     }
   }
 
@@ -107,28 +121,39 @@ class InstallmentCard extends StatelessWidget {
         ),
       );
     }
-    return Card(
+    return GlassCard(
       margin: const EdgeInsets.only(top: 14),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            const Icon(Icons.calendar_month_outlined),
-            const SizedBox(width: 8),
-            Expanded(
-                child: Text('Bo‘lib to‘lash • ${rows.length} oy',
-                    style: Theme.of(context).textTheme.titleMedium)),
-            IconButton(
-                tooltip: 'Jadvalni olib tashlash',
-                onPressed: () => guarded(
-                    context, () => store.clearPaymentSchedule(quote['id'])),
-                icon: const Icon(Icons.delete_outline)),
-          ]),
-          for (final (row, state) in rows)
-            ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.calendar_month_outlined),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Bo‘lib to‘lash • ${rows.length} oy',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Jadvalni olib tashlash',
+                  onPressed: () => guarded(
+                    context,
+                    () => store.clearPaymentSchedule(quote['id']),
+                  ),
+                  icon: const Icon(Icons.delete_outline),
+                ),
+              ],
+            ),
+            for (final (row, state) in rows)
+              GlassControl(
+                  child: ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
                   switch (state) {
                     InstallmentState.paid => Icons.check_circle,
                     InstallmentState.late => Icons.error_outline,
@@ -138,17 +163,21 @@ class InstallmentCard extends StatelessWidget {
                     InstallmentState.paid => const Color(0xff1f9d55),
                     InstallmentState.late => scheme.error,
                     InstallmentState.waiting => scheme.onSurfaceVariant,
-                  }),
-              title: Text(uzbekDay(DateTime.parse(row['due']))),
-              subtitle: Text(switch (state) {
-                InstallmentState.paid => 'To‘langan',
-                InstallmentState.late => 'Muddati o‘tgan',
-                InstallmentState.waiting => 'Kutilmoqda',
-              }),
-              trailing: Text(money(row['amount']),
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
-            ),
-        ]),
+                  },
+                ),
+                title: Text(uzbekDay(DateTime.parse(row['due']))),
+                subtitle: Text(switch (state) {
+                  InstallmentState.paid => 'To‘langan',
+                  InstallmentState.late => 'Muddati o‘tgan',
+                  InstallmentState.waiting => 'Kutilmoqda',
+                }),
+                trailing: Text(
+                  money(row['amount']),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              )),
+          ],
+        ),
       ),
     );
   }

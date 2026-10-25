@@ -5,7 +5,8 @@ import 'design_engine.dart';
 /// repository, so a newer one can be fetched without an app update.
 const manufacturersAsset = 'assets/manufacturers_uz.json';
 final manufacturersUrl = Uri.parse(
-    'https://raw.githubusercontent.com/z3wax/RomFlow/main/assets/manufacturers_uz.json');
+  'https://raw.githubusercontent.com/z3wax/RomFlow/main/assets/manufacturers_uz.json',
+);
 
 /// Systems a new workshop sees in its profile list from the start; the rest
 /// are one tap away in the catalog and in the price comparison.
@@ -27,8 +28,15 @@ const systemMaterials = {'aluminium': 'Alyuminiy', 'pvc': 'PVX'};
 class MarketPrice {
   final String what, currency, unit, source, url, seen;
   final num price;
-  const MarketPrice(this.what, this.price, this.currency, this.unit,
-      this.source, this.url, this.seen);
+  const MarketPrice(
+    this.what,
+    this.price,
+    this.currency,
+    this.unit,
+    this.source,
+    this.url,
+    this.seen,
+  );
 
   factory MarketPrice.fromJson(Map m) {
     final price = m['price'];
@@ -40,13 +48,14 @@ class MarketPrice {
       throw const FormatException('Valyuta UZS yoki USD bo‘lsin');
     }
     return MarketPrice(
-        '${m['what'] ?? ''}',
-        price,
-        currency,
-        '${m['unit'] ?? 'm2'}',
-        '${m['source'] ?? ''}',
-        '${m['url'] ?? ''}',
-        '${m['seen'] ?? ''}');
+      '${m['what'] ?? ''}',
+      price,
+      currency,
+      '${m['unit'] ?? 'm2'}',
+      '${m['source'] ?? ''}',
+      '${m['url'] ?? ''}',
+      '${m['seen'] ?? ''}',
+    );
   }
 
   /// The price in so‘m at [usdRate].
@@ -56,8 +65,16 @@ class MarketPrice {
 class Manufacturer {
   final String id, name, group, city, role, website, about;
   final List<String> materials;
-  const Manufacturer(this.id, this.name, this.group, this.city, this.role,
-      this.website, this.about, this.materials);
+  const Manufacturer(
+    this.id,
+    this.name,
+    this.group,
+    this.city,
+    this.role,
+    this.website,
+    this.about,
+    this.materials,
+  );
 }
 
 class ProfileSystem {
@@ -69,20 +86,21 @@ class ProfileSystem {
   final Map<String, dynamic> recipe;
   final Map<String, num> usd;
   final List<MarketPrice> market;
-  const ProfileSystem(
-      {required this.id,
-      required this.manufacturer,
-      required this.name,
-      required this.material,
-      required this.uses,
-      required this.thermal,
-      required this.depthMm,
-      required this.chambers,
-      required this.recipe,
-      required this.usd,
-      required this.market,
-      this.catalogUrl = '',
-      this.note = ''});
+  const ProfileSystem({
+    required this.id,
+    required this.manufacturer,
+    required this.name,
+    required this.material,
+    required this.uses,
+    required this.thermal,
+    required this.depthMm,
+    required this.chambers,
+    required this.recipe,
+    required this.usd,
+    required this.market,
+    this.catalogUrl = '',
+    this.note = '',
+  });
 
   bool get sliding => uses.contains('sliding');
 
@@ -105,14 +123,15 @@ class ManufacturerCatalog {
   final List<Manufacturer> manufacturers;
   final List<ProfileSystem> systems;
   const ManufacturerCatalog(
-      this.version,
-      this.date,
-      this.note,
-      this.referenceUsdRate,
-      this.common,
-      this.materialsMarket,
-      this.manufacturers,
-      this.systems);
+    this.version,
+    this.date,
+    this.note,
+    this.referenceUsdRate,
+    this.common,
+    this.materialsMarket,
+    this.manufacturers,
+    this.systems,
+  );
 
   Manufacturer maker(String id) => manufacturers.firstWhere((m) => m.id == id);
   ProfileSystem? system(String id) {
@@ -124,7 +143,7 @@ class ManufacturerCatalog {
 
   List<ProfileSystem> systemsOf(String makerId) => [
         for (final s in systems)
-          if (s.manufacturer == makerId) s
+          if (s.manufacturer == makerId) s,
       ];
 
   /// Reads and checks a catalog. Every system must give a recipe the
@@ -165,20 +184,21 @@ class ManufacturerCatalog {
     List<Map> list(Object? raw) => raw is List
         ? [
             for (final x in raw)
-              if (x is Map) x
+              if (x is Map) x,
           ]
         : const [];
     final makers = [
       for (final m in list(data['manufacturers']))
         Manufacturer(
-            '${m['id'] ?? ''}',
-            '${m['name'] ?? ''}',
-            '${m['group'] ?? ''}',
-            '${m['city'] ?? ''}',
-            '${m['role'] ?? 'factory'}',
-            '${m['website'] ?? ''}',
-            '${m['about'] ?? ''}',
-            [for (final x in (m['materials'] as List? ?? const [])) '$x'])
+          '${m['id'] ?? ''}',
+          '${m['name'] ?? ''}',
+          '${m['group'] ?? ''}',
+          '${m['city'] ?? ''}',
+          '${m['role'] ?? 'factory'}',
+          '${m['website'] ?? ''}',
+          '${m['about'] ?? ''}',
+          [for (final x in (m['materials'] as List? ?? const [])) '$x'],
+        ),
     ];
     final ids = {for (final m in makers) m.id};
     if (makers.isEmpty ||
@@ -203,21 +223,22 @@ class ManufacturerCatalog {
         throw FormatException('Katalogdagi tizim xato: $id');
       }
       final system = ProfileSystem(
-          id: id,
-          manufacturer: '${s['manufacturer']}',
-          name: '${s['name']}',
-          material: material,
-          uses: [
-            for (final x in (s['uses'] as List? ?? const ['window'])) '$x'
-          ],
-          thermal: s['thermal'] == true,
-          depthMm: depth,
-          chambers: chambers as int?,
-          recipe: Map<String, dynamic>.from(s['recipe']),
-          usd: prices(s['usd']),
-          market: [for (final m in list(s['market'])) MarketPrice.fromJson(m)],
-          catalogUrl: '${s['catalogUrl'] ?? ''}',
-          note: '${s['estimateNote'] ?? ''}');
+        id: id,
+        manufacturer: '${s['manufacturer']}',
+        name: '${s['name']}',
+        material: material,
+        uses: [
+          for (final x in (s['uses'] as List? ?? const ['window'])) '$x',
+        ],
+        thermal: s['thermal'] == true,
+        depthMm: depth,
+        chambers: chambers as int?,
+        recipe: Map<String, dynamic>.from(s['recipe']),
+        usd: prices(s['usd']),
+        market: [for (final m in list(s['market'])) MarketPrice.fromJson(m)],
+        catalogUrl: '${s['catalogUrl'] ?? ''}',
+        note: '${s['estimateNote'] ?? ''}',
+      );
       for (final k in ['frame', 'sash', 'mullion']) {
         if ((system.usd[k] ?? 0) <= 0) {
           throw FormatException('${system.name}: $k narxi yo‘q');
@@ -227,16 +248,15 @@ class ManufacturerCatalog {
     }
     if (systems.isEmpty) throw const FormatException('Katalogda tizim yo‘q');
     final catalog = ManufacturerCatalog(
-        version,
-        '${data['date'] ?? ''}',
-        '${data['note'] ?? ''}',
-        rate,
-        common,
-        [
-          for (final m in list(data['materialsMarket'])) MarketPrice.fromJson(m)
-        ],
-        makers,
-        systems);
+      version,
+      '${data['date'] ?? ''}',
+      '${data['note'] ?? ''}',
+      rate,
+      common,
+      [for (final m in list(data['materialsMarket'])) MarketPrice.fromJson(m)],
+      makers,
+      systems,
+    );
     for (final s in systems) {
       validateRecipe(recipeFor(catalog.profileFor(s, rate)));
     }
@@ -346,9 +366,14 @@ class SystemQuote {
 /// Systems the workshop already uses are priced with its own prices; the
 /// desk's [comparisonKeys] settings in [keep] apply to all, so the
 /// comparison is like for like.
-List<SystemQuote> compareSystems(ManufacturerCatalog catalog,
-    List<Map<String, dynamic>> profiles, DMap drawing, int quantity,
-    {Map<String, dynamic> keep = const {}, num usdRate = 0}) {
+List<SystemQuote> compareSystems(
+  ManufacturerCatalog catalog,
+  List<Map<String, dynamic>> profiles,
+  DMap drawing,
+  int quantity, {
+  Map<String, dynamic> keep = const {},
+  num usdRate = 0,
+}) {
   // The estimator takes at most 100 pieces at once; a larger order is
   // priced per hundred and scaled.
   final priced = quantity.clamp(1, 100);
@@ -361,19 +386,36 @@ List<SystemQuote> compareSystems(ManufacturerCatalog catalog,
       if (keep[k] != null) recipe[k] = keep[k];
     }
     try {
-      final r = calculateDrawing(
-          {'drawing': drawing, 'recipe': recipe, 'quantity': priced}, profile);
-      out.add(SystemQuote(
-          s, profile, ((r['total'] as num) * quantity / priced).round(), null));
+      final r = calculateDrawing({
+        'drawing': drawing,
+        'recipe': recipe,
+        'quantity': priced,
+      }, profile);
+      out.add(
+        SystemQuote(
+          s,
+          profile,
+          ((r['total'] as num) * quantity / priced).round(),
+          null,
+        ),
+      );
     } catch (e) {
-      out.add(SystemQuote(
-          s, profile, null, '$e'.replaceFirst(RegExp(r'^\w*Exception: '), '')));
+      out.add(
+        SystemQuote(
+          s,
+          profile,
+          null,
+          '$e'.replaceFirst(RegExp(r'^\w*Exception: '), ''),
+        ),
+      );
     }
   }
-  out.sort((a, b) => a.total == null
-      ? (b.total == null ? 0 : 1)
-      : b.total == null
-          ? -1
-          : a.total!.compareTo(b.total!));
+  out.sort(
+    (a, b) => a.total == null
+        ? (b.total == null ? 0 : 1)
+        : b.total == null
+            ? -1
+            : a.total!.compareTo(b.total!),
+  );
   return out;
 }

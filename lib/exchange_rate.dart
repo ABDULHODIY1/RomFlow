@@ -41,8 +41,10 @@ OfficialRate parseOpenRate(String text) {
   // "Fri, 24 Oct 2026 00:02:31 +0000" → "24 Oct 2026".
   final when = '${(data as Map)['time_last_update_utc'] ?? ''}'.split(' ');
   return OfficialRate(
-      rate.toDouble(), when.length >= 4 ? when.sublist(1, 4).join(' ') : '',
-      source: 'open');
+    rate.toDouble(),
+    when.length >= 4 ? when.sublist(1, 4).join(' ') : '',
+    source: 'open',
+  );
 }
 
 /// Today's dollar rate: the Central Bank's, or the international one when
@@ -66,9 +68,9 @@ OfficialRate parseCbuRate(String text, {String currency = 'USD'}) {
   }
   for (final row in data is List ? data : [data]) {
     if (row is! Map || '${row['Ccy']}'.toUpperCase() != currency) continue;
-    final rate = double.tryParse('${row['Rate']}'
-            .replaceAll(RegExp(r'\s'), '')
-            .replaceAll(',', '.')),
+    final rate = double.tryParse(
+          '${row['Rate']}'.replaceAll(RegExp(r'\s'), '').replaceAll(',', '.'),
+        ),
         nominal = double.tryParse('${row['Nominal'] ?? 1}') ?? 1;
     if (rate == null || !rate.isFinite || rate <= 0 || nominal <= 0) break;
     return OfficialRate(rate / nominal, '${row['Date'] ?? ''}');

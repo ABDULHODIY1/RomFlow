@@ -14,22 +14,28 @@ bool get isDesktop =>
 /// Lets the user choose where to save [bytes]. Returns false if cancelled.
 Future<bool> saveFileAs(String name, String mime, List<int> bytes) async {
   if (!isDesktop) {
-    return await nativeFiles.invokeMethod<bool>(
-            'saveFile', {'name': name, 'mime': mime, 'bytes': bytes}) ==
+    return await nativeFiles.invokeMethod<bool>('saveFile', {
+          'name': name,
+          'mime': mime,
+          'bytes': bytes,
+        }) ==
         true;
   }
   final extension = name.contains('.') ? name.split('.').last : '';
-  final location =
-      await getSaveLocation(suggestedName: name, acceptedTypeGroups: [
-    XTypeGroup(label: extension.toUpperCase(), extensions: [
-      if (extension.isNotEmpty) extension
-    ], mimeTypes: [
-      mime
-    ], uniformTypeIdentifiers: [
-      if (extension == 'json') 'public.json',
-      if (extension == 'pdf') 'com.adobe.pdf',
-    ])
-  ]);
+  final location = await getSaveLocation(
+    suggestedName: name,
+    acceptedTypeGroups: [
+      XTypeGroup(
+        label: extension.toUpperCase(),
+        extensions: [if (extension.isNotEmpty) extension],
+        mimeTypes: [mime],
+        uniformTypeIdentifiers: [
+          if (extension == 'json') 'public.json',
+          if (extension == 'pdf') 'com.adobe.pdf',
+        ],
+      ),
+    ],
+  );
   if (location == null) return false;
   var path = location.path;
   if (extension.isNotEmpty && !path.toLowerCase().endsWith('.$extension')) {
@@ -41,13 +47,17 @@ Future<bool> saveFileAs(String name, String mime, List<int> bytes) async {
 
 /// Lets the user pick a UTF-8 text file (backup, price list). Null if
 /// cancelled.
-Future<String?> pickTextFile(
-    {String label = 'JSON', List<String> extensions = const ['json']}) async {
+Future<String?> pickTextFile({
+  String label = 'JSON',
+  List<String> extensions = const ['json'],
+}) async {
   if (!isDesktop) return nativeFiles.invokeMethod<String>('pickBackup');
-  final file = await openFile(acceptedTypeGroups: [
-    XTypeGroup(label: label, extensions: extensions),
-    const XTypeGroup(label: 'Barcha fayllar'),
-  ]);
+  final file = await openFile(
+    acceptedTypeGroups: [
+      XTypeGroup(label: label, extensions: extensions),
+      const XTypeGroup(label: 'Barcha fayllar'),
+    ],
+  );
   if (file == null) return null;
   if (await file.length() > 10 * 1024 * 1024) {
     throw Exception('Fayl 10 MBdan katta');
@@ -60,15 +70,23 @@ bool get canShareFiles => !Platform.isLinux;
 
 /// Shares a file; on Linux asks where to save it. Returns a short note
 /// for the user when something other than sharing happened.
-Future<String?> shareFile(String name, String mime, List<int> bytes,
-    {String? text, Rect? origin}) async {
+Future<String?> shareFile(
+  String name,
+  String mime,
+  List<int> bytes, {
+  String? text,
+  Rect? origin,
+}) async {
   if (!canShareFiles) {
     return await saveFileAs(name, mime, bytes) ? 'Fayl saqlandi' : null;
   }
   final dir = await getTemporaryDirectory(), file = File('${dir.path}/$name');
   await file.writeAsBytes(bytes, flush: true);
-  await Share.shareXFiles([XFile(file.path, mimeType: mime)],
-      text: text, sharePositionOrigin: origin);
+  await Share.shareXFiles(
+    [XFile(file.path, mimeType: mime)],
+    text: text,
+    sharePositionOrigin: origin,
+  );
   return null;
 }
 

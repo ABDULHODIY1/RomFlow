@@ -16,13 +16,15 @@ class ReminderScheduler {
                 'id': r['id'],
                 'title': r['title'],
                 'note': r['note'] ?? '',
-                'timeMs': DateTime.parse(r['due']).millisecondsSinceEpoch
-              }
-        ]
+                'timeMs': DateTime.parse(r['due']).millisecondsSinceEpoch,
+              },
+        ],
       });
     } on MissingPluginException {
       /* No native scheduler in Flutter tests. */
-    } on PlatformException {/* The persisted in-app list remains available. */}
+    } on PlatformException {
+      /* The persisted in-app list remains available. */
+    }
   }
 
   static Future<bool> schedule(Map<String, dynamic> r) async {
@@ -36,7 +38,7 @@ class ReminderScheduler {
             'id': r['id'],
             'title': r['title'],
             'note': r['note'] ?? '',
-            'timeMs': DateTime.parse(r['due']).millisecondsSinceEpoch
+            'timeMs': DateTime.parse(r['due']).millisecondsSinceEpoch,
           }) ??
           false;
     } on MissingPluginException {

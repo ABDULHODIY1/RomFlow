@@ -135,8 +135,8 @@ List<Json> sampleProfiles() => [
           'finish': 'mokri',
           'glassRebateMm': 12,
           'priceSource':
-              'Qalin rom namunasi; zavod artikuli va narxlari tasdiqlanmagan.'
-        }
+              'Qalin rom namunasi; zavod artikuli va narxlari tasdiqlanmagan.',
+        },
       },
       {
         ..._baseProfiles().first,
@@ -158,35 +158,35 @@ List<Json> sampleProfiles() => [
           // Glass reaches under the lip, as in the workshop photos.
           'glassRebateMm': 12,
           'priceSource':
-              'O‘lchamlar sozlanadigan namuna; profil turi foydalanuvchi videosidan. ALDOX umumiy montaj chuqurligi rasmiy sahifadan; artikul kesimi tasdiqlanmagan.'
-        }
+              'O‘lchamlar sozlanadigan namuna; profil turi foydalanuvchi videosidan. ALDOX umumiy montaj chuqurligi rasmiy sahifadan; artikul kesimi tasdiqlanmagan.',
+        },
       },
       for (final entry in <Json>[
         {
           'id': 'series-akfa-aldox',
           'brand': 'AKFA',
           'name': 'AKFA ALDOX',
-          'catalogUrl': 'https://akfagroup.com/eng/aldox'
+          'catalogUrl': 'https://akfagroup.com/eng/aldox',
         },
         {
           'id': 'series-akfa-thermo65',
           'brand': 'AKFA',
           'name': 'AKFA THERMO 65',
-          'catalogUrl': 'https://akfagroup.com/eng/thermo-65'
+          'catalogUrl': 'https://akfagroup.com/eng/thermo-65',
         },
         {
           'id': 'series-alubest-aldox',
           'brand': 'Alubest',
           'name': 'Alubest Aldoks',
           'catalogUrl':
-              'https://alubest.uz/profiles-catalogs/1-alyuminievye-profili'
+              'https://alubest.uz/profiles-catalogs/1-alyuminievye-profili',
         },
         {
           'id': 'series-alubest-thermo70',
           'brand': 'Alubest',
           'name': 'Alubest AluThermo-70',
           'catalogUrl':
-              'https://alubest.uz/profiles-catalogs/3-termoseriya-aluthermo-70'
+              'https://alubest.uz/profiles-catalogs/3-termoseriya-aluthermo-70',
         },
       ])
         {
@@ -194,7 +194,7 @@ List<Json> sampleProfiles() => [
           ...entry,
           'name': '${entry['name']} — SOZLANADIGAN NAMUNA',
           'material': 'aluminium',
-          'demo': true
+          'demo': true,
         },
     ];
 Json calculate(Json i, Json p) {
@@ -291,8 +291,12 @@ const extraCatalog = <String, (String, String, int)>{
 
 int extraLine(Json e) => ((e['qty'] as num) * (e['price'] as num)).round();
 
-Json totals(List<Json> items, int discount, int installation,
-    [List extras = const []]) {
+Json totals(
+  List<Json> items,
+  int discount,
+  int installation, [
+  List extras = const [],
+]) {
   final sub = items.fold<int>(0, (s, i) => s + (i['total'] as num).toInt());
   var extra = 0;
   for (final e in extras) {

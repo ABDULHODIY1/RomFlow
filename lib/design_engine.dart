@@ -22,7 +22,7 @@ const shapeNames = <String, String>{
   'ellipse': 'Oval',
   'triangle': 'Uchburchak',
   'trapezoid': 'Trapetsiya',
-  'custom': 'Qo‘lda kontur (qavariq)'
+  'custom': 'Qo‘lda kontur (qavariq)',
 };
 const materialNames = <String, String>{
   'frame': 'Tashqi rama',
@@ -56,9 +56,9 @@ const materialNames = <String, String>{
   'roller': 'Surilma rolik',
   'slideLock': 'Surilma qulfi',
   'rail': 'Surilma relsi',
-  'corner': 'Rama / qanot burchak ulagichi',
+  'corner': 'Archa • rama / qanot burchak qotirgichi',
   'mullionJoint': 'Impost ulagichi',
-  'cornerProfile': 'Burchak (qayt) ulash profili 90°',
+  'cornerProfile': '90° burchak ulash profili',
   'screw': 'Samorez',
   'anchor': 'Montaj ankeri',
   'foam': 'Montaj ko‘pigi',
@@ -81,7 +81,7 @@ const linearStock = [
   'cornerProfile',
   'rail',
   'meshFrame',
-  'threshold'
+  'threshold',
 ];
 const areaMaterials = ['glass', 'panel', 'lambris', 'mesh', 'labor'];
 const meterMaterials = [
@@ -93,7 +93,7 @@ const meterMaterials = [
   'spacer',
   'shpros',
   'butyl',
-  'iguSeal'
+  'iguSeal',
 ];
 const recipeLabels = <String, String>{
   'frameFace': 'Rama yuzi (mm)',
@@ -180,7 +180,7 @@ const colouredMaterials = {
   'cornerProfile',
   'rail',
   'meshFrame',
-  'threshold'
+  'threshold',
 };
 
 /// Edge of the sash that carries the hinges. The opening symbol's apex
@@ -199,7 +199,7 @@ List<String> cornerJoins(DMap d) => d['shape'] != 'rect'
     ? const []
     : [
         for (final side in const ['left', 'right'])
-          if ((d['joins'] as List? ?? const []).contains(side)) side
+          if ((d['joins'] as List? ?? const []).contains(side)) side,
       ];
 
 bool isDoorOpening(String opening) =>
@@ -224,7 +224,7 @@ List<List<V>> openingSymbolLines(String opening, List<double> b) {
       [
         V(tip.x - dir * head, cy - head * .8),
         tip,
-        V(tip.x - dir * head, cy + head * .8)
+        V(tip.x - dir * head, cy + head * .8),
       ],
     ];
   }
@@ -368,12 +368,12 @@ DMap recipeFor(DMap p) {
     ...saved,
     'prices': <String, dynamic>{
       ...Map<String, dynamic>.from(d['prices']),
-      ...Map<String, dynamic>.from(saved['prices'] ?? {})
+      ...Map<String, dynamic>.from(saved['prices'] ?? {}),
     },
     'colorPct': <String, dynamic>{
       ...Map<String, dynamic>.from(d['colorPct']),
-      ...Map<String, dynamic>.from(saved['colorPct'] ?? {})
-    }
+      ...Map<String, dynamic>.from(saved['colorPct'] ?? {}),
+    },
   };
 }
 
@@ -400,7 +400,7 @@ DMap newLeaf(String id) => {
       'outward': false,
       'locks': 1,
       'closer': false,
-      'threshold': true
+      'threshold': true,
     };
 DMap newDrawing() => {
       'version': 1,
@@ -413,8 +413,8 @@ DMap newDrawing() => {
         [0, 0],
         [1, 0],
         [1, 1],
-        [0, 1]
-      ]
+        [0, 1],
+      ],
     };
 
 class V {
@@ -448,7 +448,7 @@ List<double> bounds(List<V> p) => [
       p.map((v) => v.x).reduce(math.min),
       p.map((v) => v.y).reduce(math.min),
       p.map((v) => v.x).reduce(math.max),
-      p.map((v) => v.y).reduce(math.max)
+      p.map((v) => v.y).reduce(math.max),
     ];
 List<V> outline(DMap d) {
   final w = (d['widthMm'] as num).toDouble(),
@@ -461,8 +461,10 @@ List<V> outline(DMap d) {
     }
     p = [
       for (var i = 0; i < 128; i++)
-        V(w / 2 + w / 2 * math.cos(i * math.pi / 64),
-            h / 2 + h / 2 * math.sin(i * math.pi / 64))
+        V(
+          w / 2 + w / 2 * math.cos(i * math.pi / 64),
+          h / 2 + h / 2 * math.sin(i * math.pi / 64),
+        ),
     ];
   } else if (shape == 'arch') {
     final rise = (d['riseMm'] as num).toDouble();
@@ -471,10 +473,12 @@ List<V> outline(DMap d) {
     }
     p = [
       for (var i = 0; i <= 64; i++)
-        V(w / 2 + w / 2 * math.cos(math.pi + i * math.pi / 64),
-            rise + rise * math.sin(math.pi + i * math.pi / 64)),
+        V(
+          w / 2 + w / 2 * math.cos(math.pi + i * math.pi / 64),
+          rise + rise * math.sin(math.pi + i * math.pi / 64),
+        ),
       V(w, h),
-      V(0, h)
+      V(0, h),
     ];
   } else if (shape == 'triangle') {
     p = [V(w / 2, 0), V(w, h), V(0, h)];
@@ -487,15 +491,17 @@ List<V> outline(DMap d) {
     }
     p = [
       for (final v in a)
-        V((v[0] as num).toDouble() * w, (v[1] as num).toDouble() * h)
+        V((v[0] as num).toDouble() * w, (v[1] as num).toDouble() * h),
     ];
-    if (p.any((v) =>
-        !v.x.isFinite ||
-        !v.y.isFinite ||
-        v.x < 0 ||
-        v.y < 0 ||
-        v.x > w ||
-        v.y > h)) {
+    if (p.any(
+      (v) =>
+          !v.x.isFinite ||
+          !v.y.isFinite ||
+          v.x < 0 ||
+          v.y < 0 ||
+          v.x > w ||
+          v.y > h,
+    )) {
       throw Exception('Kontur nuqtalari chizma ichida bo‘lsin');
     }
   } else {
@@ -563,7 +569,7 @@ List<V> _insetStepped(List<V> p, double mm) {
     for (var i = 0; i < n; i++)
       p[i] +
           (normal(p[i] - p[(i + n - 1) % n]) + normal(p[(i + 1) % n] - p[i])) *
-              mm
+              mm,
   ];
   for (var i = 0; i < n; i++) {
     final a = p[(i + 1) % n] - p[i], b = out[(i + 1) % n] - out[i];
@@ -577,14 +583,14 @@ List<V> _insetStepped(List<V> p, double mm) {
 List<V> boxUnion(List<List<double>> boxes) {
   double snap(num v) => (v * 100).round() / 100;
   final b = [
-    for (final x in boxes) [for (final v in x) snap(v)]
+    for (final x in boxes) [for (final v in x) snap(v)],
   ];
   final xs = {
-        for (final x in b) ...[x[0], x[2]]
+        for (final x in b) ...[x[0], x[2]],
       }.toList()
         ..sort(),
       ys = {
-        for (final x in b) ...[x[1], x[3]]
+        for (final x in b) ...[x[1], x[3]],
       }.toList()
         ..sort();
   final nx = xs.length - 1, ny = ys.length - 1;
@@ -592,12 +598,14 @@ List<V> boxUnion(List<List<double>> boxes) {
     for (var j = 0; j < ny; j++)
       [
         for (var i = 0; i < nx; i++)
-          b.any((x) =>
-              (xs[i] + xs[i + 1]) / 2 > x[0] &&
-              (xs[i] + xs[i + 1]) / 2 < x[2] &&
-              (ys[j] + ys[j + 1]) / 2 > x[1] &&
-              (ys[j] + ys[j + 1]) / 2 < x[3])
-      ]
+          b.any(
+            (x) =>
+                (xs[i] + xs[i + 1]) / 2 > x[0] &&
+                (xs[i] + xs[i + 1]) / 2 < x[2] &&
+                (ys[j] + ys[j + 1]) / 2 > x[1] &&
+                (ys[j] + ys[j + 1]) / 2 < x[3],
+          ),
+      ],
   ];
   bool at(int i, int j) => i >= 0 && j >= 0 && i < nx && j < ny && filled[j][i];
   final next = <(int, int), (int, int)>{};
@@ -636,7 +644,7 @@ List<V> boxUnion(List<List<double>> boxes) {
         return !((a.$1 == m.$1 && m.$1 == c.$1) ||
             (a.$2 == m.$2 && m.$2 == c.$2));
       }())
-        V(xs[loop[k].$1], ys[loop[k].$2])
+        V(xs[loop[k].$1], ys[loop[k].$2]),
   ];
 }
 
@@ -644,7 +652,7 @@ List<V> boxUnion(List<List<double>> boxes) {
 List<V> outset(List<V> p, double mm) {
   final pts = <V>[
     for (var i = 0; i < p.length; i++)
-      if ((p[(i + 1) % p.length] - p[i]).length > 1e-6) p[i]
+      if ((p[(i + 1) % p.length] - p[i]).length > 1e-6) p[i],
   ];
   if (mm <= 0 || pts.length < 3) return p;
   // inset() keeps the left side of each edge, so outward is to the right.
@@ -662,7 +670,7 @@ List<V> outset(List<V> p, double mm) {
         if (d.abs() < 1e-9) return starts[i];
         return starts[j] +
             dirs[j] * (cross(starts[i] - starts[j], dirs[i]) / d);
-      }()
+      }(),
   ];
 }
 
@@ -673,9 +681,10 @@ List<V> offsetOutline(List<V> p, double mm) =>
 /// The glass or panel actually ordered for a filling: the visible opening
 /// less the edge gap, plus what reaches under the profile lip.
 List<V> glassOutline(List<V> filling, DMap r) => offsetOutline(
-    filling,
-    (r['glassGap'] as num).toDouble() -
-        ((r['glassRebateMm'] ?? 0) as num).toDouble());
+      filling,
+      (r['glassGap'] as num).toDouble() -
+          ((r['glassRebateMm'] ?? 0) as num).toDouble(),
+    );
 
 List<V> rectClip(List<V> p, List<double> b) {
   var q = p;
@@ -749,10 +758,10 @@ DrawingLayout layoutDrawing(DMap d, DMap r) {
           (0, 'left'),
           (1, 'top'),
           (2, 'right'),
-          (3, 'bottom')
+          (3, 'bottom'),
         ])
-          c.box[i] + (c.frame.contains(side) ? f : e) * (i < 2 ? -1 : 1)
-      ]
+          c.box[i] + (c.frame.contains(side) ? f : e) * (i < 2 ? -1 : 1),
+      ],
   ]);
   return _layoutTree(d, r, outer, bounds(rect.inner));
 }
@@ -765,7 +774,12 @@ DrawingLayout _layoutTree(DMap d, DMap r, List<V> outer, List<double>? root) {
   final trims = d['shape'] == 'rect', stepped = root != null;
   var count = 0;
   void visit(
-      DMap n, List<double> b, int depth, Set<String> frame, Set<String> free) {
+    DMap n,
+    List<double> b,
+    int depth,
+    Set<String> frame,
+    Set<String> free,
+  ) {
     if (depth > 12 || ++count > 127) {
       throw Exception('Ko‘pi bilan 64 bo‘lim, 12 daraja');
     }
@@ -776,7 +790,7 @@ DrawingLayout _layoutTree(DMap d, DMap r, List<V> outer, List<double>? root) {
       // A trimmed side is not trimmed again further down.
       free = {
         for (final side in free)
-          if (t[side] is! num || t[side] == 0) side
+          if (t[side] is! num || t[side] == 0) side,
       };
       if (b[2] - b[0] < 80 || b[3] - b[1] < 80) {
         throw Exception('Bo‘lim ichki o‘lchami kamida 80 mm');
@@ -810,8 +824,14 @@ DrawingLayout _layoutTree(DMap d, DMap r, List<V> outer, List<double>? root) {
     final linePoly = rectClip(l.inner, strip);
     if (linePoly.length < 3) throw Exception('Impost konturdan tashqarida');
     final lb = bounds(linePoly);
-    l.splits.add(DrawingSplit(n, b, vertical ? V(pos, lb[1]) : V(lb[0], pos),
-        vertical ? V(pos, lb[3]) : V(lb[2], pos)));
+    l.splits.add(
+      DrawingSplit(
+        n,
+        b,
+        vertical ? V(pos, lb[1]) : V(lb[0], pos),
+        vertical ? V(pos, lb[3]) : V(lb[2], pos),
+      ),
+    );
     final left = List<double>.from(b), right = List<double>.from(b);
     left[k + 2] = pos - f / 2;
     right[k] = pos + f / 2;
@@ -820,15 +840,30 @@ DrawingLayout _layoutTree(DMap d, DMap r, List<V> outer, List<double>? root) {
     }
     final before = vertical ? 'right' : 'bottom',
         after = vertical ? 'left' : 'top';
-    visit(Map<String, dynamic>.from(n['a']), left, depth + 1,
-        {...frame}..remove(before), {...free}..remove(before));
-    visit(Map<String, dynamic>.from(n['b']), right, depth + 1,
-        {...frame}..remove(after), {...free}..remove(after));
+    visit(
+      Map<String, dynamic>.from(n['a']),
+      left,
+      depth + 1,
+      {...frame}..remove(before),
+      {...free}..remove(before),
+    );
+    visit(
+      Map<String, dynamic>.from(n['b']),
+      right,
+      depth + 1,
+      {...frame}..remove(after),
+      {...free}..remove(after),
+    );
   }
 
   const all = {'left', 'top', 'right', 'bottom'};
-  visit(Map<String, dynamic>.from(d['root']), root ?? bounds(l.inner), 0, all,
-      all);
+  visit(
+    Map<String, dynamic>.from(d['root']),
+    root ?? bounds(l.inner),
+    0,
+    all,
+    all,
+  );
   return l;
 }
 
@@ -839,8 +874,10 @@ DrawingLayout layoutInfill(DrawingCell cell, DMap r) {
       ? inset(cell.polygon, (r['sashFace'] as num).toDouble())
       : cell.polygon;
   if (out.inner.length < 3) throw Exception('Qanot ichida joy yetmaydi');
-  final root = Map<String, dynamic>.from(cell.node['infill'] ??
-      {'id': 'fill-${cell.node['id']}', 'fill': cell.node['fill'] ?? 'glass'});
+  final root = Map<String, dynamic>.from(
+    cell.node['infill'] ??
+        {'id': 'fill-${cell.node['id']}', 'fill': cell.node['fill'] ?? 'glass'},
+  );
   var count = 0;
   void visit(DMap n, List<double> box, int depth) {
     if (++count > 63 || depth > 8) {
@@ -868,8 +905,14 @@ DrawingLayout layoutInfill(DrawingCell cell, DMap r) {
       throw Exception('Ichki ajratgich konturdan tashqarida');
     }
     final b = bounds(line);
-    out.splits.add(DrawingSplit(n, box, k == 0 ? V(pos, b[1]) : V(b[0], pos),
-        k == 0 ? V(pos, b[3]) : V(b[2], pos)));
+    out.splits.add(
+      DrawingSplit(
+        n,
+        box,
+        k == 0 ? V(pos, b[1]) : V(b[0], pos),
+        k == 0 ? V(pos, b[3]) : V(b[2], pos),
+      ),
+    );
     final a = List<double>.from(box), z = List<double>.from(box);
     a[k + 2] = pos - f / 2;
     z[k] = pos + f / 2;
@@ -890,7 +933,10 @@ class DecorativeBar {
 }
 
 List<DecorativeBar> decorativeBars(
-    List<V> glass, DMap node, GlazingSpec glazing) {
+  List<V> glass,
+  DMap node,
+  GlazingSpec glazing,
+) {
   if (!glazing.doubleGlazed || node['shpros'] != true) return [];
   final poly = inset(glass, glazing.insetMm + 5);
   if (poly.length < 3) return [];
@@ -913,7 +959,8 @@ List<DecorativeBar> decorativeBars(
       }
       if (hits.length < 2) continue;
       hits.sort(
-          (a, b) => (vertical ? a.y : a.x).compareTo(vertical ? b.y : b.x));
+        (a, b) => (vertical ? a.y : a.x).compareTo(vertical ? b.y : b.x),
+      );
       if ((hits.last - hits.first).length > 1) {
         result.add(DecorativeBar(hits.first, hits.last));
       }
@@ -946,8 +993,10 @@ void validateRecipe(DMap r) {
     }
   }
   if (!const {'single', 'double'}.contains(r['glazingType'] ?? 'single') ||
-      !const {'plainHollow', 'chambered'}
-          .contains(r['sectionStyle'] ?? 'chambered')) {
+      !const {
+        'plainHollow',
+        'chambered',
+      }.contains(r['sectionStyle'] ?? 'chambered')) {
     throw Exception('Profil yoki shisha turi xato');
   }
   if (!const {'net', 'purchase'}.contains(r['pricingMode'] ?? 'net') ||
@@ -1023,7 +1072,8 @@ DMap packBars(List<double> pieces, double stock, double kerf, double reusable) {
   for (final len in sorted) {
     if (!len.isFinite || len <= 0 || len + kerf > stock) {
       throw Exception(
-          '${len.round()} mm detal ${stock.round()} mm tayoqqa sig‘maydi; egri detal yoki tayoq uzunligini tekshiring');
+        '${len.round()} mm detal ${stock.round()} mm tayoqqa sig‘maydi; egri detal yoki tayoq uzunligini tekshiring',
+      );
     }
     DMap? chosen;
     for (final b in bars) {
@@ -1052,7 +1102,7 @@ DMap packBars(List<double> pieces, double stock, double kerf, double reusable) {
     'offcutMm': remain,
     'reusableMm': keep,
     'scrapMm': remain - keep,
-    'optimal': false
+    'optimal': false,
   };
 }
 
@@ -1061,14 +1111,18 @@ DMap packSheets(List<DMap> parts, double sw, double sh, double gap) {
   final sheets = <DMap>[];
   double net = 0;
   final sorted = parts.toList()
-    ..sort((a, b) => ((b['w'] as num) * (b['h'] as num))
-        .compareTo((a['w'] as num) * (a['h'] as num)));
+    ..sort(
+      (a, b) => ((b['w'] as num) * (b['h'] as num)).compareTo(
+        (a['w'] as num) * (a['h'] as num),
+      ),
+    );
   for (final p in sorted) {
     final w = (p['w'] as num).toDouble(), h = (p['h'] as num).toDouble();
     net += (p['area'] as num);
     if (!((w <= sw && h <= sh) || (h <= sw && w <= sh))) {
       throw Exception(
-          'To‘ldirma ${w.ceil()}×${h.ceil()} mm list ${sw.round()}×${sh.round()} mm ga sig‘maydi');
+        'To‘ldirma ${w.ceil()}×${h.ceil()} mm list ${sw.round()}×${sh.round()} mm ga sig‘maydi',
+      );
     }
     var placed = false;
     for (final sheet in sheets) {
@@ -1087,8 +1141,8 @@ DMap packSheets(List<DMap> parts, double sw, double sh, double gap) {
             'height': b,
             'x': a + gap,
             'parts': [
-              {'w': a, 'h': b, 'id': p['id']}
-            ]
+              {'w': a, 'h': b, 'id': p['id']},
+            ],
           });
           sheet['y'] += b + gap;
           placed = true;
@@ -1107,10 +1161,10 @@ DMap packSheets(List<DMap> parts, double sw, double sh, double gap) {
             'height': b,
             'x': a + gap,
             'parts': [
-              {'w': a, 'h': b, 'id': p['id']}
-            ]
-          }
-        ]
+              {'w': a, 'h': b, 'id': p['id']},
+            ],
+          },
+        ],
       });
     }
   }
@@ -1122,14 +1176,15 @@ DMap packSheets(List<DMap> parts, double sw, double sh, double gap) {
     'netM2': net / 1e6,
     'purchaseM2': bought / 1e6,
     'offcutM2': math.max(0, bought - net) / 1e6,
-    'optimal': false
+    'optimal': false,
   };
 }
 
 DMap calculateDrawing(DMap i, DMap profile) {
   final d = Map<String, dynamic>.from(jsonDecode(jsonEncode(i['drawing']))),
       r = Map<String, dynamic>.from(
-          jsonDecode(jsonEncode(i['recipe'] ?? recipeFor(profile))));
+        jsonDecode(jsonEncode(i['recipe'] ?? recipeFor(profile))),
+      );
   validateRecipe(r);
   final qty = i['quantity'];
   final w = d['widthMm'], h = d['heightMm'];
@@ -1176,7 +1231,7 @@ DMap calculateDrawing(DMap i, DMap profile) {
     bool bent(int j) => (p[j] - p[(j + 1) % p.length]).length < total * .04;
     final straight = [
       for (var j = 0; j < p.length; j++)
-        if (!bent(j)) (p[j] - p[(j + 1) % p.length]).length
+        if (!bent(j)) (p[j] - p[(j + 1) % p.length]).length,
     ];
     if (straight.isEmpty) {
       cut(k, total + (r['bendAllowance'] as num));
@@ -1206,11 +1261,13 @@ DMap calculateDrawing(DMap i, DMap profile) {
   final curved = ['circle', 'ellipse', 'arch'].contains(d['shape']);
   if (curved) {
     warnings.add(
-        'Egri rama/egri qanot: kontur 128 nuqtali yaqinlashuv. Bukish blanki kontur + qo‘shimcha; sex texnologi radius, tutashuv va bukilishni tasdiqlasin.');
+      'Egri rama/egri qanot: kontur 128 nuqtali yaqinlashuv. Bukish blanki kontur + qo‘shimcha; sex texnologi radius, tutashuv va bukilishni tasdiqlasin.',
+    );
   }
   if (d['shape'] != 'rect') {
     warnings.add(
-        'Shaklli shisha/panel uchun listning to‘rtburchak gabariti band qilinadi; ichki qoldiqlar qayta joylashtirilmaydi.');
+      'Shaklli shisha/panel uchun listning to‘rtburchak gabariti band qilinadi; ichki qoldiqlar qayta joylashtirilmaydi.',
+    );
   }
   add('corner', polyCuts('frame', l.outer, curved: curved));
   // One connector per joined corner; mark the corner on one of the two
@@ -1244,7 +1301,8 @@ DMap calculateDrawing(DMap i, DMap profile) {
       if (door) doors++;
       final isShaped = cell.polygon.length != 4 ||
           cell.polygon.any(
-              (v) => (v.x - box[0]).abs() > .01 && (v.x - box[2]).abs() > .01);
+            (v) => (v.x - box[0]).abs() > .01 && (v.x - box[2]).abs() > .01,
+          );
       add('corner', polyCuts('sash', cell.polygon, curved: curved && isShaped));
       sashPerim += perimeter(cell.polygon) / 1000;
       glassPoly = inset(cell.polygon, (r['sashFace'] as num).toDouble());
@@ -1285,7 +1343,7 @@ DMap calculateDrawing(DMap i, DMap profile) {
           box[2] - box[0],
           box[2] - box[0],
           box[3] - box[1],
-          box[3] - box[1]
+          box[3] - box[1],
         ]) {
           cut('meshFrame', len);
         }
@@ -1319,9 +1377,9 @@ DMap calculateDrawing(DMap i, DMap profile) {
           }
           if (bars.isNotEmpty) {
             add(
-                'shpros',
-                bars.fold<double>(
-                    0, (sum, b) => sum + (b.b - b.a).length / 1000));
+              'shpros',
+              bars.fold<double>(0, (sum, b) => sum + (b.b - b.a).length / 1000),
+            );
             final joints = decorativeJoints(bars);
             add('shprosJoint', joints.length);
             if (n['rosettes'] == true) add('shprosRosette', joints.length);
@@ -1333,12 +1391,16 @@ DMap calculateDrawing(DMap i, DMap profile) {
             }
             final spacerM = perimeter(spacerPoly) / 1000;
             add('spacer', spacerM);
-            add('spacerCorner',
-                curved && glassPoly.length > 6 ? 0 : spacerPoly.length);
+            add(
+              'spacerCorner',
+              curved && glassPoly.length > 6 ? 0 : spacerPoly.length,
+            );
             add('butyl', spacerM * 2);
             add('iguSeal', gp);
-            add('desiccant',
-                spacerM * (r['desiccantGPerM'] as num? ?? 20) / 1000);
+            add(
+              'desiccant',
+              spacerM * (r['desiccantGPerM'] as num? ?? 20) / 1000,
+            );
           }
         } else {
           panelArea += ga;
@@ -1350,7 +1412,7 @@ DMap calculateDrawing(DMap i, DMap profile) {
             'w': gb[2] - gb[0],
             'h': gb[3] - gb[1],
             'area': ga * 1e6,
-            'id': '${filling.node['id']}-$pane'
+            'id': '${filling.node['id']}-$pane',
           });
         }
       }
@@ -1366,11 +1428,11 @@ DMap calculateDrawing(DMap i, DMap profile) {
         'areaM2': ga,
         'perimeterM': gp,
         'polygon': [
-          for (final v in glassPoly) [v.x, v.y]
+          for (final v in glassPoly) [v.x, v.y],
         ],
         if (fill == 'lambris')
           'lambrisStrips':
-              ((gb[2] - gb[0]) / (r['lambrisStripMm'] as num)).ceil()
+              ((gb[2] - gb[0]) / (r['lambrisStripMm'] as num)).ceil(),
       });
     }
   }
@@ -1394,12 +1456,19 @@ DMap calculateDrawing(DMap i, DMap profile) {
       colour = ((r['colorPct'] as Map?)?[r['finish']] ?? 0) as num;
   if (billNet) {
     warnings.add(
-        'Narx: profil va shisha sof sarfi + ${((waste - 1) * 100).toStringAsFixed(0)}% chiqindi bo‘yicha. Xarid uchun butun tayoq/list soni alohida ko‘rsatilgan.');
+      'Narx: profil va shisha sof sarfi + ${((waste - 1) * 100).toStringAsFixed(0)}% chiqindi bo‘yicha. Xarid uchun butun tayoq/list soni alohida ko‘rsatilgan.',
+    );
   }
   // [stock] lines come in whole bars or sheets: with net billing the customer
   // pays for what the construction uses, never more than the purchase.
-  void line(String key, String unit, double net, double purchase,
-      {String? title, bool stock = false}) {
+  void line(
+    String key,
+    String unit,
+    double net,
+    double purchase, {
+    String? title,
+    bool stock = false,
+  }) {
     var price = (prices[key] ?? 0) as num;
     if (colour > 0 && colouredMaterials.contains(key)) {
       price = price * (1 + colour / 100);
@@ -1407,8 +1476,9 @@ DMap calculateDrawing(DMap i, DMap profile) {
     final charged =
         stock && billNet ? math.min(purchase, net * waste) : purchase;
     if (price == 0 && purchase > 0) {
-      warnings
-          .add('${title ?? materialNames[key] ?? key}: narx 0 — narx kiriting');
+      warnings.add(
+        '${title ?? materialNames[key] ?? key}: narx 0 — narx kiriting',
+      );
     }
     lines.add({
       'name': title ?? materialNames[key] ?? key,
@@ -1418,22 +1488,29 @@ DMap calculateDrawing(DMap i, DMap profile) {
       'quantity': purchase,
       'charged': charged,
       'price': price,
-      'cost': (charged * price).round()
+      'cost': (charged * price).round(),
     });
   }
 
   for (final e in lens.entries) {
-    final override =
-        Map<String, dynamic>.from((r['stockOverrides'] as Map?)?[e.key] ?? {});
+    final override = Map<String, dynamic>.from(
+      (r['stockOverrides'] as Map?)?[e.key] ?? {},
+    );
     final stock = (override['stockMm'] ?? r['stockMm']) as num;
     final plan = packBars(
-        [for (var q = 0; q < qty; q++) ...e.value],
-        stock.toDouble(),
-        (r['kerfMm'] as num).toDouble(),
-        (r['reusableMm'] as num).toDouble());
+      [for (var q = 0; q < qty; q++) ...e.value],
+      stock.toDouble(),
+      (r['kerfMm'] as num).toDouble(),
+      (r['reusableMm'] as num).toDouble(),
+    );
     cuts[e.key] = plan;
-    line(e.key, 'm', plan['netMm'] / 1000, plan['purchasedMm'] / 1000,
-        stock: true);
+    line(
+      e.key,
+      'm',
+      plan['netMm'] / 1000,
+      plan['purchasedMm'] / 1000,
+      stock: true,
+    );
   }
   for (final e in sheets.entries) {
     if (e.key == 'lambris') {
@@ -1443,40 +1520,51 @@ DMap calculateDrawing(DMap i, DMap profile) {
             ((piece['w'] as num) / (r['lambrisStripMm'] as num)).ceil();
         for (var copy = 0; copy < qty; copy++) {
           strips.addAll(
-              List<double>.filled(count, (piece['h'] as num).toDouble()));
+            List<double>.filled(count, (piece['h'] as num).toDouble()),
+          );
         }
       }
-      final plan = packBars(strips, (r['lambrisStockMm'] as num).toDouble(),
-          (r['kerfMm'] as num).toDouble(), (r['reusableMm'] as num).toDouble());
+      final plan = packBars(
+        strips,
+        (r['lambrisStockMm'] as num).toDouble(),
+        (r['kerfMm'] as num).toDouble(),
+        (r['reusableMm'] as num).toDouble(),
+      );
       cuts[e.key] = plan;
       final net =
           e.value.fold<double>(0, (a, b) => a + (b['area'] as num)) * qty / 1e6;
-      line(e.key, 'm²', net,
-          plan['purchasedMm'] * (r['lambrisStripMm'] as num) / 1e6,
-          stock: true);
+      line(
+        e.key,
+        'm²',
+        net,
+        plan['purchasedMm'] * (r['lambrisStripMm'] as num) / 1e6,
+        stock: true,
+      );
       continue;
     }
     final isGlass = e.key == 'glass';
     final plan = packSheets(
-        [for (var q = 0; q < qty; q++) ...e.value],
-        (r[isGlass ? 'sheetW' : 'panelSheetW'] as num).toDouble(),
-        (r[isGlass ? 'sheetH' : 'panelSheetH'] as num).toDouble(),
-        (r['sheetGap'] as num).toDouble());
+      [for (var q = 0; q < qty; q++) ...e.value],
+      (r[isGlass ? 'sheetW' : 'panelSheetW'] as num).toDouble(),
+      (r[isGlass ? 'sheetH' : 'panelSheetH'] as num).toDouble(),
+      (r['sheetGap'] as num).toDouble(),
+    );
     sheetPlans[e.key] = plan;
     line(e.key, 'm²', plan['netM2'], plan['purchaseM2'], stock: true);
   }
   for (final e in amount.entries) {
     line(
-        e.key,
-        areaMaterials.contains(e.key)
-            ? 'm²'
-            : e.key == 'desiccant'
-                ? 'kg'
-                : meterMaterials.contains(e.key)
-                    ? 'm'
-                    : 'dona',
-        e.value * qty,
-        e.value * qty);
+      e.key,
+      areaMaterials.contains(e.key)
+          ? 'm²'
+          : e.key == 'desiccant'
+              ? 'kg'
+              : meterMaterials.contains(e.key)
+                  ? 'm'
+                  : 'dona',
+      e.value * qty,
+      e.value * qty,
+    );
   }
   final bases = <String, double>{
     'frameM': perimeter(l.outer) / 1000,
@@ -1488,7 +1576,7 @@ DMap calculateDrawing(DMap i, DMap profile) {
     'areaM2': area,
     'opening': open.toDouble(),
     'door': doors.toDouble(),
-    'piece': 1
+    'piece': 1,
   };
   final custom = r['customMaterials'] as List? ?? [];
   if (custom.length > 100) {
@@ -1508,13 +1596,19 @@ DMap calculateDrawing(DMap i, DMap profile) {
     }
     final amount = bases[m['basis']]! * rate * qty;
     prices['extra-${lines.length}'] = price;
-    line('extra-${lines.length}', m['unit'] ?? 'dona', amount, amount,
-        title: m['name'] ?? 'Qo‘shimcha');
+    line(
+      'extra-${lines.length}',
+      m['unit'] ?? 'dona',
+      amount,
+      amount,
+      title: m['name'] ?? 'Qo‘shimcha',
+    );
   }
   final cost = lines.fold<int>(0, (s, v) => s + (v['cost'] as int));
   final total = (cost * (1 + (r['markupPct'] as num) / 100)).round();
   warnings.add(
-      'Me’yorlar sozlanadigan sex retsepti; zavodning tasdiqlangan kesish formulasi emas. Raskroy har bir smeta pozitsiyasi bo‘yicha; global optimal kafolatlanmaydi.');
+    'Me’yorlar sozlanadigan sex retsepti; zavodning tasdiqlangan kesish formulasi emas. Raskroy har bir smeta pozitsiyasi bo‘yicha; global optimal kafolatlanmaydi.',
+  );
   return {
     ...i,
     'template': 'drawing',
@@ -1539,7 +1633,7 @@ DMap calculateDrawing(DMap i, DMap profile) {
     'doorCount': doors,
     'priceDate': r['priceDate'],
     'warning': warnings.toSet().join('\n'),
-    'calculationVersion': 'drawing-v1'
+    'calculationVersion': 'drawing-v1',
   };
 }
 
@@ -1547,16 +1641,22 @@ String drawingSvg(DMap drawing, DMap recipe) {
   final l = layoutDrawing(drawing, recipe),
       w = drawing['widthMm'],
       h = drawing['heightMm'];
-  String polygon(List<V> p, String fill,
-          {String stroke = '#8796a6', num width = 6}) =>
+  String polygon(
+    List<V> p,
+    String fill, {
+    String stroke = '#8796a6',
+    num width = 6,
+  }) =>
       '<polygon points="${p.map((v) => '${v.x},${v.y}').join(' ')}" fill="$fill" stroke="$stroke" stroke-width="$width"/>';
   final out = StringBuffer(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-90 -60 ${w + 180} ${h + 180}">');
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-90 -60 ${w + 180} ${h + 180}">',
+  );
   out.write(polygon(l.outer, '#d8dee6'));
   for (final side in cornerJoins(drawing)) {
     final x = side == 'left' ? -28 : (w as num) + 6;
     out.write(
-        '<rect x="$x" y="0" width="22" height="$h" fill="#3d4650"/><text x="${x + 11}" y="-14" font-size="34" text-anchor="middle" fill="#3d4650">90°</text>');
+      '<rect x="$x" y="0" width="22" height="$h" fill="#3d4650"/><text x="${x + 11}" y="-14" font-size="34" text-anchor="middle" fill="#3d4650">90°</text>',
+    );
   }
   for (var j = 0; j < l.cells.length; j++) {
     final c = l.cells[j],
@@ -1566,27 +1666,34 @@ String drawingSvg(DMap drawing, DMap recipe) {
             : c.polygon;
     out.write(polygon(c.polygon, '#fefefa'));
     if (p.length < 3) continue;
-    out.write(polygon(
+    out.write(
+      polygon(
         p,
         c.node['fill'] == 'glass'
             ? '#83d6dd'
             : c.node['fill'] == 'empty'
                 ? '#eef3f7'
-                : '#d4b794'));
+                : '#d4b794',
+      ),
+    );
     if (c.node['infill'] != null) {
       final infill = layoutInfill(c, recipe);
       for (final sub in infill.cells) {
-        out.write(polygon(
+        out.write(
+          polygon(
             sub.polygon,
             sub.node['fill'] == 'glass'
                 ? '#83d6dd'
                 : sub.node['fill'] == 'empty'
                     ? '#eef3f7'
-                    : '#d4b794'));
+                    : '#d4b794',
+          ),
+        );
       }
       for (final split in infill.splits) {
         out.write(
-            '<line x1="${split.a.x}" y1="${split.a.y}" x2="${split.b.x}" y2="${split.b.y}" stroke="#cbd5df" stroke-width="${recipe['mullionFace']}"/>');
+          '<line x1="${split.a.x}" y1="${split.a.y}" x2="${split.b.x}" y2="${split.b.y}" stroke="#cbd5df" stroke-width="${recipe['mullionFace']}"/>',
+        );
       }
     }
     for (final fill in layoutInfill(c, recipe).cells) {
@@ -1594,7 +1701,8 @@ String drawingSvg(DMap drawing, DMap recipe) {
       final poly = inset(fill.polygon, (recipe['glassGap'] as num).toDouble());
       for (final bar in decorativeBars(poly, c.node, GlazingSpec(recipe))) {
         out.write(
-            '<line x1="${bar.a.x}" y1="${bar.a.y}" x2="${bar.b.x}" y2="${bar.b.y}" stroke="#b49742" stroke-width="8"/>');
+          '<line x1="${bar.a.x}" y1="${bar.a.y}" x2="${bar.b.x}" y2="${bar.b.y}" stroke="#b49742" stroke-width="8"/>',
+        );
       }
     }
     final b = bounds(p),
@@ -1603,23 +1711,28 @@ String drawingSvg(DMap drawing, DMap recipe) {
         o = c.node['opening'] as String;
     for (final line in openingSymbolLines(o, b)) {
       out.write(
-          '<polyline points="${line.map((v) => '${v.x},${v.y}').join(' ')}" fill="none" stroke="#206bc4" stroke-width="6"/>');
+        '<polyline points="${line.map((v) => '${v.x},${v.y}').join(' ')}" fill="none" stroke="#206bc4" stroke-width="6"/>',
+      );
     }
     final handle = handlePoint(o, b);
     if (handle != null) {
       final vertical = hingeSide(o) == 'top' || hingeSide(o) == 'bottom';
       out.write(
-          '<line x1="${handle.x - (vertical ? 45 : 0)}" y1="${handle.y - (vertical ? 0 : 45)}" x2="${handle.x + (vertical ? 45 : 0)}" y2="${handle.y + (vertical ? 0 : 45)}" stroke="#33485e" stroke-width="16"/>');
+        '<line x1="${handle.x - (vertical ? 45 : 0)}" y1="${handle.y - (vertical ? 0 : 45)}" x2="${handle.x + (vertical ? 45 : 0)}" y2="${handle.y + (vertical ? 0 : 45)}" stroke="#33485e" stroke-width="16"/>',
+      );
     }
     out.write(
-        '<text x="$cx" y="${cy + 40}" text-anchor="middle" font-size="36">${j + 1}</text>');
+      '<text x="$cx" y="${cy + 40}" text-anchor="middle" font-size="36">${j + 1}</text>',
+    );
   }
   for (final s in l.splits) {
     out.write(
-        '<line x1="${s.a.x}" y1="${s.a.y}" x2="${s.b.x}" y2="${s.b.y}" stroke="#cbd5df" stroke-width="${recipe['mullionFace']}"/>');
+      '<line x1="${s.a.x}" y1="${s.a.y}" x2="${s.b.x}" y2="${s.b.y}" stroke="#cbd5df" stroke-width="${recipe['mullionFace']}"/>',
+    );
   }
   out.write(
-      '<text x="${w / 2}" y="${h + 80}" text-anchor="middle" font-size="44">$w x $h mm</text></svg>');
+    '<text x="${w / 2}" y="${h + 80}" text-anchor="middle" font-size="44">$w x $h mm</text></svg>',
+  );
   return out.toString();
 }
 
@@ -1634,8 +1747,15 @@ class DrawingPreset {
   final num riseMm;
   final DMap Function() root;
   const DrawingPreset(
-      this.id, this.name, this.group, this.widthMm, this.heightMm, this.root,
-      {this.shape = 'rect', this.riseMm = 500});
+    this.id,
+    this.name,
+    this.group,
+    this.widthMm,
+    this.heightMm,
+    this.root, {
+    this.shape = 'rect',
+    this.riseMm = 500,
+  });
 
   /// The design at its own size, or at [width] × [height]. An arch keeps
   /// its proportions, so a semicircle stays a semicircle.
@@ -1660,8 +1780,13 @@ DMap _leaf(String opening, {String fill = 'glass', DMap? infill}) => {
       'fill': fill,
       if (infill != null) 'infill': infill,
     };
-DMap _split(String axis, num ratio, DMap a, DMap b) =>
-    {'id': 's', 'axis': axis, 'ratio': ratio, 'a': a, 'b': b};
+DMap _split(String axis, num ratio, DMap a, DMap b) => {
+      'id': 's',
+      'axis': axis,
+      'ratio': ratio,
+      'a': a,
+      'b': b,
+    };
 DMap _row(List<DMap> cells) => cells.length == 1
     ? cells.first
     : _split('v', 1 / cells.length, cells.first, _row(cells.sublist(1)));
@@ -1670,20 +1795,28 @@ DMap _row(List<DMap> cells) => cells.length == 1
 DMap _sized(List<(num, DMap)> cells, [String axis = 'v']) {
   if (cells.length == 1) return cells.first.$2;
   final total = cells.fold<num>(0, (s, c) => s + c.$1);
-  return _split(axis, cells.first.$1 / total, cells.first.$2,
-      _sized(cells.sublist(1), axis));
+  return _split(
+    axis,
+    cells.first.$1 / total,
+    cells.first.$2,
+    _sized(cells.sublist(1), axis),
+  );
 }
 
 DMap _rows(List<(num, DMap)> cells) => _sized(cells, 'h');
 DMap _fixed() => _leaf('fixed');
 DMap _panel() => _leaf('fixed', fill: 'panel');
-DMap _glassOverPanel(num glassShare) => _split('h', glassShare,
-    {'id': 'g', 'fill': 'glass'}, {'id': 'p', 'fill': 'panel'});
+DMap _glassOverPanel(num glassShare) => _split(
+      'h',
+      glassShare,
+      {'id': 'g', 'fill': 'glass'},
+      {'id': 'p', 'fill': 'panel'},
+    );
 
 /// A transom row of [count] fixed panes over [below].
 DMap _transom(int count, DMap below, [num share = .24]) => _rows([
       (share, _row([for (var i = 0; i < count; i++) _fixed()])),
-      (1 - share, below)
+      (1 - share, below),
     ]);
 
 /// Glazed row over a row of sandwich panels (balcony parapet).
@@ -1700,391 +1833,643 @@ final drawingPresets = <DrawingPreset>[
   // Windows
   DrawingPreset('fixed', 'Yopiq oyna', 'Deraza', 1200, 1400, _fixed),
   DrawingPreset(
-      'single', 'Bir tabaqali', 'Deraza', 700, 1400, () => _leaf('tiltTurn')),
-  DrawingPreset('two', '2 bo‘limli', 'Deraza', 1400, 1400,
-      () => _row([_leaf('tiltTurn'), _fixed()])),
-  DrawingPreset('twoOpen', '2 tabaqali', 'Deraza', 1400, 1400,
-      () => _row([_leaf('left'), _leaf('right')])),
-  DrawingPreset('three', '3 bo‘limli', 'Deraza', 2100, 1400,
-      () => _row([_leaf('left'), _fixed(), _leaf('right')])),
+    'single',
+    'Bir tabaqali',
+    'Deraza',
+    700,
+    1400,
+    () => _leaf('tiltTurn'),
+  ),
   DrawingPreset(
-      'transom',
-      'Fortochkali',
-      'Deraza',
-      1400,
-      1600,
-      () => _split(
-          'h', .28, _leaf('bottom'), _row([_leaf('tiltTurn'), _fixed()]))),
-  DrawingPreset('singleTransom', 'Fortochka + tabaqa', 'Deraza', 800, 1700,
-      () => _transom(1, _leaf('tiltTurn'), .22)),
-  DrawingPreset('twoTransom', 'Fortochka + 2', 'Deraza', 1400, 1700,
-      () => _transom(1, _row([_leaf('tiltTurn'), _fixed()]))),
-  DrawingPreset('threeTransom2', '2 fortochka + 3', 'Deraza', 2100, 1700,
-      () => _transom(2, _row([_leaf('left'), _fixed(), _leaf('right')]))),
+    'two',
+    '2 bo‘limli',
+    'Deraza',
+    1400,
+    1400,
+    () => _row([_leaf('tiltTurn'), _fixed()]),
+  ),
   DrawingPreset(
-      'threeMiddle',
-      '3, o‘rtasi bo‘lingan',
-      'Deraza',
-      2100,
-      1600,
-      () => _transom(
-          1,
-          _row([
-            _fixed(),
-            _rows([(.3, _leaf('bottom')), (.7, _leaf('tiltTurn'))]),
-            _fixed()
-          ]))),
+    'twoOpen',
+    '2 tabaqali',
+    'Deraza',
+    1400,
+    1400,
+    () => _row([_leaf('left'), _leaf('right')]),
+  ),
   DrawingPreset(
-      'twoLeftTransom',
-      '2, chapda fortochka',
-      'Deraza',
-      1400,
-      1500,
-      () => _row([
-            _rows([(.3, _leaf('bottom')), (.7, _leaf('tiltTurn'))]),
-            _fixed()
-          ])),
+    'three',
+    '3 bo‘limli',
+    'Deraza',
+    2100,
+    1400,
+    () => _row([_leaf('left'), _fixed(), _leaf('right')]),
+  ),
   DrawingPreset(
-      'twoRightTransom',
-      '2, o‘ngda fortochka',
-      'Deraza',
-      1400,
-      1500,
-      () => _row([
-            _fixed(),
-            _rows([(.3, _leaf('bottom')), (.7, _leaf('tiltTurn'))])
-          ])),
+    'transom',
+    'Fortochkali',
+    'Deraza',
+    1400,
+    1600,
+    () =>
+        _split('h', .28, _leaf('bottom'), _row([_leaf('tiltTurn'), _fixed()])),
+  ),
   DrawingPreset(
-      'threeSideTransoms',
-      '3, yonlarida fortochka',
-      'Deraza',
-      2100,
-      1500,
-      () => _row([
-            _rows([(.3, _fixed()), (.7, _leaf('left'))]),
-            _fixed(),
-            _rows([(.3, _fixed()), (.7, _leaf('right'))]),
-          ])),
-  DrawingPreset('four', '4 bo‘limli', 'Deraza', 2600, 1400,
-      () => _row([_leaf('left'), _fixed(), _fixed(), _leaf('right')])),
+    'singleTransom',
+    'Fortochka + tabaqa',
+    'Deraza',
+    800,
+    1700,
+    () => _transom(1, _leaf('tiltTurn'), .22),
+  ),
   DrawingPreset(
-      'five',
-      '5 bo‘limli',
-      'Deraza',
-      3200,
-      1400,
-      () => _row([
-            _leaf('left'),
-            _fixed(),
-            _leaf('tiltTurn'),
-            _fixed(),
-            _leaf('right')
-          ])),
+    'twoTransom',
+    'Fortochka + 2',
+    'Deraza',
+    1400,
+    1700,
+    () => _transom(1, _row([_leaf('tiltTurn'), _fixed()])),
+  ),
   DrawingPreset(
-      'fourTransom3',
-      '3 fortochka + 4',
-      'Deraza',
-      2600,
-      1700,
-      () => _transom(
-          3, _row([_leaf('left'), _fixed(), _fixed(), _leaf('right')]))),
+    'threeTransom2',
+    '2 fortochka + 3',
+    'Deraza',
+    2100,
+    1700,
+    () => _transom(2, _row([_leaf('left'), _fixed(), _leaf('right')])),
+  ),
   DrawingPreset(
-      'fourTransom2',
-      '2 fortochka + 4',
-      'Deraza',
-      2600,
-      1700,
-      () => _transom(
-          2, _row([_leaf('left'), _fixed(), _fixed(), _leaf('right')]))),
+    'threeMiddle',
+    '3, o‘rtasi bo‘lingan',
+    'Deraza',
+    2100,
+    1600,
+    () => _transom(
+      1,
+      _row([
+        _fixed(),
+        _rows([(.3, _leaf('bottom')), (.7, _leaf('tiltTurn'))]),
+        _fixed(),
+      ]),
+    ),
+  ),
   DrawingPreset(
-      'fiveTransom3',
-      '3 fortochka + 5',
-      'Deraza',
-      3200,
-      1700,
-      () => _transom(
-          3,
-          _row([
-            _leaf('left'),
-            _fixed(),
-            _leaf('tiltTurn'),
-            _fixed(),
-            _leaf('right')
-          ]))),
+    'twoLeftTransom',
+    '2, chapda fortochka',
+    'Deraza',
+    1400,
+    1500,
+    () => _row([
+      _rows([(.3, _leaf('bottom')), (.7, _leaf('tiltTurn'))]),
+      _fixed(),
+    ]),
+  ),
   DrawingPreset(
-      'grid3x4',
-      'Vitraj 3×4',
-      'Deraza',
-      2600,
-      2200,
-      () => _rows([
-            (.2, _row([for (var i = 0; i < 4; i++) _fixed()])),
-            (.55, _row([_leaf('left'), _fixed(), _fixed(), _leaf('right')])),
-            (.25, _row([for (var i = 0; i < 4; i++) _fixed()])),
-          ])),
+    'twoRightTransom',
+    '2, o‘ngda fortochka',
+    'Deraza',
+    1400,
+    1500,
+    () => _row([
+      _fixed(),
+      _rows([(.3, _leaf('bottom')), (.7, _leaf('tiltTurn'))]),
+    ]),
+  ),
   DrawingPreset(
-      'grid3x5',
-      'Vitraj 3×5',
-      'Deraza',
-      3200,
-      2400,
-      () => _rows([
-            (.2, _row([for (var i = 0; i < 5; i++) _fixed()])),
-            (
-              .55,
-              _row([
-                _leaf('left'),
-                _fixed(),
-                _leaf('tiltTurn'),
-                _fixed(),
-                _leaf('right')
-              ])
-            ),
-            (.25, _row([for (var i = 0; i < 5; i++) _fixed()])),
-          ])),
-  DrawingPreset('balconyParapet4', 'Balkon, 4 + panel', 'Deraza', 2600, 2200,
-      () => _parapet(3, [_leaf('left'), _fixed(), _fixed(), _leaf('right')])),
-  DrawingPreset('balconyParapet3', 'Balkon, 3 + panel', 'Deraza', 2000, 2200,
-      () => _parapet(2, [_leaf('left'), _fixed(), _leaf('right')])),
+    'threeSideTransoms',
+    '3, yonlarida fortochka',
+    'Deraza',
+    2100,
+    1500,
+    () => _row([
+      _rows([(.3, _fixed()), (.7, _leaf('left'))]),
+      _fixed(),
+      _rows([(.3, _fixed()), (.7, _leaf('right'))]),
+    ]),
+  ),
   DrawingPreset(
-      'balconyParapet5',
-      'Balkon, 5 + panel',
-      'Deraza',
-      3200,
-      2200,
-      () => _parapet(3, [
-            _leaf('left'),
-            _fixed(),
-            _leaf('tiltTurn'),
-            _fixed(),
-            _leaf('right')
-          ])),
+    'four',
+    '4 bo‘limli',
+    'Deraza',
+    2600,
+    1400,
+    () => _row([_leaf('left'), _fixed(), _fixed(), _leaf('right')]),
+  ),
   DrawingPreset(
-      'vitraj',
-      'Vitraj 3×3',
-      'Deraza',
-      2400,
-      2400,
-      () => _row([
-            for (var c = 0; c < 3; c++)
-              _split('h', 1 / 3, _fixed(),
-                  _split('h', .5, _leaf(c == 1 ? 'bottom' : 'fixed'), _fixed()))
-          ])),
-  DrawingPreset('sliding', 'Surilma', 'Deraza', 2000, 1500,
-      () => _row([_leaf('slideRight'), _leaf('slideLeft')])),
-  DrawingPreset('sliding3', 'Surilma, 3 qanot', 'Deraza', 2700, 1500,
-      () => _row([_leaf('slideRight'), _fixed(), _leaf('slideLeft')])),
+    'five',
+    '5 bo‘limli',
+    'Deraza',
+    3200,
+    1400,
+    () => _row([
+      _leaf('left'),
+      _fixed(),
+      _leaf('tiltTurn'),
+      _fixed(),
+      _leaf('right'),
+    ]),
+  ),
   DrawingPreset(
-      'sliding4',
-      'Surilma, 4 qanot',
-      'Deraza',
-      3400,
-      1500,
-      () => _row([
-            _leaf('slideRight'),
-            _leaf('slideLeft'),
-            _leaf('slideRight'),
-            _leaf('slideLeft')
-          ])),
+    'fourTransom3',
+    '3 fortochka + 4',
+    'Deraza',
+    2600,
+    1700,
+    () =>
+        _transom(3, _row([_leaf('left'), _fixed(), _fixed(), _leaf('right')])),
+  ),
+  DrawingPreset(
+    'fourTransom2',
+    '2 fortochka + 4',
+    'Deraza',
+    2600,
+    1700,
+    () =>
+        _transom(2, _row([_leaf('left'), _fixed(), _fixed(), _leaf('right')])),
+  ),
+  DrawingPreset(
+    'fiveTransom3',
+    '3 fortochka + 5',
+    'Deraza',
+    3200,
+    1700,
+    () => _transom(
+      3,
+      _row([
+        _leaf('left'),
+        _fixed(),
+        _leaf('tiltTurn'),
+        _fixed(),
+        _leaf('right'),
+      ]),
+    ),
+  ),
+  DrawingPreset(
+    'grid3x4',
+    'Vitraj 3×4',
+    'Deraza',
+    2600,
+    2200,
+    () => _rows([
+      (.2, _row([for (var i = 0; i < 4; i++) _fixed()])),
+      (.55, _row([_leaf('left'), _fixed(), _fixed(), _leaf('right')])),
+      (.25, _row([for (var i = 0; i < 4; i++) _fixed()])),
+    ]),
+  ),
+  DrawingPreset(
+    'grid3x5',
+    'Vitraj 3×5',
+    'Deraza',
+    3200,
+    2400,
+    () => _rows([
+      (.2, _row([for (var i = 0; i < 5; i++) _fixed()])),
+      (
+        .55,
+        _row([
+          _leaf('left'),
+          _fixed(),
+          _leaf('tiltTurn'),
+          _fixed(),
+          _leaf('right'),
+        ]),
+      ),
+      (.25, _row([for (var i = 0; i < 5; i++) _fixed()])),
+    ]),
+  ),
+  DrawingPreset(
+    'balconyParapet4',
+    'Balkon, 4 + panel',
+    'Deraza',
+    2600,
+    2200,
+    () => _parapet(3, [_leaf('left'), _fixed(), _fixed(), _leaf('right')]),
+  ),
+  DrawingPreset(
+    'balconyParapet3',
+    'Balkon, 3 + panel',
+    'Deraza',
+    2000,
+    2200,
+    () => _parapet(2, [_leaf('left'), _fixed(), _leaf('right')]),
+  ),
+  DrawingPreset(
+    'balconyParapet5',
+    'Balkon, 5 + panel',
+    'Deraza',
+    3200,
+    2200,
+    () => _parapet(3, [
+      _leaf('left'),
+      _fixed(),
+      _leaf('tiltTurn'),
+      _fixed(),
+      _leaf('right'),
+    ]),
+  ),
+  DrawingPreset(
+    'vitraj',
+    'Vitraj 3×3',
+    'Deraza',
+    2400,
+    2400,
+    () => _row([
+      for (var c = 0; c < 3; c++)
+        _split(
+          'h',
+          1 / 3,
+          _fixed(),
+          _split('h', .5, _leaf(c == 1 ? 'bottom' : 'fixed'), _fixed()),
+        ),
+    ]),
+  ),
+  DrawingPreset(
+    'sliding',
+    'Surilma',
+    'Deraza',
+    2000,
+    1500,
+    () => _row([_leaf('slideRight'), _leaf('slideLeft')]),
+  ),
+  DrawingPreset(
+    'sliding3',
+    'Surilma, 3 qanot',
+    'Deraza',
+    2700,
+    1500,
+    () => _row([_leaf('slideRight'), _fixed(), _leaf('slideLeft')]),
+  ),
+  DrawingPreset(
+    'sliding4',
+    'Surilma, 4 qanot',
+    'Deraza',
+    3400,
+    1500,
+    () => _row([
+      _leaf('slideRight'),
+      _leaf('slideLeft'),
+      _leaf('slideRight'),
+      _leaf('slideLeft'),
+    ]),
+  ),
 
   // Doors
   DrawingPreset(
-      'door', 'Eshik', 'Eshik', 900, 2100, () => _door('doorLeft', .55)),
-  DrawingPreset('doorPanel', 'Kirish eshigi', 'Eshik', 900, 2100,
-      () => _leaf('doorLeft', fill: 'panel')),
-  DrawingPreset('doorGlass', 'Shisha eshik', 'Eshik', 900, 2100,
-      () => _leaf('doorRight')),
-  DrawingPreset('doorTransom', 'Eshik+fortochka', 'Eshik', 950, 2550,
-      () => _split('h', .18, _fixed(), _leaf('doorLeft', fill: 'lambris'))),
-  DrawingPreset('doorTransomGlass', 'Fortochka + eshik', 'Eshik', 950, 2500,
-      () => _transom(1, _door('doorLeft'), .18)),
-  DrawingPreset('doubleDoor', '2 tabaqali eshik', 'Eshik', 1500, 2100,
-      () => _row([_door('passive', .55), _door('doorRight', .55)])),
-  DrawingPreset('doorNarrowWide', 'Tor + keng', 'Eshik', 1300, 2100,
-      () => _sized([(.36, _leaf('passive')), (.64, _leaf('doorRight'))])),
-  DrawingPreset('doorWideNarrow', 'Keng + tor', 'Eshik', 1300, 2100,
-      () => _sized([(.64, _leaf('doorLeft')), (.36, _leaf('passive'))])),
-  DrawingPreset('doorNarrowWidePanel', 'Tor + keng, panelli', 'Eshik', 1300,
-      2100, () => _sized([(.36, _door('passive')), (.64, _door('doorRight'))])),
+    'door',
+    'Eshik',
+    'Eshik',
+    900,
+    2100,
+    () => _door('doorLeft', .55),
+  ),
   DrawingPreset(
-      'doorTransomPair',
-      'Fortochka + tor + keng',
-      'Eshik',
-      1300,
-      2500,
-      () => _transom(1,
-          _sized([(.36, _door('passive')), (.64, _door('doorRight'))]), .18)),
+    'doorPanel',
+    'Kirish eshigi',
+    'Eshik',
+    900,
+    2100,
+    () => _leaf('doorLeft', fill: 'panel'),
+  ),
   DrawingPreset(
-      'doorSidelights',
-      'Yon oynali eshik',
-      'Eshik',
-      2200,
-      2100,
-      () => _sized([
-            (.2, _fixed()),
-            (.22, _door('passive')),
-            (.38, _door('doorRight')),
-            (.2, _fixed()),
-          ])),
-  DrawingPreset('doorSidelight', 'Bir yon oynali eshik', 'Eshik', 1400, 2100,
-      () => _sized([(.36, _fixed()), (.64, _door('doorRight'))])),
+    'doorGlass',
+    'Shisha eshik',
+    'Eshik',
+    900,
+    2100,
+    () => _leaf('doorRight'),
+  ),
   DrawingPreset(
-      'doorPortal',
-      'Portal: fortochka + yon oynalar',
-      'Eshik',
-      2200,
-      2600,
-      () => _transom(
-          3,
-          _sized([
-            (.2, _rows([(.7, _fixed()), (.3, _panel())])),
-            (.22, _door('passive')),
-            (.38, _door('doorRight')),
-            (.2, _rows([(.7, _fixed()), (.3, _panel())])),
-          ]),
-          .18)),
+    'doorTransom',
+    'Eshik+fortochka',
+    'Eshik',
+    950,
+    2550,
+    () => _split('h', .18, _fixed(), _leaf('doorLeft', fill: 'lambris')),
+  ),
   DrawingPreset(
-      'balcony',
-      'Balkon bloki',
-      'Eshik',
-      2100,
-      2150,
-      () => _split(
-          'v',
-          .38,
-          _leaf('doorLeft', infill: _glassOverPanel(.6)),
-          _split('h', .66, _row([_leaf('tiltTurn'), _fixed()]),
-              _leaf('fixed', fill: 'panel')))),
+    'doorTransomGlass',
+    'Fortochka + eshik',
+    'Eshik',
+    950,
+    2500,
+    () => _transom(1, _door('doorLeft'), .18),
+  ),
   DrawingPreset(
-      'balconyRight',
-      'Balkon bloki, o‘ngda eshik',
-      'Eshik',
-      2100,
-      2150,
-      () => _split(
-          'v',
-          .62,
-          _split('h', .66, _row([_fixed(), _leaf('tiltTurn')]), _panel()),
-          _leaf('doorRight', infill: _glassOverPanel(.6)))),
-  DrawingPreset('slidingDoor', 'Surilma eshik', 'Eshik', 2400, 2200,
-      () => _row([_leaf('slideRight'), _leaf('slideLeft')])),
+    'doubleDoor',
+    '2 tabaqali eshik',
+    'Eshik',
+    1500,
+    2100,
+    () => _row([_door('passive', .55), _door('doorRight', .55)]),
+  ),
+  DrawingPreset(
+    'doorNarrowWide',
+    'Tor + keng',
+    'Eshik',
+    1300,
+    2100,
+    () => _sized([(.36, _leaf('passive')), (.64, _leaf('doorRight'))]),
+  ),
+  DrawingPreset(
+    'doorWideNarrow',
+    'Keng + tor',
+    'Eshik',
+    1300,
+    2100,
+    () => _sized([(.64, _leaf('doorLeft')), (.36, _leaf('passive'))]),
+  ),
+  DrawingPreset(
+    'doorNarrowWidePanel',
+    'Tor + keng, panelli',
+    'Eshik',
+    1300,
+    2100,
+    () => _sized([(.36, _door('passive')), (.64, _door('doorRight'))]),
+  ),
+  DrawingPreset(
+    'doorTransomPair',
+    'Fortochka + tor + keng',
+    'Eshik',
+    1300,
+    2500,
+    () => _transom(
+      1,
+      _sized([(.36, _door('passive')), (.64, _door('doorRight'))]),
+      .18,
+    ),
+  ),
+  DrawingPreset(
+    'doorSidelights',
+    'Yon oynali eshik',
+    'Eshik',
+    2200,
+    2100,
+    () => _sized([
+      (.2, _fixed()),
+      (.22, _door('passive')),
+      (.38, _door('doorRight')),
+      (.2, _fixed()),
+    ]),
+  ),
+  DrawingPreset(
+    'doorSidelight',
+    'Bir yon oynali eshik',
+    'Eshik',
+    1400,
+    2100,
+    () => _sized([(.36, _fixed()), (.64, _door('doorRight'))]),
+  ),
+  DrawingPreset(
+    'doorPortal',
+    'Portal: fortochka + yon oynalar',
+    'Eshik',
+    2200,
+    2600,
+    () => _transom(
+      3,
+      _sized([
+        (.2, _rows([(.7, _fixed()), (.3, _panel())])),
+        (.22, _door('passive')),
+        (.38, _door('doorRight')),
+        (.2, _rows([(.7, _fixed()), (.3, _panel())])),
+      ]),
+      .18,
+    ),
+  ),
+  DrawingPreset(
+    'balcony',
+    'Balkon bloki',
+    'Eshik',
+    2100,
+    2150,
+    () => _split(
+      'v',
+      .38,
+      _leaf('doorLeft', infill: _glassOverPanel(.6)),
+      _split(
+        'h',
+        .66,
+        _row([_leaf('tiltTurn'), _fixed()]),
+        _leaf('fixed', fill: 'panel'),
+      ),
+    ),
+  ),
+  DrawingPreset(
+    'balconyRight',
+    'Balkon bloki, o‘ngda eshik',
+    'Eshik',
+    2100,
+    2150,
+    () => _split(
+      'v',
+      .62,
+      _split('h', .66, _row([_fixed(), _leaf('tiltTurn')]), _panel()),
+      _leaf('doorRight', infill: _glassOverPanel(.6)),
+    ),
+  ),
+  DrawingPreset(
+    'slidingDoor',
+    'Surilma eshik',
+    'Eshik',
+    2400,
+    2200,
+    () => _row([_leaf('slideRight'), _leaf('slideLeft')]),
+  ),
 
   // Arches
-  DrawingPreset('archFixed', 'Arka', 'Arka', 1200, 1600, _fixed,
-      shape: 'arch', riseMm: 600),
-  DrawingPreset('archTop1', 'Arka + tabaqa', 'Arka', 1000, 1800,
-      () => _split('h', .28, _fixed(), _leaf('tiltTurn')),
-      shape: 'arch', riseMm: 500),
   DrawingPreset(
-      'arch',
-      'Arka + 2',
-      'Arka',
-      1200,
-      1500,
-      () => _split(
-          'h', .3, _leaf('fixed'), _row([_leaf('left'), _leaf('right')])),
-      shape: 'arch',
-      riseMm: 380),
+    'archFixed',
+    'Arka',
+    'Arka',
+    1200,
+    1600,
+    _fixed,
+    shape: 'arch',
+    riseMm: 600,
+  ),
   DrawingPreset(
-      'archTop3',
-      'Arka + 3',
-      'Arka',
-      1800,
-      1900,
-      () => _split(
-          'h', .3, _fixed(), _row([_leaf('left'), _fixed(), _leaf('right')])),
-      shape: 'arch',
-      riseMm: 560),
+    'archTop1',
+    'Arka + tabaqa',
+    'Arka',
+    1000,
+    1800,
+    () => _split('h', .28, _fixed(), _leaf('tiltTurn')),
+    shape: 'arch',
+    riseMm: 500,
+  ),
   DrawingPreset(
-      'archSplitTop3',
-      'Bo‘lingan arka + 3',
-      'Arka',
-      1800,
-      1900,
-      () => _split('h', .3, _row([_fixed(), _fixed()]),
-          _row([_leaf('left'), _fixed(), _leaf('right')])),
-      shape: 'arch',
-      riseMm: 560),
+    'arch',
+    'Arka + 2',
+    'Arka',
+    1200,
+    1500,
+    () =>
+        _split('h', .3, _leaf('fixed'), _row([_leaf('left'), _leaf('right')])),
+    shape: 'arch',
+    riseMm: 380,
+  ),
   DrawingPreset(
-      'archMiddle',
-      'Arka + 3, o‘rtasi bo‘lingan',
-      'Arka',
-      1800,
-      1900,
-      () => _split(
-          'h',
-          .3,
-          _fixed(),
-          _row([
-            _fixed(),
-            _rows([(.3, _leaf('bottom')), (.7, _leaf('tiltTurn'))]),
-            _fixed()
-          ])),
-      shape: 'arch',
-      riseMm: 560),
+    'archTop3',
+    'Arka + 3',
+    'Arka',
+    1800,
+    1900,
+    () => _split(
+      'h',
+      .3,
+      _fixed(),
+      _row([_leaf('left'), _fixed(), _leaf('right')]),
+    ),
+    shape: 'arch',
+    riseMm: 560,
+  ),
   DrawingPreset(
-      'archSplitTop2',
-      'Bo‘lingan arka + 2',
-      'Arka',
-      1400,
-      1800,
-      () => _split('h', .3, _row([_fixed(), _fixed()]),
-          _row([_leaf('tiltTurn'), _fixed()])),
-      shape: 'arch',
-      riseMm: 520),
-  DrawingPreset('archFlat2', 'Yassi arka + 2', 'Arka', 1400, 1500,
-      () => _split('h', .18, _fixed(), _row([_leaf('tiltTurn'), _fixed()])),
-      shape: 'arch', riseMm: 260),
+    'archSplitTop3',
+    'Bo‘lingan arka + 3',
+    'Arka',
+    1800,
+    1900,
+    () => _split(
+      'h',
+      .3,
+      _row([_fixed(), _fixed()]),
+      _row([_leaf('left'), _fixed(), _leaf('right')]),
+    ),
+    shape: 'arch',
+    riseMm: 560,
+  ),
   DrawingPreset(
-      'archFlat3',
-      'Yassi arka + 3',
-      'Arka',
-      2000,
-      1600,
-      () => _split(
-          'h', .18, _fixed(), _row([_leaf('left'), _fixed(), _leaf('right')])),
-      shape: 'arch',
-      riseMm: 290),
+    'archMiddle',
+    'Arka + 3, o‘rtasi bo‘lingan',
+    'Arka',
+    1800,
+    1900,
+    () => _split(
+      'h',
+      .3,
+      _fixed(),
+      _row([
+        _fixed(),
+        _rows([(.3, _leaf('bottom')), (.7, _leaf('tiltTurn'))]),
+        _fixed(),
+      ]),
+    ),
+    shape: 'arch',
+    riseMm: 560,
+  ),
   DrawingPreset(
-      'archFlatSplit3',
-      'Yassi bo‘lingan arka + 3',
-      'Arka',
-      2000,
-      1600,
-      () => _split('h', .18, _row([_fixed(), _fixed()]),
-          _row([_leaf('left'), _fixed(), _leaf('right')])),
-      shape: 'arch',
-      riseMm: 290),
+    'archSplitTop2',
+    'Bo‘lingan arka + 2',
+    'Arka',
+    1400,
+    1800,
+    () => _split(
+      'h',
+      .3,
+      _row([_fixed(), _fixed()]),
+      _row([_leaf('tiltTurn'), _fixed()]),
+    ),
+    shape: 'arch',
+    riseMm: 520,
+  ),
   DrawingPreset(
-      'archFlatSides',
-      'Yassi arka, yonlarida fortochka',
-      'Arka',
-      2000,
-      1700,
-      () => _split(
-          'h',
-          .17,
-          _fixed(),
-          _row([
-            _rows([(.3, _fixed()), (.7, _leaf('left'))]),
-            _fixed(),
-            _rows([(.3, _fixed()), (.7, _leaf('right'))]),
-          ])),
-      shape: 'arch',
-      riseMm: 290),
-  DrawingPreset('archDoor', 'Arkali eshik', 'Arka', 1000, 2400,
-      () => _split('h', .22, _fixed(), _door('doorLeft')),
-      shape: 'arch', riseMm: 500),
+    'archFlat2',
+    'Yassi arka + 2',
+    'Arka',
+    1400,
+    1500,
+    () => _split('h', .18, _fixed(), _row([_leaf('tiltTurn'), _fixed()])),
+    shape: 'arch',
+    riseMm: 260,
+  ),
+  DrawingPreset(
+    'archFlat3',
+    'Yassi arka + 3',
+    'Arka',
+    2000,
+    1600,
+    () => _split(
+      'h',
+      .18,
+      _fixed(),
+      _row([_leaf('left'), _fixed(), _leaf('right')]),
+    ),
+    shape: 'arch',
+    riseMm: 290,
+  ),
+  DrawingPreset(
+    'archFlatSplit3',
+    'Yassi bo‘lingan arka + 3',
+    'Arka',
+    2000,
+    1600,
+    () => _split(
+      'h',
+      .18,
+      _row([_fixed(), _fixed()]),
+      _row([_leaf('left'), _fixed(), _leaf('right')]),
+    ),
+    shape: 'arch',
+    riseMm: 290,
+  ),
+  DrawingPreset(
+    'archFlatSides',
+    'Yassi arka, yonlarida fortochka',
+    'Arka',
+    2000,
+    1700,
+    () => _split(
+      'h',
+      .17,
+      _fixed(),
+      _row([
+        _rows([(.3, _fixed()), (.7, _leaf('left'))]),
+        _fixed(),
+        _rows([(.3, _fixed()), (.7, _leaf('right'))]),
+      ]),
+    ),
+    shape: 'arch',
+    riseMm: 290,
+  ),
+  DrawingPreset(
+    'archDoor',
+    'Arkali eshik',
+    'Arka',
+    1000,
+    2400,
+    () => _split('h', .22, _fixed(), _door('doorLeft')),
+    shape: 'arch',
+    riseMm: 500,
+  ),
 
   // Other shapes
-  DrawingPreset('circle', 'Dumaloq', 'Boshqa', 900, 900, _fixed,
-      shape: 'circle'),
+  DrawingPreset(
+    'circle',
+    'Dumaloq',
+    'Boshqa',
+    900,
+    900,
+    _fixed,
+    shape: 'circle',
+  ),
   DrawingPreset('oval', 'Oval', 'Boshqa', 1200, 800, _fixed, shape: 'ellipse'),
-  DrawingPreset('triangle', 'Uchburchak', 'Boshqa', 1500, 900, _fixed,
-      shape: 'triangle'),
-  DrawingPreset('trapezoid', 'Trapetsiya', 'Boshqa', 1500, 1200,
-      () => _row([_fixed(), _fixed()]),
-      shape: 'trapezoid'),
+  DrawingPreset(
+    'triangle',
+    'Uchburchak',
+    'Boshqa',
+    1500,
+    900,
+    _fixed,
+    shape: 'triangle',
+  ),
+  DrawingPreset(
+    'trapezoid',
+    'Trapetsiya',
+    'Boshqa',
+    1500,
+    1200,
+    () => _row([_fixed(), _fixed()]),
+    shape: 'trapezoid',
+  ),
 ];
 
 /// Catalog tabs in order, with their titles.
@@ -2176,14 +2561,19 @@ Map<String, String?> sectionSides(DMap drawing, String id) {
 /// window grows. Returns the new drawing; throws when the result is too
 /// small or too big.
 DMap resizeSection(
-    DMap drawing, DMap recipe, String id, String side, double deltaMm) {
+  DMap drawing,
+  DMap recipe,
+  String id,
+  String side,
+  double deltaMm,
+) {
   final d = Map<String, dynamic>.from(jsonDecode(jsonEncode(drawing)));
   final sides = sectionSides(d, id);
   if (!sides.containsKey(side)) throw Exception('Bu tomonni surib bo‘lmaydi');
   final layout = layoutDrawing(d, recipe);
   if (sides[side] == null && d['shape'] == 'rect') {
     final boxes = {
-      for (final c in layout.cells) c.node['id'] as String: [...c.box]
+      for (final c in layout.cells) c.node['id'] as String: [...c.box],
     };
     final i = _sideIndex[side]!;
     boxes[id]![i] += deltaMm;
@@ -2231,8 +2621,12 @@ DMap resizeSection(
 /// Rebuilds [d] so that every section has the clear box in [boxes] (from
 /// [layout], one of them changed): the frame goes round them all, every
 /// impost stays where it was and sections short of the frame are trimmed.
-void _refit(DMap d, DMap recipe, DrawingLayout layout,
-    Map<String, List<double>> boxes) {
+void _refit(
+  DMap d,
+  DMap recipe,
+  DrawingLayout layout,
+  Map<String, List<double>> boxes,
+) {
   final f = (recipe['frameFace'] as num).toDouble(),
       face = (recipe['mullionFace'] as num).toDouble();
   final all = boxes.values;
@@ -2253,7 +2647,7 @@ void _refit(DMap d, DMap recipe, DrawingLayout layout,
   d['heightMm'] = round(h);
   final positions = {
     for (final s in layout.splits)
-      s.node['id']: s.node['axis'] == 'v' ? s.a.x : s.a.y
+      s.node['id']: s.node['axis'] == 'v' ? s.a.x : s.a.y,
   };
   void walk(DMap n, List<double> b) {
     if (n['axis'] == null) {
@@ -2298,16 +2692,16 @@ Map<String, num> subtreeTrim(DMap drawing, DMap recipe, String id) {
   if (node == null || box == null) return const {};
   final cells = [
     for (final c in layout.cells)
-      if (findNode(node, c.node['id'] as String) != null) c
+      if (findNode(node, c.node['id'] as String) != null) c,
   ];
   if (cells.isEmpty) return const {};
   final outer = bounds([
-    for (final c in cells) ...[V(c.box[0], c.box[1]), V(c.box[2], c.box[3])]
+    for (final c in cells) ...[V(c.box[0], c.box[1]), V(c.box[2], c.box[3])],
   ]);
   return {
     for (final MapEntry(key: side, value: i) in _sideIndex.entries)
       if ((outer[i] - box[i]).abs() > 10)
-        side: ((outer[i] - box[i]).abs() * 10).round() / 10
+        side: ((outer[i] - box[i]).abs() * 10).round() / 10,
   };
 }
 
@@ -2323,8 +2717,14 @@ void equalizeSections(DMap drawing, DMap recipe, {String? rootId}) {
     final boxes = {for (final s in layout.splits) s.node['id']: s.box},
         inner = bounds(layout.inner);
     var moved = 0.0;
-    void walk(DMap n, String? parentAxis, double start, double end, int before,
-        int total) {
+    void walk(
+      DMap n,
+      String? parentAxis,
+      double start,
+      double end,
+      int before,
+      int total,
+    ) {
       final axis = n['axis'] as String?;
       if (axis == null) return;
       final box = boxes[n['id']];
