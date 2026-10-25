@@ -31,8 +31,8 @@ class _WorkshopToolsState extends State<WorkshopTools> {
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: s,
         builder: (context, _) => Scaffold(
-          appBar:
-              AppBar(title: Text(page == 0 ? 'Qarz daftari' : 'Eslatmalar')),
+          appBar: GlassAppBar(
+              title: Text(page == 0 ? 'Qarz daftari' : 'Eslatmalar')),
           body: readable(SafeArea(
             child: ListView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -342,7 +342,7 @@ class _DebtFormState extends State<DebtForm> {
 
   @override
   Widget build(BuildContext c) => Scaffold(
-        appBar: AppBar(title: const Text('Qarz yozish')),
+        appBar: GlassAppBar(title: const Text('Qarz yozish')),
         body: readable(SafeArea(
           child: Form(
             key: form,
@@ -452,7 +452,7 @@ class DebtDetail extends StatelessWidget {
           final d = store.debts.firstWhere((d) => d['id'] == id),
               balance = Store.debtBalance(d);
           return Scaffold(
-            appBar: AppBar(title: Text(d['person'])),
+            appBar: GlassAppBar(title: Text(d['person'])),
             body: readable(SafeArea(
               child: ListView(
                 keyboardDismissBehavior:
@@ -543,7 +543,7 @@ class _PaymentFormState extends State<PaymentForm> {
 
   @override
   Widget build(BuildContext c) => Scaffold(
-        appBar: AppBar(title: const Text('Qarz to‘lovi')),
+        appBar: GlassAppBar(title: const Text('Qarz to‘lovi')),
         body: readable(Form(
           key: form,
           child: ListView(
@@ -604,7 +604,7 @@ class _ReminderFormState extends State<ReminderForm> {
 
   @override
   Widget build(BuildContext c) => Scaffold(
-        appBar: AppBar(title: const Text('Eslatma')),
+        appBar: GlassAppBar(title: const Text('Eslatma')),
         body: readable(SafeArea(
           child: Form(
             key: form,

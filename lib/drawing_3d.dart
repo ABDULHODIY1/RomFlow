@@ -9,6 +9,7 @@ import 'app_theme.dart';
 import 'calculator.dart' show money;
 import 'in_place_page.dart';
 import 'platform_files.dart';
+import 'adaptive_ui.dart';
 
 class P3 {
   final double x, y, z;
@@ -1737,7 +1738,7 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
   }
 
   Future<void> componentList() async {
-    final id = await showModalBottomSheet<String>(
+    final id = await showGlassSheet<String>(
         context: context,
         isScrollControlled: true,
         builder: (c) => SafeArea(
@@ -1805,9 +1806,10 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
         data: romFlowTheme(Brightness.dark),
         child: Scaffold(
             backgroundColor: const Color(0xff101d30),
-            appBar: AppBar(
+            appBar: GlassAppBar(
                 backgroundColor: const Color(0xff101d30),
                 foregroundColor: Colors.white,
+                glassBrightness: Brightness.dark,
                 title: Text(explodeMode ? 'Detallar' : '3D'),
                 actions: [
                   IconButton(
@@ -1940,15 +1942,24 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
                     ])
                       Padding(
                         padding: const EdgeInsets.only(bottom: 6),
-                        child: IconButton(
-                            key: ValueKey(key),
-                            tooltip: tip,
-                            onPressed: () => look(y, p),
-                            style: IconButton.styleFrom(
-                                backgroundColor: Colors.black26,
-                                minimumSize: const Size(38, 38),
-                                padding: EdgeInsets.zero),
-                            icon: Icon(icon, size: 19, color: Colors.white70)),
+                        child: usesIOSGlass
+                            ? GlassIconButton(
+                                key: ValueKey(key),
+                                icon: icon,
+                                tooltip: tip,
+                                onPressed: () => look(y, p),
+                                size: 40,
+                                brightness: Brightness.dark)
+                            : IconButton(
+                                key: ValueKey(key),
+                                tooltip: tip,
+                                onPressed: () => look(y, p),
+                                style: IconButton.styleFrom(
+                                    backgroundColor: Colors.black26,
+                                    minimumSize: const Size(38, 38),
+                                    padding: EdgeInsets.zero),
+                                icon: Icon(icon,
+                                    size: 19, color: Colors.white70)),
                       ),
                   ]),
                 ),
@@ -2024,88 +2035,110 @@ class _View3DState extends State<View3D> with TickerProviderStateMixin {
                               icon: const Icon(Icons.close,
                                   color: Colors.white70))
                         ])),
-              Container(
-                  padding: const EdgeInsets.fromLTRB(8, 4, 12, 8),
-                  decoration: const BoxDecoration(
-                      color: Color(0xff16263a),
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(18))),
+              glassPanel(
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Row(children: [
-                      IconButton(
-                          tooltip: controller.isAnimating
-                              ? 'To‘xtatish'
-                              : explodeMode
-                                  ? 'Sochish / yig‘ish animatsiyasi'
-                                  : 'Ochish / yopish',
-                          onPressed: !explodeMode && model.groups.isEmpty
+                Row(children: [
+                  IconButton(
+                      tooltip: controller.isAnimating
+                          ? 'To‘xtatish'
+                          : explodeMode
+                              ? 'Sochish / yig‘ish animatsiyasi'
+                              : 'Ochish / yopish',
+                      onPressed: !explodeMode && model.groups.isEmpty
+                          ? null
+                          : togglePlayback,
+                      icon: Icon(
+                          controller.isAnimating
+                              ? Icons.pause_circle_filled
+                              : Icons.play_circle_fill,
+                          color: Colors.lightBlueAccent,
+                          size: 38)),
+                  Expanded(
+                      child: Slider(
+                          key: ValueKey(explodeMode
+                              ? 'explode-slider'
+                              : 'opening-slider'),
+                          value: controller.value,
+                          onChanged: !explodeMode && model.groups.isEmpty
                               ? null
-                              : togglePlayback,
-                          icon: Icon(
-                              controller.isAnimating
-                                  ? Icons.pause_circle_filled
-                                  : Icons.play_circle_fill,
-                              color: Colors.lightBlueAccent,
-                              size: 38)),
-                      Expanded(
-                          child: Slider(
-                              key: ValueKey(explodeMode
-                                  ? 'explode-slider'
-                                  : 'opening-slider'),
-                              value: controller.value,
-                              onChanged: !explodeMode && model.groups.isEmpty
-                                  ? null
-                                  : (v) {
-                                      controller.stop();
-                                      controller.value = v;
-                                    })),
-                      if (explodeMode) ...[
-                        tool(
-                            const ValueKey('explode-labels'),
-                            Icons.tag,
-                            'Raqamlar',
-                            labels,
-                            () => setState(() => labels = !labels)),
-                        tool(
-                            const ValueKey('explode-isolate'),
-                            Icons.filter_center_focus,
-                            'Faqat tanlangan',
-                            isolate,
-                            selectedMaterial == null
-                                ? null
-                                : () => setState(() => isolate = !isolate)),
-                      ],
-                    ]),
-                    if (calculationError != null)
-                      Text('Hisob uchun me’yorni tekshiring: $calculationError',
-                          maxLines: 2,
-                          style: const TextStyle(
-                              color: Colors.orangeAccent, fontSize: 11)),
-                  ])),
+                              : (v) {
+                                  controller.stop();
+                                  controller.value = v;
+                                })),
+                  if (explodeMode) ...[
+                    tool(
+                        const ValueKey('explode-labels'),
+                        Icons.tag,
+                        'Raqamlar',
+                        labels,
+                        () => setState(() => labels = !labels)),
+                    tool(
+                        const ValueKey('explode-isolate'),
+                        Icons.filter_center_focus,
+                        'Faqat tanlangan',
+                        isolate,
+                        selectedMaterial == null
+                            ? null
+                            : () => setState(() => isolate = !isolate)),
+                  ],
+                ]),
+                if (calculationError != null)
+                  Text('Hisob uchun me’yorni tekshiring: $calculationError',
+                      maxLines: 2,
+                      style: const TextStyle(
+                          color: Colors.orangeAccent, fontSize: 11)),
+              ])),
             ]))));
   }
 
   /// A round icon with its name as a tooltip, lit when [on].
+  /// The play bar under the model: dark glass, or the plain dark panel.
+  Widget glassPanel({required Widget child}) {
+    const radius = BorderRadius.vertical(top: Radius.circular(18));
+    const padding = EdgeInsets.fromLTRB(8, 4, 12, 8);
+    return usesIOSGlass
+        ? GlassSurface(
+            radius: radius,
+            brightness: Brightness.dark,
+            shadow: false,
+            child: Padding(padding: padding, child: child))
+        : Container(
+            padding: padding,
+            decoration: const BoxDecoration(
+                color: Color(0xff16263a), borderRadius: radius),
+            child: child);
+  }
+
   Widget tool(
           Key key, IconData icon, String name, bool on, VoidCallback? onTap) =>
       Padding(
         padding: const EdgeInsets.only(right: 6),
-        child: IconButton(
-          key: key,
-          tooltip: name,
-          isSelected: on,
-          onPressed: onTap,
-          style: IconButton.styleFrom(
-              backgroundColor: on
-                  ? const Color(0xff2f7fd8)
-                  : Colors.white.withValues(alpha: .08),
-              minimumSize: const Size(42, 42)),
-          icon: Icon(icon, size: 21, color: on ? Colors.white : Colors.white70),
-        ),
+        child: usesIOSGlass
+            ? GlassIconButton(
+                key: key,
+                icon: icon,
+                tooltip: name,
+                selected: on,
+                onPressed: onTap,
+                size: 42,
+                brightness: Brightness.dark)
+            : IconButton(
+                key: key,
+                tooltip: name,
+                isSelected: on,
+                onPressed: onTap,
+                style: IconButton.styleFrom(
+                    backgroundColor: on
+                        ? const Color(0xff2f7fd8)
+                        : Colors.white.withValues(alpha: .08),
+                    minimumSize: const Size(42, 42)),
+                icon: Icon(icon,
+                    size: 21, color: on ? Colors.white : Colors.white70),
+              ),
       );
 
   Future<void> inventory() async {
-    await showModalBottomSheet<void>(
+    await showGlassSheet<void>(
         context: context,
         isScrollControlled: true,
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -2225,9 +2258,10 @@ class _ProfileSectionsState extends State<ProfileSections> {
     final (_, size, model) = pieces[index];
     return Scaffold(
       backgroundColor: const Color(0xff101d30),
-      appBar: AppBar(
+      appBar: GlassAppBar(
           backgroundColor: const Color(0xff101d30),
           foregroundColor: Colors.white,
+          glassBrightness: Brightness.dark,
           title: const Text('Profil kesimlari')),
       body: SafeArea(
         child: Column(children: [

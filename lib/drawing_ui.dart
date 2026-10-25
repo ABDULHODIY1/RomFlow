@@ -13,6 +13,7 @@ import 'design_catalog.dart';
 import 'in_place_page.dart';
 import 'manufacturers.dart' show comparisonKeys;
 import 'manufacturers_page.dart';
+import 'adaptive_ui.dart';
 
 const _blue = Color(0xff206bc4);
 
@@ -313,7 +314,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
   Future<void> partsPalette() async {
     final owner = node(selected);
     if (owner == null || owner['axis'] != null) return;
-    final result = await showModalBottomSheet<String>(
+    final result = await showGlassSheet<String>(
       context: context,
       isScrollControlled: true,
       builder: (context) => SafeArea(
@@ -524,7 +525,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
   }
 
   Future<void> loadTemplate() async {
-    final selectedTemplate = await showModalBottomSheet<DMap>(
+    final selectedTemplate = await showGlassSheet<DMap>(
       context: context,
       builder: (c) => SafeArea(
         child: ListView(
@@ -978,7 +979,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
     final leaf = n != null && n['axis'] == null ? n : null;
     if (visualMode) return visualWorkspace(layout, leaf);
     return Scaffold(
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: const Text('Batafsil sozlash'),
         actions: [
           IconButton(
@@ -2003,7 +2004,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
     preview();
     if (report == null) return;
     final current = report!;
-    final add = await showModalBottomSheet<bool>(
+    final add = await showGlassSheet<bool>(
         context: context,
         isScrollControlled: true,
         builder: (context) => SafeArea(
@@ -2186,6 +2187,46 @@ class _DrawingEditorState extends State<DrawingEditor> {
           ]),
         ),
       ),
+    );
+  }
+
+  /// The palette of tool groups: a glass capsule when Liquid Glass is on.
+  Widget glassBar(ColorScheme scheme, Widget child) => Padding(
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, 0),
+      child: usesIOSGlass
+          ? GlassSurface(radius: BorderRadius.circular(22), child: child)
+          : DecoratedBox(
+              decoration: BoxDecoration(
+                  color: scheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: scheme.outlineVariant)),
+              child: child));
+
+  /// The bottom panel: a glass card when Liquid Glass is on.
+  Widget deskPanel(ColorScheme scheme, Widget child) {
+    const padding = EdgeInsets.fromLTRB(12, 4, 12, 10);
+    if (usesIOSGlass) {
+      return Padding(
+          padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
+          child: GlassSurface(
+              radius: BorderRadius.circular(26),
+              child: Padding(padding: padding, child: child)));
+    }
+    return Container(
+      margin: const EdgeInsets.only(top: 6),
+      padding: padding,
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+        border: Border(top: BorderSide(color: scheme.outlineVariant)),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: .06),
+              blurRadius: 16,
+              offset: const Offset(0, -4))
+        ],
+      ),
+      child: child,
     );
   }
 
@@ -2642,7 +2683,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
   }
 
   Future<void> appearanceSheet() async {
-    await showModalBottomSheet<void>(
+    await showGlassSheet<void>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
@@ -2846,7 +2887,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
   }
 
   Future<void> sectionMenu(String id) async {
-    await showModalBottomSheet<void>(
+    await showGlassSheet<void>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
@@ -3022,7 +3063,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
 
   Future<void> dividerMenu(DrawingSplit split, DrawingLayout layout) async {
     final main = layout.splits.any((s) => s.node['id'] == split.node['id']);
-    final choice = await showModalBottomSheet<String>(
+    final choice = await showGlassSheet<String>(
       context: context,
       showDragHandle: true,
       builder: (sheet) => SafeArea(
@@ -3130,7 +3171,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
     final price = livePriceText();
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(
+      appBar: GlassAppBar(
           title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -3161,13 +3202,9 @@ class _DrawingEditorState extends State<DrawingEditor> {
         LayoutBuilder(builder: (context, box) {
           // All six groups stay visible on a phone without scrolling.
           final width = math.min(72.0, (box.maxWidth - 42) / 6 - 6);
-          return Container(
-              margin: const EdgeInsets.fromLTRB(12, 2, 12, 0),
-              decoration: BoxDecoration(
-                  color: scheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: scheme.outlineVariant)),
-              child: tools([
+          return glassBar(
+              scheme,
+              tools([
                 for (final entry in <(String, String, IconData)>[
                   ('split', 'Bo‘lish', Icons.grid_view_outlined),
                   ('window', 'Deraza', Icons.window_outlined),
@@ -3356,21 +3393,9 @@ class _DrawingEditorState extends State<DrawingEditor> {
                           : dropWorkspace(layout)),
                   Positioned(top: 8, right: 8, child: viewSwitch()),
                 ]))),
-        Container(
-          margin: const EdgeInsets.only(top: 6),
-          padding: const EdgeInsets.fromLTRB(12, 4, 12, 10),
-          decoration: BoxDecoration(
-            color: scheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-            border: Border(top: BorderSide(color: scheme.outlineVariant)),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withValues(alpha: .06),
-                  blurRadius: 16,
-                  offset: const Offset(0, -4))
-            ],
-          ),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
+        deskPanel(
+          scheme,
+          Column(mainAxisSize: MainAxisSize.min, children: [
             profileBar(),
             specBar(),
             const SizedBox(height: 6),
@@ -4376,7 +4401,7 @@ class _RecipeEditorState extends State<RecipeEditor> {
       );
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Materiallar va narxlar')),
+        appBar: GlassAppBar(title: const Text('Materiallar va narxlar')),
         body: SafeArea(
           child: ListView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,

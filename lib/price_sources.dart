@@ -11,6 +11,7 @@ import 'manufacturers.dart' show manufacturersUrl;
 import 'platform_files.dart';
 import 'store.dart';
 import 'workshop_tools.dart' show localDate;
+import 'adaptive_ui.dart';
 
 /// Price lists from sources the workshop is allowed to use: a dealer's or
 /// supplier's feed, or its own published spreadsheet (Google Sheets →
@@ -484,7 +485,7 @@ class _PriceSourcesPageState extends State<PriceSourcesPage> {
     return AnimatedBuilder(
       animation: s,
       builder: (context, _) => Scaffold(
-        appBar: AppBar(title: const Text('Narxlarni yangilash')),
+        appBar: GlassAppBar(title: const Text('Narxlarni yangilash')),
         floatingActionButton: FloatingActionButton.extended(
             onPressed: () => editSource(),
             icon: const Icon(Icons.add_link),
@@ -599,7 +600,7 @@ class _PriceReviewPageState extends State<PriceReviewPage> {
       error = '$e'.replaceFirst('FormatException: ', '');
     }
     return Scaffold(
-      appBar: AppBar(title: Text('Narxlar • ${widget.sourceName}')),
+      appBar: GlassAppBar(title: Text('Narxlar • ${widget.sourceName}')),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12),

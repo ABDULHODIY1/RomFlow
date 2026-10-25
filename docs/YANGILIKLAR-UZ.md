@@ -1,3 +1,15 @@
+# RomFlow 2.2.0 — Liquid Glass
+
+## iPhone va iPad’da Liquid Glass dizayn
+- **Pastki menyu** — suzuvchi shisha kapsula (iOS 26+ da Apple’ning haqiqiy Liquid Glass materiali); ro‘yxatlar uning ostidan o‘tadi va shisha orqali ko‘rinadi.
+- **Tepadagi panel** — shaffof shisha, kontent ostidan o‘tadi; tugmalar dumaloq shisha.
+- **Pastdan chiqadigan oynalar** (Zavodlar narxi, Profil va rang, andozalar…) — katta burchakli shisha varaq.
+- **Chizma stoli** — asboblar qatori va pastki panel shisha kartalar.
+- **3D** — rejim va ko‘rinish tugmalari, pastki ijro paneli to‘q shisha; model ular orqali ko‘rinadi.
+- Bosh sahifadagi “Razmer yozish” — shisha tugma.
+- Shisha: orqasi xiralashadi va rangi to‘yinadi, cheti yorug‘likni ushlaydi, tepadan yumshoq yaltirash; iOS “Kontrastni oshirish” yoqilgan bo‘lsa — to‘liq qoplangan.
+- **Sozlamalar → Ko‘rinish → Dizayn**: Avto (iPhone’da Liquid Glass), Liquid Glass (Android’da ham) yoki Oddiy.
+
 # RomFlow 2.1.0 — O‘zbekiston zavodlari narxi
 
 ## Ishlab chiqaruvchilar katalogi

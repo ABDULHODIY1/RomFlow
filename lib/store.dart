@@ -26,6 +26,10 @@ class Store extends ChangeNotifier {
       workshopPhone = '',
       workshopAddress = '';
   String themePreference = 'system';
+
+  /// 'auto' (Liquid Glass on iPhone and iPad, Material elsewhere), 'glass'
+  /// or 'material'.
+  String designPreference = 'auto';
   String? startupMessage;
 
   /// So‘m per US dollar for prices quoted in dollars; 0 when not set.
@@ -292,6 +296,10 @@ class Store extends ChangeNotifier {
           Map<String, dynamic>.from(row['item']['recipe']));
     }
     themePreference = d['themePreference'] ?? 'system';
+    designPreference = '${d['designPreference'] ?? 'auto'}';
+    if (!const {'auto', 'glass', 'material'}.contains(designPreference)) {
+      designPreference = 'auto';
+    }
     if (!const {'system', 'light', 'dark'}.contains(themePreference)) {
       throw const FormatException('Tema noto‘g‘ri');
     }
@@ -344,6 +352,7 @@ class Store extends ChangeNotifier {
         'debts': debts,
         'reminders': reminders,
         'themePreference': themePreference,
+        'designPreference': designPreference,
         'inventory': inventory,
         'inventoryMoves': inventoryMoves,
         'drawingTemplates': drawingTemplates,
@@ -825,6 +834,13 @@ class Store extends ChangeNotifier {
           'created': DateTime.now().toIso8601String(),
         });
       });
+  Future<void> setDesign(String value) => _change('Dizayn o‘zgartirildi', () {
+        if (!const {'auto', 'glass', 'material'}.contains(value)) {
+          throw Exception('Dizayn noto‘g‘ri');
+        }
+        designPreference = value;
+      });
+
   Future<void> setTheme(String value) => _change('Tema o‘zgartirildi', () {
         if (!const {'system', 'light', 'dark'}.contains(value)) {
           throw Exception('Tema noto‘g‘ri');
@@ -1102,6 +1118,7 @@ class Store extends ChangeNotifier {
         inventoryMoves = [];
         drawingTemplates = [];
         themePreference = 'system';
+        designPreference = 'auto';
         priceSources = [];
         measurements = [];
         usdRate = 0;

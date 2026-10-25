@@ -35,7 +35,7 @@ class StaffPage extends StatelessWidget {
           final owed = store.staff
               .fold<int>(0, (sum, w) => sum + store.staffBalance(w['id']));
           return Scaffold(
-            appBar: AppBar(title: const Text('Xodimlar va ish haqi')),
+            appBar: GlassAppBar(title: const Text('Xodimlar va ish haqi')),
             floatingActionButton: FloatingActionButton.extended(
               onPressed: () => editWorker(context, store),
               icon: const Icon(Icons.person_add_alt),
@@ -296,7 +296,7 @@ class StaffDetailPage extends StatelessWidget {
           final found = store.staff.where((w) => w['id'] == staffId);
           if (found.isEmpty) {
             return Scaffold(
-                appBar: AppBar(),
+                appBar: GlassAppBar(),
                 body: const Center(child: Text('Xodim topilmadi')));
           }
           final w = found.first;
@@ -307,7 +307,7 @@ class StaffDetailPage extends StatelessWidget {
           final orders =
               store.quotes.where((q) => q['staffId'] == staffId).toList();
           return Scaffold(
-            appBar: AppBar(title: Text(w['name']), actions: [
+            appBar: GlassAppBar(title: Text(w['name']), actions: [
               IconButton(
                   tooltip: 'Tahrirlash',
                   onPressed: () => editWorker(context, store, w),

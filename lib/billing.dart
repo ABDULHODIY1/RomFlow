@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'calculator.dart' show Json;
 import 'store.dart';
+import 'adaptive_ui.dart';
 
 /// Tariffs and payments. The paid plans and payment methods are in place,
 /// but charging is switched off: while [BillingConfig.paymentsEnabled] is
@@ -105,7 +106,7 @@ class TariffPage extends StatelessWidget {
         free = !BillingConfig.paymentsEnabled,
         apple = Platform.isIOS || Platform.isMacOS;
     return Scaffold(
-      appBar: AppBar(title: const Text('Tarif va to‘lov')),
+      appBar: GlassAppBar(title: const Text('Tarif va to‘lov')),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(

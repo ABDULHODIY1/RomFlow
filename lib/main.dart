@@ -35,7 +35,7 @@ import 'installments.dart';
 import 'reminder_service.dart';
 import 'demo_overlay.dart';
 
-const appVersion = '2.1.0';
+const appVersion = '2.2.0';
 
 const ink = Color(0xff172b4d),
     blue = Color(0xff206bc4),
@@ -143,6 +143,7 @@ class RomFlow extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: store,
         builder: (context, _) => MaterialApp(
+          key: ValueKey(_designKey(store.designPreference)),
           title: 'RomFlow',
           builder: (context, child) => demoMode
               ? DemoOverlay(child: WorkshopKeyboardTools(child: child!))
@@ -317,37 +318,56 @@ class _HomeState extends State<Home> {
           final width = MediaQuery.sizeOf(context).width,
               // Tablets, desktops and phones on their side get a side rail.
               wide = width >= 720,
+              // Under Liquid Glass the list runs behind the bars; its own
+              // padding keeps the first and last rows clear of them.
+              glassLayout = usesIOSGlass && !wide,
               content = SafeArea(
+                top: !glassLayout,
+                bottom: !glassLayout,
                 child: RefreshIndicator(
                   onRefresh: () => guarded(context, s.refresh),
+                  // Below the glass app bar: status bar plus toolbar.
+                  edgeOffset: glassLayout
+                      ? MediaQuery.paddingOf(context).top + kToolbarHeight
+                      : 0,
                   child: LayoutBuilder(
-                    builder: (context, box) => ListView(
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      padding: EdgeInsets.fromLTRB(
-                          math.max(16, (box.maxWidth - 1120) / 2),
-                          8,
-                          math.max(16, (box.maxWidth - 1120) / 2),
-                          100),
-                      children: page == 0
-                          ? dashboard(box.maxWidth)
-                          : page == 1
-                              ? orders()
-                              : page == 2
-                                  ? catalog()
-                                  : settings(),
+                    // Grids inside the list must not add the bars' padding
+                    // again.
+                    builder: (context, box) => MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      removeBottom: true,
+                      child: ListView(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: EdgeInsets.fromLTRB(
+                            math.max(16, (box.maxWidth - 1120) / 2),
+                            8 +
+                                (glassLayout
+                                    ? MediaQuery.paddingOf(context).top
+                                    : 0),
+                            math.max(16, (box.maxWidth - 1120) / 2),
+                            100 +
+                                (glassLayout
+                                    ? MediaQuery.paddingOf(context).bottom
+                                    : 0)),
+                        children: page == 0
+                            ? dashboard(box.maxWidth)
+                            : page == 1
+                                ? orders()
+                                : page == 2
+                                    ? catalog()
+                                    : settings(),
+                      ),
                     ),
                   ),
                 ),
               );
           return Scaffold(
-            appBar: AppBar(
-              flexibleSpace: usesIOSGlass && !wide
-                  ? const GlassSurface(
-                      radius: BorderRadius.zero,
-                      child: SizedBox.expand(),
-                    )
-                  : null,
+            // Liquid Glass: the lists scroll under the glass bars.
+            extendBody: usesIOSGlass && !wide,
+            extendBodyBehindAppBar: usesIOSGlass && !wide,
+            appBar: GlassAppBar(
               title: Row(
                 children: [
                   const BrandLogo(size: 38),
@@ -363,13 +383,20 @@ class _HomeState extends State<Home> {
                 ],
               ),
               actions: [
-                IconButton(
-                  key: const ValueKey('tariff'),
-                  tooltip: 'Tarif va to‘lov',
-                  onPressed: () => open(TariffPage(store: s)),
-                  icon: const Icon(Icons.workspace_premium_outlined),
-                ),
-                const SizedBox(width: 4),
+                usesIOSGlass
+                    ? GlassIconButton(
+                        key: const ValueKey('tariff'),
+                        tooltip: 'Tarif va to‘lov',
+                        onPressed: () => open(TariffPage(store: s)),
+                        icon: Icons.workspace_premium_outlined,
+                        size: 40)
+                    : IconButton(
+                        key: const ValueKey('tariff'),
+                        tooltip: 'Tarif va to‘lov',
+                        onPressed: () => open(TariffPage(store: s)),
+                        icon: const Icon(Icons.workspace_premium_outlined),
+                      ),
+                SizedBox(width: usesIOSGlass ? 12 : 4),
               ],
             ),
             body: wide
@@ -940,6 +967,20 @@ class _HomeState extends State<Home> {
         ),
         heading('Ko‘rinish'),
         DropdownButtonFormField<String>(
+          key: ValueKey('design-${s.designPreference}'),
+          isExpanded: true,
+          initialValue: s.designPreference,
+          decoration: const InputDecoration(labelText: 'Dizayn'),
+          items: const [
+            DropdownMenuItem(
+                value: 'auto', child: Text('Avto • iPhone’da Liquid Glass')),
+            DropdownMenuItem(value: 'glass', child: Text('Liquid Glass')),
+            DropdownMenuItem(value: 'material', child: Text('Oddiy')),
+          ],
+          onChanged: (v) => guarded(context, () => s.setDesign(v!)),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
           key: ValueKey(s.themePreference),
           isExpanded: true,
           initialValue: s.themePreference,
@@ -1478,17 +1519,21 @@ class DashboardHero extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: OutlinedButton.icon(
-                key: const ValueKey('home-measure'),
-                style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.white70),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 14)),
-                onPressed: onMeasure,
-                icon: const Icon(Icons.straighten, size: 20),
-                label: const FittedBox(
-                    fit: BoxFit.scaleDown, child: Text('Razmer yozish')),
+              child: glassOver(
+                OutlinedButton.icon(
+                  key: const ValueKey('home-measure'),
+                  style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: usesIOSGlass
+                          ? BorderSide.none
+                          : const BorderSide(color: Colors.white70),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 14)),
+                  onPressed: onMeasure,
+                  icon: const Icon(Icons.straighten, size: 20),
+                  label: const FittedBox(
+                      fit: BoxFit.scaleDown, child: Text('Razmer yozish')),
+                ),
               ),
             ),
           ]),
@@ -1497,6 +1542,19 @@ class DashboardHero extends StatelessWidget {
     );
   }
 }
+
+/// The design chosen in Settings, applied before the app is built; a new
+/// key rebuilds every page when it changes.
+String _designKey(String preference) {
+  applyDesign(preference);
+  return usesIOSGlass ? 'glass' : 'material';
+}
+
+/// [child] on a glass pill when Liquid Glass is on.
+Widget glassOver(Widget child, {double radius = 22}) => usesIOSGlass
+    ? GlassSurface(
+        radius: BorderRadius.circular(radius), shadow: false, child: child)
+    : child;
 
 Future<bool> confirm(BuildContext context, String title, String text,
     {String action = 'O‘chirish'}) async {
@@ -1546,7 +1604,7 @@ class CustomerPage extends StatelessWidget {
           final found = store.customers.where((c) => c['id'] == customerId);
           if (found.isEmpty) {
             return Scaffold(
-                appBar: AppBar(),
+                appBar: GlassAppBar(),
                 body: const Center(child: Text('Mijoz topilmadi')));
           }
           final c = found.first;
@@ -1559,7 +1617,7 @@ class CustomerPage extends StatelessWidget {
               .where((q) => q['status'] != 'cancelled')
               .fold<num>(0, (a, q) => a + (q['balance'] as num));
           return Scaffold(
-            appBar: AppBar(title: Text(c['name']), actions: [
+            appBar: GlassAppBar(title: Text(c['name']), actions: [
               IconButton(
                   tooltip: 'Tahrirlash',
                   onPressed: () => addCustomer(context, store, c),
@@ -2332,7 +2390,7 @@ class _BuilderPageState extends State<BuilderPage> {
     final prices = itemTotals(), total = liveTotal();
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(
+      appBar: GlassAppBar(
           title: Text(widget.editing == null ? 'Smeta' : 'Smetani tahrirlash')),
       bottomNavigationBar: totalBar(total),
       body: readable(SafeArea(
@@ -2688,13 +2746,13 @@ class _QuotePageState extends State<QuotePage> {
           final matches = s.quotes.where((q) => q['id'] == widget.id);
           if (matches.isEmpty) {
             return Scaffold(
-              appBar: AppBar(),
+              appBar: GlassAppBar(),
               body: const Center(child: Text('Smeta topilmadi')),
             );
           }
           final q = matches.first;
           return Scaffold(
-            appBar: AppBar(
+            appBar: GlassAppBar(
               title: const Text('Smeta tafsilotlari'),
               actions: [
                 IconButton(
@@ -3423,7 +3481,7 @@ class _CutsPageState extends State<CutsPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Profil raskroyi')),
+        appBar: GlassAppBar(title: const Text('Profil raskroyi')),
         body: readable(ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(20),
@@ -3501,7 +3559,7 @@ class AuditPage extends StatelessWidget {
   const AuditPage({super.key, required this.store});
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Faoliyat tarixi')),
+        appBar: GlassAppBar(title: const Text('Faoliyat tarixi')),
         body: readable(ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(20),

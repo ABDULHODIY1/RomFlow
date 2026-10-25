@@ -12,6 +12,7 @@ import 'design_catalog.dart' show DesignPainter;
 import 'design_engine.dart';
 import 'platform_files.dart';
 import 'window_photo.dart';
+import 'adaptive_ui.dart';
 
 /// "Joyida": the window or door where it goes, the opening in the wall or
 /// the old window, drawn in perspective so the client sees it installed
@@ -335,7 +336,7 @@ class _InPlacePageState extends State<InPlacePage> {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: photo == null ? null : const Color(0xff10161d),
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: const Text('Joyida ko‘rish'),
         actions: [
           if (photo != null)
@@ -767,7 +768,7 @@ class _LiveInPlacePageState extends State<LiveInPlacePage>
     final c = camera, scheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
+      appBar: GlassAppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         title: const Text('Joyida — kamera'),

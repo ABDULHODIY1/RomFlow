@@ -38,7 +38,7 @@ class WarehousePage extends StatelessWidget {
             }
           }
           return Scaffold(
-            appBar: AppBar(
+            appBar: GlassAppBar(
               title:
                   Text(items == null ? 'Ombor' : 'Material yetishmovchiligi'),
               actions: [
@@ -294,7 +294,7 @@ class _StockFormState extends State<StockForm> {
       );
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Material qoldig‘i')),
+        appBar: GlassAppBar(title: const Text('Material qoldig‘i')),
         body: readable(SafeArea(
           child: Form(
             key: form,

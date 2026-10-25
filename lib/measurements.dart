@@ -4,6 +4,7 @@ import 'dialogs.dart';
 import 'main.dart'
     show BuilderPage, callNumber, confirm, guarded, message, uzbekDay;
 import 'store.dart';
+import 'adaptive_ui.dart';
 
 String _time(DateTime d) =>
     '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
@@ -141,7 +142,7 @@ class MeasurementsPage extends StatelessWidget {
                   .reversed
                   .toList();
           return Scaffold(
-            appBar: AppBar(title: const Text('Razmer — o‘lchash')),
+            appBar: GlassAppBar(title: const Text('Razmer — o‘lchash')),
             floatingActionButton: FloatingActionButton.extended(
                 onPressed: () => Navigator.push(
                     context,
@@ -378,7 +379,7 @@ class _MeasurementEditorState extends State<MeasurementEditor> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
+        appBar: GlassAppBar(
             title:
                 Text(widget.measurement == null ? 'Yangi razmer' : 'Razmer')),
         bottomNavigationBar: SafeArea(

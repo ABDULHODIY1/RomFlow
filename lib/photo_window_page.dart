@@ -10,6 +10,7 @@ import 'design_catalog.dart';
 import 'design_engine.dart';
 import 'store.dart';
 import 'window_photo.dart';
+import 'adaptive_ui.dart';
 
 /// AI camera: a photo of a window becomes its drawing. The window's four
 /// corners are marked on the photo, the frame is straightened, and its bars
@@ -401,7 +402,7 @@ class _PhotoWindowPageState extends State<PhotoWindowPage> {
             ? 1
             : 2;
     return Scaffold(
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: const Text('AI kamera'),
         actions: [
           if (photo != null)

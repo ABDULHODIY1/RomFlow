@@ -6,6 +6,7 @@ import 'design_engine.dart';
 import 'manufacturers.dart';
 import 'price_sources.dart' show openPriceSources;
 import 'store.dart';
+import 'adaptive_ui.dart';
 
 String _clean(Object e) => '$e'.replaceFirst(RegExp(r'^\w*Exception: '), '');
 
@@ -99,7 +100,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
       builder: (context, _) {
         final c = s.catalog;
         return Scaffold(
-          appBar: AppBar(
+          appBar: GlassAppBar(
             title: const Text('Ishlab chiqaruvchilar'),
             actions: [
               busy
@@ -325,7 +326,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
     final prices = Map<String, dynamic>.from(recipeFor(profile)['prices']);
     final usd = Map<String, dynamic>.from(
         profile['drawingRecipe']?['usdPrices'] ?? const {});
-    await showModalBottomSheet<void>(
+    await showGlassSheet<void>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
@@ -427,7 +428,7 @@ Future<String?> showPriceComparison(BuildContext context, Store store,
   final currentData =
       store.profiles.where((p) => p['id'] == currentProfile).firstOrNull;
   final current = currentData?['catalogId'];
-  final picked = await showModalBottomSheet<ProfileSystem>(
+  final picked = await showGlassSheet<ProfileSystem>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,

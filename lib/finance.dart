@@ -126,7 +126,7 @@ class _FinancePageState extends State<FinancePage> {
           length: 2,
           initialIndex: widget.initialTab,
           child: Scaffold(
-            appBar: AppBar(
+            appBar: GlassAppBar(
                 title: const Text('Moliya va statistika'),
                 bottom: const TabBar(tabs: [
                   Tab(text: 'Moliya'),
