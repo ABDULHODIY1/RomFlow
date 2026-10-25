@@ -191,9 +191,52 @@ class GlassControl extends StatelessWidget {
       radius: BorderRadius.circular(12),
       tint: soft,
       shadow: false,
-      child: child,
+      child: CustomPaint(
+        foregroundPainter: MediaQuery.highContrastOf(context)
+            ? null
+            : _GlassControlHighlight(
+                Theme.of(context).brightness == Brightness.dark),
+        child: child,
+      ),
     );
   }
+}
+
+/// Keep the rim visible on controls that paint their own opaque backgrounds.
+class _GlassControlHighlight extends CustomPainter {
+  final bool dark;
+  const _GlassControlHighlight(this.dark);
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final shape = BorderRadius.circular(12).toRSuperellipse(rect.deflate(.5));
+    canvas.drawRSuperellipse(
+        shape,
+        Paint()
+          ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: const Alignment(0, -.2),
+              colors: [
+                Colors.white.withValues(alpha: dark ? .05 : .10),
+                Colors.transparent,
+              ]).createShader(rect));
+    canvas.drawRSuperellipse(
+        shape,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1
+          ..shader = LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withValues(alpha: dark ? .45 : .75),
+                Colors.white.withValues(alpha: .03),
+                Colors.white.withValues(alpha: dark ? .18 : .35),
+              ]).createShader(rect));
+  }
+
+  @override
+  bool shouldRepaint(_GlassControlHighlight old) => old.dark != dark;
 }
 
 /// All ordinary Material buttons get glass from their theme, including custom
