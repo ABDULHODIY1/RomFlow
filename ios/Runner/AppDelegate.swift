@@ -210,6 +210,39 @@ final class GlassButtons: NSObject, FlutterPlatformView {
   private let stack = UIStackView()
   private let channel: FlutterMethodChannel
   private static let blue = UIColor(red: 0.125, green: 0.42, blue: 0.77, alpha: 1)
+
+  /// A template icon from unit-square polylines (an opening symbol): the
+  /// button tints it like an SF symbol.
+  static func drawnIcon(_ strokes: [[Double]], mark: [Double]?, side: CGFloat) -> UIImage {
+    let image = UIGraphicsImageRenderer(size: CGSize(width: side, height: side)).image { _ in
+      let inset: CGFloat = 1.5, span = side - 2 * inset
+      func at(_ x: Double, _ y: Double) -> CGPoint {
+        CGPoint(x: inset + CGFloat(x) * span, y: inset + CGFloat(y) * span)
+      }
+      UIColor.black.setStroke()
+      let box = UIBezierPath(roundedRect: CGRect(x: inset, y: inset, width: span, height: span), cornerRadius: 2)
+      box.lineWidth = 1.6
+      box.stroke()
+      for line in strokes where line.count >= 4 {
+        let path = UIBezierPath()
+        path.move(to: at(line[0], line[1]))
+        var i = 2
+        while i + 1 < line.count { path.addLine(to: at(line[i], line[i + 1])); i += 2 }
+        path.lineWidth = 1.5
+        path.lineJoinStyle = .round
+        path.stroke()
+      }
+      if let m = mark, m.count == 4 {
+        let path = UIBezierPath()
+        path.move(to: at(m[0], m[1]))
+        path.addLine(to: at(m[2], m[3]))
+        path.lineWidth = 3
+        path.lineCapStyle = .round
+        path.stroke()
+      }
+    }
+    return image.withRenderingMode(.alwaysTemplate)
+  }
   init(frame: CGRect, id: Int64, args: [String: Any]?, messenger: FlutterBinaryMessenger) {
     channel = FlutterMethodChannel(name: "romflow/glass-buttons/\(id)", binaryMessenger: messenger)
     super.init()
@@ -313,6 +346,11 @@ final class GlassButtons: NSObject, FlutterPlatformView {
       config.imagePadding = 6
       config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
         pointSize: CGFloat(item["iconSize"] as? Double ?? 16), weight: .semibold)
+    }
+    if let strokes = item["strokes"] as? [[Double]] {
+      config.image = GlassButtons.drawnIcon(
+        strokes, mark: item["mark"] as? [Double],
+        side: CGFloat(item["iconSize"] as? Double ?? 16) + 4)
     }
     config.baseBackgroundColor = style == "white" ? .white : tint
     config.baseForegroundColor = foreground

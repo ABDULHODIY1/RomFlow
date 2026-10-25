@@ -3743,6 +3743,12 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 label: row[i].label,
                 selected: row[i].selected,
                 draggable: row[i].dragData != null,
+                strokes: row[i].opening != null
+                    ? openingIconStrokes(row[i].opening!)
+                    : null,
+                mark: row[i].opening != null
+                    ? openingIconMark(row[i].opening!)
+                    : null,
                 size: 42,
                 iconSize: 17,
               ),
@@ -4619,6 +4625,25 @@ double distanceToSegment(V p, V a, V b) {
 
 /// The drawing desk's paper, in both themes.
 const paperColor = Color(0xffedf4fb);
+
+/// The opening symbol in a unit square, as the native toolbar draws it:
+/// the same lines as on the drawing.
+List<List<double>> openingIconStrokes(String opening) => [
+      for (final line in openingSymbolLines(opening, const [0, 0, 1, 1]))
+        [
+          for (final v in line) ...[v.x, v.y]
+        ],
+    ];
+
+/// The handle's short thick mark in a unit square, or null.
+List<double>? openingIconMark(String opening) {
+  final h = handlePoint(opening, const [0, 0, 1, 1]);
+  if (h == null) return null;
+  final side = hingeSide(opening), across = side == 'top' || side == 'bottom';
+  return across
+      ? [h.x - .18, h.y, h.x + .18, h.y]
+      : [h.x, h.y - .18, h.x, h.y + .18];
+}
 
 /// SF Symbols for the opening types on the native toolbar.
 const openingSymbols = {

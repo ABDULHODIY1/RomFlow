@@ -71,6 +71,9 @@ void main() {
       expect(tilt.length, 2);
       expect(tilt[1][1].y, 0); // tilts on bottom hinges
       expect(openingSymbolLines('fixed', box), isEmpty);
+      // The iOS toolbar draws the same lines, meeting at the handle.
+      expect(openingIconStrokes('left').single.sublist(2, 4), [1, .5]);
+      expect(openingIconMark('left')![0], 1);
       expect(snapRatio(.49, 1500), .5);
       expect(snapRatio(.42, 1500), isNull);
     });

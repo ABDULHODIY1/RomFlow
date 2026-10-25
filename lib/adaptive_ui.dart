@@ -797,6 +797,11 @@ class GlassButton {
   /// Pressed and held, the button reports the finger's moves (dragging a
   /// part onto the drawing).
   final bool draggable;
+
+  /// A drawn icon instead of [symbol]: polylines as x, y pairs in a unit
+  /// square, and an optional thick mark (x0, y0, x1, y1), such as a handle.
+  final List<List<double>>? strokes;
+  final List<double>? mark;
   final double? size;
   final double height, fontSize, iconSize;
   const GlassButton(
@@ -812,6 +817,8 @@ class GlassButton {
     this.expand = false,
     this.light = false,
     this.draggable = false,
+    this.strokes,
+    this.mark,
     this.size,
     this.height = 48,
     this.fontSize = 15,
@@ -831,6 +838,8 @@ class GlassButton {
         'expand': expand,
         'light': light,
         'draggable': draggable,
+        if (strokes != null) 'strokes': strokes,
+        if (mark != null) 'mark': mark,
         if (size != null) 'size': size,
         'height': height,
         'fontSize': fontSize,
