@@ -1,0 +1,223 @@
+name: Signed store builds
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Store platform
+        type: choice
+        options: [android, ios, both]
+        default: both
+      build_number:
+        description: Unused build number (increase for each store upload)
+        required: true
+        default: '29'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signed-store-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.35.7'
+  BUILD_NUMBER: ${{ inputs.build_number }}
+  FLUTTER_SUPPRESS_ANALYTICS: true
+  DART_SUPPRESS_ANALYTICS: true
+
+jobs:
+  android:
+    if: inputs.platform == 'android' || inputs.platform == 'both'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require production upload key
+        env:
+          KEYSTORE: ${{ secrets.ROMFLOW_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ROMFLOW_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ROMFLOW_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ROMFLOW_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_NUMBER" =~ ^[1-9][0-9]{0,8}$ ]] || { echo '::error::Invalid build number'; exit 1; }
+          for name in KEYSTORE STORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            [ -n "${!name}" ] || { echo "::error::Missing signing secret: $name. Debug signing is forbidden for store builds."; exit 1; }
+          done
+          [ "$KEY_ALIAS" != androiddebugkey ] || { echo '::error::Android debug key is forbidden'; exit 1; }
+          umask 077
+          printf '%s' "$KEYSTORE" | base64 --decode > android/app/upload.keystore
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          def escape(s):
+              data = s.encode('utf-16-be')
+              return ''.join('\\u' + data[i:i+2].hex() for i in range(0, len(data), 2))
+          values = {'storeFile': 'upload.keystore', 'storePassword': os.environ['STORE_PASSWORD'],
+                    'keyAlias': os.environ['KEY_ALIAS'], 'keyPassword': os.environ['KEY_PASSWORD']}
+          Path('android/key.properties').write_text(''.join(k + '=' + escape(v) + '\n' for k, v in values.items()))
+          PY
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Reject Android debug certificates
+        env:
+          STORE_PASSWORD: ${{ secrets.ROMFLOW_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ROMFLOW_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          keytool -exportcert -rfc -keystore android/app/upload.keystore \
+            -storepass:env STORE_PASSWORD -alias "$KEY_ALIAS" > "$RUNNER_TEMP/upload-cert.pem"
+          subject=$(openssl x509 -in "$RUNNER_TEMP/upload-cert.pem" -noout -subject)
+          if printf '%s' "$subject" | grep -qi 'Android Debug'; then
+            echo '::error::Android debug certificate is forbidden'; exit 1
+          fi
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build appbundle --release --build-number="$BUILD_NUMBER"
+      - run: flutter build apk --release --build-number="$BUILD_NUMBER"
+      - name: Check bundle signature and name store files
+        run: |
+          set -euo pipefail
+          bundle=build/app/outputs/bundle/release/app-release.aab
+          jarsigner -verify "$bundle" > "$RUNNER_TEMP/bundle-signature.txt" 2>&1
+          grep -q 'jar verified' "$RUNNER_TEMP/bundle-signature.txt"
+          version=$(awk '/^version:/{sub(/\+.*/, "", $2); print $2}' pubspec.yaml)
+          mkdir -p dist
+          cp "$bundle" "dist/RomFlow-$version-$BUILD_NUMBER-play.aab"
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/RomFlow-$version-$BUILD_NUMBER-signed.apk"
+      - name: Remove signing material
+        if: always()
+        run: rm -f android/app/upload.keystore android/key.properties "$RUNNER_TEMP/upload-cert.pem"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RomFlow-Store-Android
+          path: dist/*
+          if-no-files-found: error
+
+  ios:
+    if: inputs.platform == 'ios' || inputs.platform == 'both'
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require App Store signing material
+        env:
+          CERTIFICATE: ${{ secrets.APPLE_DISTRIBUTION_P12_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_P12_PASSWORD }}
+          PROFILE: ${{ secrets.APPLE_APPSTORE_PROFILE_BASE64 }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_NUMBER" =~ ^[1-9][0-9]{0,8}$ ]] || { echo '::error::Invalid build number'; exit 1; }
+          for name in CERTIFICATE CERTIFICATE_PASSWORD PROFILE TEAM; do
+            [ -n "${!name}" ] || { echo "::error::Missing App Store signing secret: $name"; exit 1; }
+          done
+          umask 077
+          printf '%s' "$CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/distribution.p12"
+          printf '%s' "$PROFILE" | base64 --decode > "$RUNNER_TEMP/store.mobileprovision"
+          security cms -D -i "$RUNNER_TEMP/store.mobileprovision" > "$RUNNER_TEMP/profile.plist"
+          python3 - <<'PY'
+          import os, plistlib, datetime
+          from pathlib import Path
+          p = plistlib.loads((Path(os.environ['RUNNER_TEMP']) / 'profile.plist').read_bytes())
+          team = os.environ['TEAM']
+          assert p['TeamIdentifier'] == [team], 'Wrong Apple team'
+          assert p['Entitlements']['application-identifier'] == team + '.uz.romflow.workshop', 'Wrong bundle ID'
+          assert not p.get('ProvisionedDevices') and not p.get('ProvisionsAllDevices'), 'App Store profile required'
+          assert not p['Entitlements'].get('get-task-allow', False), 'Development profile forbidden'
+          assert p['ExpirationDate'] > datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None), 'Expired profile'
+          with open(os.environ['GITHUB_ENV'], 'a') as f:
+              f.write('PROFILE_UUID=' + p['UUID'] + '\nAPPLE_TEAM=' + team + '\n')
+          options = {'method': 'app-store-connect', 'destination': 'export', 'teamID': team,
+                     'signingStyle': 'manual', 'signingCertificate': 'Apple Distribution',
+                     'provisioningProfiles': {'uz.romflow.workshop': p['UUID']}, 'uploadSymbols': True}
+          (Path(os.environ['RUNNER_TEMP']) / 'ExportOptions.plist').write_bytes(plistlib.dumps(options))
+          PY
+          keychain="$RUNNER_TEMP/store-signing.keychain-db"
+          keychain_password=$(openssl rand -hex 32)
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$RUNNER_TEMP/distribution.p12" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -k "$keychain_password" "$keychain"
+          security list-keychains -d user -s "$keychain" login.keychain-db
+          security find-identity -v -p codesigning "$keychain" | grep -q 'Apple Distribution'
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$RUNNER_TEMP/store.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+      - name: Select released Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | grep -vi -e beta -e rc | sort -V | tail -1)
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Configure signing only on the app target
+        run: |
+          ruby - <<'RUBY'
+          require 'xcodeproj'
+          p = Xcodeproj::Project.open('ios/Runner.xcodeproj')
+          p.targets.find { |t| t.name == 'Runner' }.build_configurations.each do |c|
+            c.build_settings['CODE_SIGN_STYLE'] = 'Manual'
+            c.build_settings['DEVELOPMENT_TEAM'] = ENV.fetch('APPLE_TEAM')
+            c.build_settings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] = 'Apple Distribution'
+            c.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = ENV.fetch('PROFILE_UUID')
+          end
+          p.save
+          RUBY
+      - run: flutter build ipa --release --build-number="$BUILD_NUMBER" --export-options-plist="$RUNNER_TEMP/ExportOptions.plist"
+      - name: Verify signed app and name IPA
+        run: |
+          set -euo pipefail
+          codesign --verify --deep --strict build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app
+          version=$(awk '/^version:/{sub(/\+.*/, "", $2); print $2}' pubspec.yaml)
+          mkdir -p dist
+          cp build/ios/ipa/*.ipa "dist/RomFlow-$version-$BUILD_NUMBER-appstore.ipa"
+      - name: Remove signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/store-signing.keychain-db" || true
+          rm -f "$RUNNER_TEMP/distribution.p12" "$RUNNER_TEMP/store.mobileprovision" "$RUNNER_TEMP/profile.plist"
+          if [ -n "${PROFILE_UUID:-}" ]; then
+            rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RomFlow-Store-iOS
+          path: dist/*.ipa
+          if-no-files-found: error
+
+  release-files:
+    needs: [android, ios]
+    if: always() && github.ref == 'refs/heads/main' && (needs.android.result == 'success' || needs.ios.result == 'success')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: RomFlow-Store-*
+          merge-multiple: true
+          path: store-files
+      - name: Attach signed files to the existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(awk '/^version:/{sub(/\+.*/, "", $2); print $2}' pubspec.yaml)
+          gh release upload "v$version" store-files/*
