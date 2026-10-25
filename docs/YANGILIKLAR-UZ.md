@@ -1,3 +1,29 @@
+# RomFlow yangiliklari
+
+## 1.0.1 — rangli Liquid Glass va 3D tuzatishlari
+
+- iOS uchun oddiy, ikonka, matnli va qo‘shish tugmalari umumiy rangli glass ko‘rinishiga moslandi; filtrlar, segmentlar, maydonlar va ro‘yxat boshqaruvlari ham shu uslubda.
+- Native iOS glass tugmalariga amal ranglari uzatiladi. Yuqori kontrastda shaffoflik o‘chadi; klaviatura va o‘chirilgan holatlar saqlanadi.
+- Tor ekran va katta matnda uzun amal tugmasi yorlig‘i sig‘adigan qilib o‘raladi. iPhone/iPad, yotiq holat va katta matn bo‘yicha testlar bor.
+- iPhone 13 va yangilariga Studio 4K tekstura profili; kuchsiz qurilmalarga yengil profil. Qizish/xotira bosimida yuklama kamayadi.
+- Aylanishda kamera o‘lchami barqaror, qirra qoplamasi va perspektiva teksturasi yaxshilandi. Telefonda FPS o‘lchovi hali bajarilmagan.
+- Delfin ruchkasi tortiladi, ikki tishli vilka pastga tushadi, keyin qanot ochiladi. Rama ushlagichlari yupqa va sirtga mahkamlangan; Archa nomi tuzatildi.
+- Flutter analyze xatosiz; 195 ta test o‘tdi. Native iOS yig‘ilishi CI’da alohida tekshiriladi.
+
+# RomFlow 1.0.1 — Liquid Glass va 3D render
+
+- 3D aylanishda vintlar va mayda detallar saqlanadi; tekstura darajasi harakat boshlanganida tushirilmaydi.
+- Kamera vsync asosida yumshatiladi; 60/120 Hz harakat matematikasi tekshirildi.
+- Yuzalarga yengil protsedurali tekstura, shishaga burchakka bog‘liq aks qo‘shildi.
+- “Rasmini ulashish” menyusida 4K (uzun tomoni 4096 px) rasm chiqarish bor.
+- Chizish buferlari va UV koordinatalari qayta ishlatiladi; tekstura UI oqimidan tashqarida tayyorlanadi.
+- Mavjud sahifa tuzilishi, ranglar va chizma hisobi saqlangan.
+- Kartalar, tasdiqlash oynalari va shakllar umumiy o‘qilishi qulay glass yuzasidan foydalanadi.
+- Yuqori kontrastda shaffoflik va blur o‘chadi; kichik ikonkalarning bosish maydoni 48 px.
+- Native iOS tugmalari va navigatsiya tema, matn kattaligi va holat o‘zgarishlarini oladi.
+- Native boshqaruv yangilanmasa, Flutter boshqaruviga qaytadi; eskirgan yoki o‘chirilgan tugma hodisalari bajarilmaydi.
+- Och va qorong‘i temalar uchun navigatsiya ranglari uyg‘unlashtirildi.
+
 # RomFlow 1.0.0 — birinchi reliz
 
 Eshik va rom ustaxonalari uchun smeta, chizma, 3D va buyurtmalar.
@@ -11,7 +37,8 @@ Android, iPhone, iPad, Windows, macOS va Linux. Internetsiz ishlaydi.
 - **AI kamera va “Joyida”**: rasmdan chizma; jonli kamerada rom haqiqiy darchaga qo‘yiladi.
 - **Buyurtmalar**: smeta → PDF → bosqichlar, to‘lov, qarz, bo‘lib to‘lash, razmer, eslatma, ombor, xodimlar, moliya.
 - **Narxlar**: Markaziy bank dollar kursi har kuni; diler jadvalidan narx yuklash.
-- **iPhone va iPad**: Liquid Glass dizayn; iPhone SE’dan Pro Max’gacha va iPad’larda tekshirilgan.
+- **iPhone va iPad**: Apple’ning o‘z Liquid Glass’i — pastki tab bar va asosiy tugmalar tizimning o‘zi chizadi (iOS 26+); iPhone SE’dan Pro Max’gacha va iPad’larda tekshirilgan.
+- **Kamroq yozuv**: katalogda rasm ostidagi nomlar, bosh sahifa va chizma stolidagi uzun izohlar olib tashlandi.
 
 ## O‘rnatish
 - Android: `RomFlow-1.0.0-27-arm64.apk` (ko‘p telefonlar), `…-armv7.apk` (eski), `RomFlow-1.0.0-27.apk` (hammasi). Oldingi sinov versiyalari ustiga o‘rnatiladi, ma’lumotlar saqlanadi.
