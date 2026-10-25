@@ -8,6 +8,11 @@ on:
   pull_request:
     paths-ignore: ['docs/**', '**/*.md', 'LICENSE']
   workflow_dispatch:
+    inputs:
+      full:
+        description: 'Hammasi: Windows, Linux, demo video va emulyator sinovi ham'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -132,6 +137,8 @@ jobs:
 
   demo:
     name: Record demo video on an Android emulator
+    # Only when asked for: GitHub minutes are limited on a private repo.
+    if: github.event_name == 'workflow_dispatch' && inputs.full
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -183,6 +190,8 @@ jobs:
 
   smoke:
     name: Install and open the APK on an emulator
+    # Only when asked for: GitHub minutes are limited on a private repo.
+    if: github.event_name == 'workflow_dispatch' && inputs.full
     needs: apk
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -244,6 +253,8 @@ jobs:
 
   linux:
     name: Linux desktop build
+    # Only when asked for: GitHub minutes are limited on a private repo.
+    if: github.event_name == 'workflow_dispatch' && inputs.full
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -271,6 +282,8 @@ jobs:
 
   windows:
     name: Windows desktop build
+    # Only when asked for: GitHub minutes are limited on a private repo.
+    if: github.event_name == 'workflow_dispatch' && inputs.full
     # Flutter 3.35 knows Visual Studio 2022, not the newer one on windows-latest.
     runs-on: windows-2022
     timeout-minutes: 40
@@ -314,13 +327,16 @@ jobs:
       - run: xcodebuild -version
       - run: flutter pub get
       - run: flutter build macos --release
+        if: github.event_name == 'workflow_dispatch' && inputs.full
       - name: Build iOS without signing
         run: flutter build ios --release --no-codesign
       - name: Package
         run: |
           version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr '+' '-')
           mkdir -p dist ipa/Payload
-          ditto -c -k --sequesterRsrc --keepParent build/macos/Build/Products/Release/RomFlow.app "dist/RomFlow-$version-macos.zip"
+          if [ -d build/macos/Build/Products/Release/RomFlow.app ]; then
+            ditto -c -k --sequesterRsrc --keepParent build/macos/Build/Products/Release/RomFlow.app "dist/RomFlow-$version-macos.zip"
+          fi
           cp -R build/ios/iphoneos/Runner.app ipa/Payload/
           (cd ipa && zip -qry "../dist/RomFlow-$version-ios-unsigned.ipa" Payload)
           ls -la dist
@@ -330,7 +346,7 @@ jobs:
           path: |
             dist/*.zip
             dist/*.ipa
-          if-no-files-found: error
+          if-no-files-found: warn
 
   release:
     name: Add the other platforms to the release
