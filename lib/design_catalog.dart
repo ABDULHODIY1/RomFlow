@@ -512,7 +512,8 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
             ),
             child: Ink(
               decoration: BoxDecoration(gradient: gradient),
-              child: InkWell(
+              child: GlassControl(
+                  child: InkWell(
                 onTap: onTap,
                 onLongPress: onLongPress,
                 child: Padding(
@@ -549,7 +550,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
                     ],
                   ),
                 ),
-              ),
+              )),
             ),
           ),
         );
@@ -693,7 +694,8 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
             width: 2,
           ),
         ),
-        child: InkWell(
+        child: GlassControl(
+            child: InkWell(
           key: ValueKey('design-${p.id}'),
           onTap: () => open(p),
           onLongPress: () {
@@ -754,7 +756,7 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
   }
@@ -1153,7 +1155,8 @@ class _CatalogHeader extends SliverPersistentHeaderDelegate {
                               width: 1.5,
                             ),
                           ),
-                          child: InkWell(
+                          child: GlassControl(
+                              child: InkWell(
                             key: ValueKey('group-${e.key}'),
                             borderRadius: BorderRadius.circular(14),
                             onTap: () => onGroup(e.key),
@@ -1190,7 +1193,7 @@ class _CatalogHeader extends SliverPersistentHeaderDelegate {
                                 ],
                               ),
                             ),
-                          ),
+                          )),
                         ),
                       ),
                     ),

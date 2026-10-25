@@ -1603,13 +1603,14 @@ class QuickAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme,
         accent = toneColor(tone, Theme.of(context).brightness);
-    return Material(
-      color: scheme.surface,
+    final control = Material(
+      color: usesIOSGlass ? Colors.transparent : scheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: scheme.outlineVariant, width: .8),
       ),
-      child: InkWell(
+      child: GlassControl(
+          child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Column(
@@ -1632,7 +1633,8 @@ class QuickAction extends StatelessWidget {
               fit: BoxFit.scaleDown,
               child: Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
+                  color: scheme.onSurface,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1640,8 +1642,16 @@ class QuickAction extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
+    return usesIOSGlass
+        ? GlassSurface(
+            radius: BorderRadius.circular(16),
+            tint:
+                Color.alphaBlend(accent.withValues(alpha: .09), scheme.surface),
+            shadow: false,
+            child: control)
+        : control;
   }
 }
 
@@ -1752,7 +1762,8 @@ class DashboardHero extends StatelessWidget {
               Material(
                 color: Colors.white.withValues(alpha: .16),
                 borderRadius: BorderRadius.circular(20),
-                child: InkWell(
+                child: GlassControl(
+                    child: InkWell(
                   borderRadius: BorderRadius.circular(20),
                   onTap: onPlan,
                   child: Padding(
@@ -1779,7 +1790,7 @@ class DashboardHero extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
+                )),
               ),
             ],
           ),
@@ -2518,7 +2529,8 @@ class _BuilderPageState extends State<BuilderPage> {
     return GlassCard(
       key: ValueKey('window-$index'),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
+      child: GlassControl(
+          child: InkWell(
         onTap: drawn && !busy ? () => editWindow(index) : null,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 12, 4, 10),
@@ -2651,7 +2663,7 @@ class _BuilderPageState extends State<BuilderPage> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 
@@ -2940,7 +2952,8 @@ class _BuilderPageState extends State<BuilderPage> {
                 Material(
                   color: scheme.primaryContainer,
                   borderRadius: BorderRadius.circular(16),
-                  child: InkWell(
+                  child: GlassControl(
+                      child: InkWell(
                     key: const ValueKey('add-window'),
                     borderRadius: BorderRadius.circular(16),
                     onTap: busy ? null : addWindow,
@@ -2964,7 +2977,7 @@ class _BuilderPageState extends State<BuilderPage> {
                         ],
                       ),
                     ),
-                  ),
+                  )),
                 ),
                 const SizedBox(height: 12),
                 quickForm(),

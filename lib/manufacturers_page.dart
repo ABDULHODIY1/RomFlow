@@ -301,7 +301,8 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
     final used = s.profiles.any((p) => p['catalogId'] == system.id);
     return Padding(
       padding: const EdgeInsets.only(top: 10, right: 8),
-      child: InkWell(
+      child: GlassControl(
+          child: InkWell(
         key: ValueKey('system-${system.id}'),
         borderRadius: BorderRadius.circular(12),
         onTap: () => details(c, system),
@@ -371,7 +372,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 

@@ -2204,7 +2204,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
 
   Widget viewSwitch() {
     final scheme = Theme.of(context).colorScheme;
-    Widget side(String label, bool on, VoidCallback tap) => InkWell(
+    Widget side(String label, bool on, VoidCallback tap) => GlassControl(
+            child: InkWell(
           key: ValueKey('view-$label'),
           borderRadius: BorderRadius.circular(14),
           onTap: tap,
@@ -2223,7 +2224,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
               ),
             ),
           ),
-        );
+        ));
     return Material(
       color: scheme.surface,
       elevation: 2,
@@ -2236,7 +2237,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
             side('2D', !show3d, () => setState(() => show3d = false)),
             side('3D', show3d, () => setState(() => show3d = true)),
             // The window on a photo of its opening.
-            InkWell(
+            GlassControl(
+                child: InkWell(
               key: const ValueKey('view-place'),
               borderRadius: BorderRadius.circular(14),
               onTap: placeOnPhoto,
@@ -2254,7 +2256,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   ),
                 ),
               ),
-            ),
+            )),
           ],
         ),
       ),
@@ -2286,7 +2288,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
       key: const ValueKey('section-bar'),
       color: scheme.primaryContainer,
       borderRadius: BorderRadius.circular(12),
-      child: InkWell(
+      child: GlassControl(
+          child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () => sectionMenu(selected),
         child: Padding(
@@ -2330,7 +2333,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 
@@ -2388,7 +2391,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
         .map((p) => '${p['name']}')
         .firstOrNull;
     final canCompare = widget.store.catalog != null;
-    return InkWell(
+    return GlassControl(
+        child: InkWell(
       key: const ValueKey('compare-prices'),
       borderRadius: BorderRadius.circular(10),
       onTap: canCompare ? comparePrices : null,
@@ -2433,7 +2437,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Future<void> comparePrices() async {
@@ -2477,7 +2481,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
     final scheme = Theme.of(context).colorScheme;
     Widget cell(String key, String caption, Widget value, VoidCallback onTap) =>
         Expanded(
-          child: InkWell(
+          child: GlassControl(
+              child: InkWell(
             key: ValueKey('spec-$key'),
             borderRadius: BorderRadius.circular(10),
             onTap: onTap,
@@ -2501,7 +2506,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                 ],
               ),
             ),
-          ),
+          )),
         );
     TextStyle strong = TextStyle(
       fontSize: 14,

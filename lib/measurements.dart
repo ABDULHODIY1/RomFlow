@@ -68,7 +68,8 @@ class MeasurementsPage extends StatelessWidget {
         planned = m['status'] == 'planned',
         late = planned && at.isBefore(DateTime.now());
     return GlassCard(
-      child: InkWell(
+      child: GlassControl(
+          child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () => Navigator.push(
           context,
@@ -159,7 +160,7 @@ class MeasurementsPage extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 

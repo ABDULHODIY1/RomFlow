@@ -46,7 +46,8 @@ class DraftTool extends StatelessWidget {
           child: Material(
             color: selected ? colors.primaryContainer : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
-            child: InkWell(
+            child: GlassControl(
+                child: InkWell(
               onTap: onTap,
               borderRadius: BorderRadius.circular(10),
               child: SizedBox(
@@ -81,7 +82,7 @@ class DraftTool extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
+            )),
           ),
         ),
       ),
