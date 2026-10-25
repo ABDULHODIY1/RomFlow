@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import Darwin
 import UserNotifications
 @main
 @objc class AppDelegate: FlutterAppDelegate, UIDocumentPickerDelegate {
@@ -8,9 +9,20 @@ import UserNotifications
   override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
     if let registrar = self.registrar(forPlugin: "RomFlowLiquidNavigation") {
-      registrar.register(GlassNavigationFactory(messenger: registrar.messenger()), withId: "romflow/liquid-navigation")
+      registrar.register(NativeTabBarFactory(messenger: registrar.messenger()), withId: "romflow/liquid-navigation")
+      registrar.register(GlassButtonsFactory(messenger: registrar.messenger()), withId: "romflow/glass-buttons")
     }
     if let vc = window?.rootViewController as? FlutterViewController {
+      FlutterMethodChannel(name: "romflow/render-device", binaryMessenger: vc.binaryMessenger).setMethodCallHandler { call, result in
+        guard call.method == "status" else { result(FlutterMethodNotImplemented); return }
+        var system = utsname()
+        uname(&system)
+        let machine = Mirror(reflecting: system.machine).children.reduce("") { text, element in
+          guard let value = element.value as? Int8, value != 0 else { return text }
+          return text + String(UnicodeScalar(UInt8(bitPattern: value)))
+        }
+        result(["machine": machine, "thermal": ProcessInfo.processInfo.thermalState.rawValue])
+      }
       FlutterMethodChannel(name: "romflow/reminders", binaryMessenger: vc.binaryMessenger).setMethodCallHandler { call, result in
         if call.method == "reconcile", let args=call.arguments as? [String:Any],let items=args["items"] as? [[String:Any]] {
           let center=UNUserNotificationCenter.current(),keep=Set(items.compactMap {$0["id"] as? String})
@@ -91,54 +103,190 @@ import UserNotifications
 }
 
 
-// Native Liquid Glass when compiled with the iOS 26 SDK; material blur fallback
-// for older iOS versions. Flutter content and the native bar have separate layers.
-final class GlassNavigationFactory: NSObject, FlutterPlatformViewFactory {
+// Apple's own Liquid Glass. With the iOS 26 SDK the system draws the tab bar
+// and the glass buttons exactly as in its own apps (the lens on the chosen
+// tab, the glass that bends the content behind); earlier iOS versions get
+// the system bars and tinted buttons of their time.
+final class NativeTabBarFactory: NSObject, FlutterPlatformViewFactory {
   let messenger: FlutterBinaryMessenger
-  init(messenger: FlutterBinaryMessenger) {self.messenger=messenger;super.init()}
-  func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {FlutterStandardMessageCodec.sharedInstance()}
-  func create(withFrame frame:CGRect,viewIdentifier viewId:Int64,arguments args:Any?) -> FlutterPlatformView {
-    GlassNavigation(frame:frame,id:viewId,args:args as? [String:Any],messenger:messenger)
+  init(messenger: FlutterBinaryMessenger) { self.messenger = messenger; super.init() }
+  func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol { FlutterStandardMessageCodec.sharedInstance() }
+  func create(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?) -> FlutterPlatformView {
+    NativeTabBar(frame: frame, id: viewId, args: args as? [String: Any], messenger: messenger)
   }
 }
-final class GlassNavigation: NSObject,FlutterPlatformView {
-  private let root=UIView()
-  private var buttons:[UIButton]=[]
-  private var labels:[UILabel]=[]
-  private let channel:FlutterMethodChannel
-  init(frame:CGRect,id:Int64,args:[String:Any]?,messenger:FlutterBinaryMessenger) {
-    channel=FlutterMethodChannel(name:"romflow/liquid-navigation/\(id)",binaryMessenger:messenger)
+
+final class NativeTabBar: NSObject, FlutterPlatformView, UITabBarDelegate {
+  private let root = UIView()
+  private let bar = UITabBar()
+  private let channel: FlutterMethodChannel
+  init(frame: CGRect, id: Int64, args: [String: Any]?, messenger: FlutterBinaryMessenger) {
+    channel = FlutterMethodChannel(name: "romflow/liquid-navigation/\(id)", binaryMessenger: messenger)
     super.init()
-    root.frame=frame;root.backgroundColor = .clear
-    let effect:UIVisualEffect
+    root.frame = frame
+    root.backgroundColor = .clear
+    let titles = args?["titles"] as? [String] ?? ["Asosiy", "Buyurtmalar", "Katalog", "Sozlamalar"]
+    let icons = args?["icons"] as? [String] ?? ["square.grid.2x2", "doc.text", "square.grid.3x3", "slider.horizontal.3"]
+    var items: [UITabBarItem] = []
+    for (i, title) in titles.enumerated() {
+      let name = i < icons.count ? icons[i] : "circle"
+      let item = UITabBarItem(title: title, image: UIImage(systemName: name), tag: i)
+      item.selectedImage = UIImage(systemName: name + ".fill") ?? UIImage(systemName: name)
+      items.append(item)
+    }
+    bar.items = items
+    bar.delegate = self
+    bar.translatesAutoresizingMaskIntoConstraints = false
+    root.addSubview(bar)
+    NSLayoutConstraint.activate([
+      bar.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+      bar.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+      bar.topAnchor.constraint(equalTo: root.topAnchor),
+      bar.bottomAnchor.constraint(equalTo: root.bottomAnchor),
+    ])
+    configure(args ?? [:])
+    channel.setMethodCallHandler { [weak self] call, result in
+      if call.method == "configure", let args = call.arguments as? [String: Any] {
+        self?.configure(args); result(nil)
+      } else if call.method == "select", let index = call.arguments as? Int {
+        self?.select(index); result(nil)
+      } else { result(FlutterMethodNotImplemented) }
+    }
+  }
+  private func configure(_ args: [String: Any]) {
+    root.overrideUserInterfaceStyle = args["dark"] as? Bool == true ? .dark : .light
+    select(args["selected"] as? Int ?? 0)
+  }
+  private func select(_ index: Int) {
+    guard let items = bar.items, index >= 0, index < items.count else { return }
+    bar.selectedItem = items[index]
+  }
+  func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) { channel.invokeMethod("onTab", arguments: item.tag) }
+  func view() -> UIView { root }
+  deinit { channel.setMethodCallHandler(nil) }
+}
+
+final class GlassButtonsFactory: NSObject, FlutterPlatformViewFactory {
+  let messenger: FlutterBinaryMessenger
+  init(messenger: FlutterBinaryMessenger) { self.messenger = messenger; super.init() }
+  func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol { FlutterStandardMessageCodec.sharedInstance() }
+  func create(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?) -> FlutterPlatformView {
+    GlassButtons(frame: frame, id: viewId, args: args as? [String: Any], messenger: messenger)
+  }
+}
+
+/// A row (or column) of system glass buttons. Each item: id, symbol (SF
+/// Symbol), title, subtitle, style ("glass", "prominent", "white"),
+/// selected, enabled, expand (takes the free width), size (a round button).
+final class GlassButtons: NSObject, FlutterPlatformView {
+  private let root = UIView()
+  private let stack = UIStackView()
+  private let channel: FlutterMethodChannel
+  private static let blue = UIColor(red: 0.125, green: 0.42, blue: 0.77, alpha: 1)
+  init(frame: CGRect, id: Int64, args: [String: Any]?, messenger: FlutterBinaryMessenger) {
+    channel = FlutterMethodChannel(name: "romflow/glass-buttons/\(id)", binaryMessenger: messenger)
+    super.init()
+    root.frame = frame
+    root.backgroundColor = .clear
+    stack.translatesAutoresizingMaskIntoConstraints = false
+    root.addSubview(stack)
+    NSLayoutConstraint.activate([
+      stack.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+      stack.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+      stack.topAnchor.constraint(equalTo: root.topAnchor),
+      stack.bottomAnchor.constraint(equalTo: root.bottomAnchor),
+    ])
+    configure(args ?? [:])
+    channel.setMethodCallHandler { [weak self] call, result in
+      if call.method == "configure", let args = call.arguments as? [String: Any] {
+        self?.configure(args); result(nil)
+      } else if call.method == "items", let items = call.arguments as? [[String: Any]] {
+        self?.build(items); result(nil)
+      } else { result(FlutterMethodNotImplemented) }
+    }
+  }
+  private func configure(_ args: [String: Any]) {
+    root.overrideUserInterfaceStyle = args["dark"] as? Bool == true ? .dark : .light
+    stack.axis = args["vertical"] as? Bool == true ? .vertical : .horizontal
+    stack.spacing = CGFloat(args["spacing"] as? Double ?? 8)
+    stack.alignment = .center
+    stack.distribution = args["equal"] as? Bool == true ? .fillEqually : .fill
+    build(args["items"] as? [[String: Any]] ?? [])
+  }
+  private func build(_ items: [[String: Any]]) {
+    for view in stack.arrangedSubviews { stack.removeArrangedSubview(view); view.removeFromSuperview() }
+    for item in items { stack.addArrangedSubview(make(item)) }
+  }
+  private func make(_ item: [String: Any]) -> UIButton {
+    let id = item["id"] as? String ?? ""
+    let selected = item["selected"] as? Bool ?? false
+    let style = selected ? "prominent" : (item["style"] as? String ?? "glass")
+    let tint: UIColor
+    if let argb = item["tint"] as? NSNumber {
+      let value = argb.uint32Value
+      tint = UIColor(red: CGFloat((value >> 16) & 255) / 255,
+        green: CGFloat((value >> 8) & 255) / 255,
+        blue: CGFloat(value & 255) / 255,
+        alpha: CGFloat((value >> 24) & 255) / 255)
+    } else { tint = GlassButtons.blue }
+    var config: UIButton.Configuration
     #if compiler(>=6.2)
-    if #available(iOS 26.0,*) {let glass=UIGlassEffect(style:.regular);glass.isInteractive=true;effect=glass}
-    else {effect=UIBlurEffect(style:.systemMaterial)}
+    if #available(iOS 26.0, *) {
+      config = style == "glass" ? .glass() : .prominentGlass()
+    } else {
+      config = style == "glass" ? .tinted() : .filled()
+    }
     #else
-    effect=UIBlurEffect(style:.systemMaterial)
+    config = style == "glass" ? .tinted() : .filled()
     #endif
-    let surface=UIVisualEffectView(effect:effect);surface.translatesAutoresizingMaskIntoConstraints=false;surface.layer.cornerRadius=30;surface.clipsToBounds=true;root.addSubview(surface)
-    NSLayoutConstraint.activate([surface.leadingAnchor.constraint(equalTo:root.leadingAnchor),surface.trailingAnchor.constraint(equalTo:root.trailingAnchor),surface.topAnchor.constraint(equalTo:root.topAnchor),surface.bottomAnchor.constraint(equalTo:root.bottomAnchor)])
-    let row=UIStackView();row.axis = .horizontal;row.distribution = .fillEqually;row.translatesAutoresizingMaskIntoConstraints=false;surface.contentView.addSubview(row)
-    NSLayoutConstraint.activate([row.leadingAnchor.constraint(equalTo:surface.contentView.leadingAnchor,constant:4),row.trailingAnchor.constraint(equalTo:surface.contentView.trailingAnchor,constant:-4),row.topAnchor.constraint(equalTo:surface.contentView.topAnchor,constant:4),row.bottomAnchor.constraint(equalTo:surface.contentView.bottomAnchor,constant:-4)])
-    let titles=["Asosiy","Buyurtmalar","Katalog","Sozlamalar"],icons=["square.grid.2x2","doc.text","square.grid.3x3","slider.horizontal.3"]
-    for i in 0..<4 {
-      let button=UIButton(type:.system);button.tag=i;button.accessibilityLabel=titles[i];button.layer.cornerRadius=26
-      let icon=UIImageView(image:UIImage(systemName:icons[i]));icon.contentMode = .scaleAspectFit
-      let label=UILabel();label.text=titles[i];label.font = .systemFont(ofSize:10,weight:.medium);label.textAlignment = .center
-      let content=UIStackView(arrangedSubviews:[icon,label]);content.axis = .vertical;content.spacing=4;content.alignment = .center;content.isUserInteractionEnabled=false;content.translatesAutoresizingMaskIntoConstraints=false;button.addSubview(content)
-      NSLayoutConstraint.activate([content.centerXAnchor.constraint(equalTo:button.centerXAnchor),content.centerYAnchor.constraint(equalTo:button.centerYAnchor),icon.heightAnchor.constraint(equalToConstant:22),icon.widthAnchor.constraint(equalToConstant:26)])
-      button.addTarget(self,action:#selector(tapped(_:)),for:.touchUpInside);row.addArrangedSubview(button);buttons.append(button);labels.append(label)
+    config.cornerStyle = .capsule
+    let fontSize = CGFloat(item["fontSize"] as? Double ?? 15)
+    if let title = item["title"] as? String, !title.isEmpty {
+      config.title = title
+      config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attributes in
+        var a = attributes; a.font = .systemFont(ofSize: fontSize, weight: .semibold); return a
+      }
     }
-    select(args?["selected"] as? Int ?? 0)
-    channel.setMethodCallHandler { [weak self] call,result in
-      if call.method=="select",let index=call.arguments as? Int {self?.select(index);result(nil)}else{result(FlutterMethodNotImplemented)}
+    if let subtitle = item["subtitle"] as? String, !subtitle.isEmpty {
+      config.subtitle = subtitle
+      config.titleAlignment = .center
+      config.subtitleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attributes in
+        var a = attributes; a.font = .systemFont(ofSize: CGFloat(item["subtitleFontSize"] as? Double ?? 11), weight: .medium); return a
+      }
     }
+    if let symbol = item["symbol"] as? String {
+      config.image = UIImage(systemName: symbol)
+      config.imagePadding = 6
+      config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
+        pointSize: CGFloat(item["iconSize"] as? Double ?? 16), weight: .semibold)
+    }
+    config.baseBackgroundColor = style == "white" ? .white : tint
+    config.baseForegroundColor = style == "white" ? GlassButtons.blue : (style == "glass" ? tint : .white)
+    if item["light"] as? Bool == true { config.baseForegroundColor = .white }
+    let button = UIButton(configuration: config)
+    button.tintColor = style == "white" ? .white : tint
+    button.titleLabel?.numberOfLines = 1
+    button.titleLabel?.adjustsFontSizeToFitWidth = true
+    button.titleLabel?.minimumScaleFactor = 0.75
+    button.isEnabled = item["enabled"] as? Bool ?? true
+    button.isSelected = selected
+    button.accessibilityLabel = item["label"] as? String ?? config.title ?? id
+    button.accessibilityHint = item["subtitle"] as? String
+    button.addAction(UIAction { [weak self] _ in self?.channel.invokeMethod("onTap", arguments: id) }, for: .touchUpInside)
+    button.translatesAutoresizingMaskIntoConstraints = false
+    if let size = item["size"] as? Double {
+      NSLayoutConstraint.activate([
+        button.widthAnchor.constraint(equalToConstant: max(44, CGFloat(size))),
+        button.heightAnchor.constraint(equalToConstant: max(44, CGFloat(size))),
+      ])
+    } else {
+      button.heightAnchor.constraint(equalToConstant: CGFloat(item["height"] as? Double ?? 48)).isActive = true
+    }
+    let expand = item["expand"] as? Bool ?? false
+    button.setContentHuggingPriority(expand ? .defaultLow : .required, for: .horizontal)
+    button.setContentCompressionResistancePriority(expand ? .defaultLow : .required, for: .horizontal)
+    return button
   }
-  private func select(_ index:Int) {
-    for (i,button) in buttons.enumerated(){button.isSelected=i==index;button.tintColor=i==index ? .systemBlue:.secondaryLabel;button.backgroundColor=i==index ? UIColor.systemBlue.withAlphaComponent(0.12):.clear;labels[i].textColor=button.tintColor;button.accessibilityTraits=i==index ? [.button,.selected]:[.button]}
-  }
-  @objc private func tapped(_ sender:UIButton){select(sender.tag);channel.invokeMethod("onTab",arguments:sender.tag)}
-  func view() -> UIView {root}
-  deinit {channel.setMethodCallHandler(nil)}
+  func view() -> UIView { root }
+  deinit { channel.setMethodCallHandler(nil) }
 }
