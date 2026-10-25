@@ -148,9 +148,9 @@ class RomFlow extends StatelessWidget {
           key: ValueKey(_designKey(store.designPreference)),
           title: 'RomFlow',
           // Very large Dynamic Type would push controls over each other on
-          // a small phone: text grows at most 1.3×.
+          // a small phone: text grows at most 1.15×.
           builder: (context, child) => MediaQuery.withClampedTextScaling(
-            maxScaleFactor: 1.3,
+            maxScaleFactor: 1.15,
             child: demoMode
                 ? DemoOverlay(child: WorkshopKeyboardTools(child: child!))
                 : WorkshopKeyboardTools(child: child!),
@@ -842,15 +842,24 @@ class _HomeState extends State<Home> {
       const SizedBox(height: 8),
       GlassControl(
         child: SegmentedButton<bool>(
+          // The icon says which is on; a check mark beside it pushed
+          // "Buyurtmalar (0)" onto two lines.
+          showSelectedIcon: false,
           segments: [
             ButtonSegment(
               value: false,
-              label: Text('Buyurtmalar (${s.quotes.length})'),
+              label: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text('Buyurtmalar ${s.quotes.length}', maxLines: 1),
+              ),
               icon: const Icon(Icons.receipt_long_outlined),
             ),
             ButtonSegment(
               value: true,
-              label: Text('Mijozlar (${s.customers.length})'),
+              label: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text('Mijozlar ${s.customers.length}', maxLines: 1),
+              ),
               icon: const Icon(Icons.people_outline),
             ),
           ],
@@ -947,7 +956,11 @@ class _HomeState extends State<Home> {
           key: const ValueKey('open-manufacturers'),
           onPressed: () => open(ManufacturersPage(store: s)),
           icon: const Icon(Icons.factory_outlined),
-          label: const Text('Zavodlar narxi: AKFA, Engelberg, Alubest…'),
+          label: const Text(
+            'Zavodlar narxi',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
@@ -959,7 +972,11 @@ class _HomeState extends State<Home> {
         FilledButton.tonalIcon(
           onPressed: () => openPriceSources(context, s),
           icon: const Icon(Icons.cloud_sync_outlined),
-          label: const Text('Narxlarni yangilash (diler / jadval)'),
+          label: const Text(
+            'Narxlarni yangilash',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         const SizedBox(height: 12),
         notice(

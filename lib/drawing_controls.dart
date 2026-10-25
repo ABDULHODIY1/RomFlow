@@ -66,16 +66,20 @@ class DraftTool extends StatelessWidget {
                     else
                       Icon(icon, size: 24, color: color),
                     const SizedBox(height: 4),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: color,
-                          fontWeight:
-                              selected ? FontWeight.w600 : FontWeight.w400,
+                    Padding(
+                      // The label shrinks before it touches the tile's edge.
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: color,
+                            fontWeight:
+                                selected ? FontWeight.w600 : FontWeight.w400,
+                          ),
                         ),
                       ),
                     ),

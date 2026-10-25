@@ -512,45 +512,48 @@ class _DesignCatalogPageState extends State<DesignCatalogPage> {
             ),
             child: Ink(
               decoration: BoxDecoration(gradient: gradient),
+              // Glass only on the plain card: a milky layer washed the AI
+              // camera's colours and white title out.
               child: GlassControl(
+                  enabled: gradient == null,
                   child: InkWell(
-                onTap: onTap,
-                onLongPress: onLongPress,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                    onTap: onTap,
+                    onLongPress: onLongPress,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          icon,
-                          const Spacer(),
-                          Icon(
-                            Icons.chevron_right,
-                            size: 20,
-                            color: gradient == null
-                                ? scheme.primary
-                                : Colors.white,
+                          Row(
+                            children: [
+                              icon,
+                              const Spacer(),
+                              Icon(
+                                Icons.chevron_right,
+                                size: 20,
+                                color: gradient == null
+                                    ? scheme.primary
+                                    : Colors.white,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w800,
+                              color: gradient == null
+                                  ? scheme.onSurface
+                                  : Colors.white,
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 15.5,
-                          fontWeight: FontWeight.w800,
-                          color: gradient == null
-                              ? scheme.onSurface
-                              : Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )),
+                    ),
+                  )),
             ),
           ),
         );
@@ -1112,11 +1115,13 @@ class _CatalogHeader extends SliverPersistentHeaderDelegate {
             height: 48,
             child: Row(
               children: [
+                const SizedBox(width: 8),
                 IconButton(
                   tooltip: 'Orqaga',
                   onPressed: onBack,
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                 ),
+                const SizedBox(width: 6),
                 Expanded(
                   child: Opacity(
                     opacity: (1 - t * 1.6).clamp(0.0, 1.0),
@@ -1155,45 +1160,52 @@ class _CatalogHeader extends SliverPersistentHeaderDelegate {
                               width: 1.5,
                             ),
                           ),
+                          // Dark glass on the blue header, not the light
+                          // one that hid the white names.
                           child: GlassControl(
+                              tint: group == e.key
+                                  ? const Color(0xff3d7fb8)
+                                  : const Color(0xff17405f),
+                              brightness: Brightness.dark,
                               child: InkWell(
-                            key: ValueKey('group-${e.key}'),
-                            borderRadius: BorderRadius.circular(14),
-                            onTap: () => onGroup(e.key),
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(6, 6, 6, 4),
-                              child: Column(
-                                children: [
-                                  Expanded(
-                                    child: DesignThumb(
-                                      hero: true,
-                                      drawing: drawingPresets
-                                          .firstWhere(
-                                            (p) => p.id == _art[e.key],
-                                          )
-                                          .drawing(),
-                                      recipe: recipe,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 3),
-                                  // The name stays readable when the header folds.
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Text(
-                                      '${e.value} ${drawingPresets.where((p) => p.group == e.key).length}',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: group == e.key
-                                            ? FontWeight.w800
-                                            : FontWeight.w600,
-                                        fontSize: 13,
+                                key: ValueKey('group-${e.key}'),
+                                borderRadius: BorderRadius.circular(14),
+                                onTap: () => onGroup(e.key),
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(6, 6, 6, 4),
+                                  child: Column(
+                                    children: [
+                                      Expanded(
+                                        child: DesignThumb(
+                                          hero: true,
+                                          drawing: drawingPresets
+                                              .firstWhere(
+                                                (p) => p.id == _art[e.key],
+                                              )
+                                              .drawing(),
+                                          recipe: recipe,
+                                        ),
                                       ),
-                                    ),
+                                      const SizedBox(height: 3),
+                                      // The name stays readable when the header folds.
+                                      FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          '${e.value} ${drawingPresets.where((p) => p.group == e.key).length}',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: group == e.key
+                                                ? FontWeight.w800
+                                                : FontWeight.w600,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
-                          )),
+                                ),
+                              )),
                         ),
                       ),
                     ),

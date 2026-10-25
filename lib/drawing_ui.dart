@@ -2321,6 +2321,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
                 'Sozlash',
                 style: TextStyle(
@@ -2481,32 +2482,44 @@ class _DrawingEditorState extends State<DrawingEditor> {
     final scheme = Theme.of(context).colorScheme;
     Widget cell(String key, String caption, Widget value, VoidCallback onTap) =>
         Expanded(
-          child: GlassControl(
-              child: InkWell(
-            key: ValueKey('spec-$key'),
-            borderRadius: BorderRadius.circular(10),
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    caption,
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      color: scheme.onSurfaceVariant,
+          child: Padding(
+            // Each cell its own piece of glass, not one glued strip.
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: GlassControl(
+                child: InkWell(
+              key: ValueKey('spec-$key'),
+              borderRadius: BorderRadius.circular(10),
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // One line in every cell, so the row stays level.
+                    SizedBox(
+                      height: 15,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          caption,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  SizedBox(
-                    height: 20,
-                    child: FittedBox(fit: BoxFit.scaleDown, child: value),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    SizedBox(
+                      height: 20,
+                      child: FittedBox(fit: BoxFit.scaleDown, child: value),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          )),
+            )),
+          ),
         );
     TextStyle strong = TextStyle(
       fontSize: 14,
@@ -3552,15 +3565,24 @@ class _DrawingEditorState extends State<DrawingEditor> {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: GlassAppBar(
+        titleSpacing: 0,
+        // Three tools share the bar: a compact title stays whole.
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(widget.title),
+            Text(
+              widget.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+            ),
             Text(
               label == null
                   ? 'Chizing — hisob avtomatik'
                   : '$label • ${drawing['widthMm']}×${drawing['heightMm']}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],

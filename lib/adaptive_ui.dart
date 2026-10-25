@@ -167,10 +167,22 @@ class _GlassPainter extends CustomPainter {
 class GlassControl extends StatelessWidget {
   final Widget child;
   final Color? tint;
-  const GlassControl({super.key, required this.child, this.tint});
+
+  /// False leaves [child] as it is (a card with its own colours).
+  final bool enabled;
+
+  /// Dark glass on a dark or coloured backdrop, whatever the app theme.
+  final Brightness? brightness;
+  const GlassControl({
+    super.key,
+    required this.child,
+    this.tint,
+    this.enabled = true,
+    this.brightness,
+  });
   @override
   Widget build(BuildContext context) {
-    if (!usesIOSGlass) return child;
+    if (!usesIOSGlass || !enabled) return child;
     final scheme = Theme.of(context).colorScheme;
     final c = child;
     final selected = c is ChoiceChip
@@ -183,21 +195,51 @@ class GlassControl extends StatelessWidget {
                     ? c.value == true
                     : false;
     final accent = tint ?? scheme.primary;
-    final soft = Color.alphaBlend(
-      accent.withValues(alpha: selected ? .20 : .07),
-      scheme.surface,
-    );
+    final soft = brightness == Brightness.dark
+        ? accent.withValues(alpha: .55)
+        : Color.alphaBlend(
+            accent.withValues(alpha: selected ? .20 : .07),
+            scheme.surface,
+          );
+    // Chips and segmented buttons are capsules: the glass follows them
+    // instead of drawing a box around the pill.
+    final capsule = c is ChoiceChip ||
+        c is FilterChip ||
+        c is ActionChip ||
+        c is InputChip ||
+        c is SegmentedButton;
+    final radius = BorderRadius.circular(capsule ? 100 : 12);
+    final dark =
+        (brightness ?? Theme.of(context).brightness) == Brightness.dark;
+    final highlight = MediaQuery.highContrastOf(context)
+        ? null
+        : _GlassControlHighlight(dark, radius);
+    // A field's floating label sits on its top edge: the glass goes behind
+    // the field and never clips the label.
+    if (c is TextField || c is FormField) {
+      return Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              child: GlassSurface(
+                radius: radius,
+                tint: soft,
+                shadow: false,
+                brightness: brightness,
+                child: const SizedBox.expand(),
+              ),
+            ),
+          ),
+          child,
+        ],
+      );
+    }
     return GlassSurface(
-      radius: BorderRadius.circular(12),
+      radius: radius,
       tint: soft,
       shadow: false,
-      child: CustomPaint(
-        foregroundPainter: MediaQuery.highContrastOf(context)
-            ? null
-            : _GlassControlHighlight(
-                Theme.of(context).brightness == Brightness.dark),
-        child: child,
-      ),
+      brightness: brightness,
+      child: CustomPaint(foregroundPainter: highlight, child: child),
     );
   }
 }
@@ -205,11 +247,12 @@ class GlassControl extends StatelessWidget {
 /// Keep the rim visible on controls that paint their own opaque backgrounds.
 class _GlassControlHighlight extends CustomPainter {
   final bool dark;
-  const _GlassControlHighlight(this.dark);
+  final BorderRadius radius;
+  const _GlassControlHighlight(this.dark, this.radius);
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
-    final shape = BorderRadius.circular(12).toRSuperellipse(rect.deflate(.5));
+    final shape = radius.toRSuperellipse(rect.deflate(.5));
     canvas.drawRSuperellipse(
         shape,
         Paint()
@@ -236,7 +279,8 @@ class _GlassControlHighlight extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_GlassControlHighlight old) => old.dark != dark;
+  bool shouldRepaint(_GlassControlHighlight old) =>
+      old.dark != dark || old.radius != radius;
 }
 
 /// All ordinary Material buttons get glass from their theme, including custom

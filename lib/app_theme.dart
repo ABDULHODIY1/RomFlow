@@ -1,5 +1,6 @@
 import 'adaptive_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Shared, restrained surfaces keep the workshop readable in both themes.
 ThemeData romFlowTheme(Brightness brightness) {
@@ -89,6 +90,10 @@ ThemeData romFlowTheme(Brightness brightness) {
       scrolledUnderElevation: 0,
       centerTitle: false,
       titleTextStyle: typography.titleLarge,
+      // The glass app bar is transparent, which Flutter reads as dark: the
+      // clock and battery turned white on the light page and vanished.
+      systemOverlayStyle:
+          dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
     ),
     cardTheme: CardThemeData(
       color: surface,

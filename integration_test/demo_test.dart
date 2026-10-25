@@ -208,7 +208,7 @@ void main() {
       await nav('Buyurtmalar');
       await say(
           '2. Mijoz qo‘shish: qidiruv, qo‘ng‘iroq va mijoz sahifasi bor.');
-      await tap(find.textContaining('Mijozlar ('));
+      await tap(find.textContaining(RegExp(r'^Mijozlar \d+$')));
       await tap(find.text('Mijoz'));
       await type('Ism', 'Aziz Karimov');
       await type('Telefon', '+998 91 765 43 21');

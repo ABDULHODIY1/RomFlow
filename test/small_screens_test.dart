@@ -64,9 +64,9 @@ void main() {
             final before = problems.length;
             await tester.pumpWidget(MaterialApp(
                 theme: romFlowTheme(Brightness.light),
-                // As the app does: text grows at most 1.3×.
+                // As the app does: text grows at most 1.15×.
                 builder: (context, child) => MediaQuery.withClampedTextScaling(
-                    maxScaleFactor: 1.3, child: child!),
+                    maxScaleFactor: 1.15, child: child!),
                 home: page));
             await tester.pump(const Duration(milliseconds: 400));
             await tester.pump(const Duration(milliseconds: 400));
