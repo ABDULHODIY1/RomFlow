@@ -385,7 +385,7 @@ final class GlassButtons: NSObject, FlutterPlatformView, UIGestureRecognizerDele
       let pull = UIPanGestureRecognizer(target: self, action: #selector(dragged(_:)))
       pull.maximumNumberOfTouches = 1
       let hold = UILongPressGestureRecognizer(target: self, action: #selector(dragged(_:)))
-      hold.minimumPressDuration = 0.25
+      hold.minimumPressDuration = 0.1
       for gesture in [pull, hold] as [UIGestureRecognizer] {
         gesture.delegate = self
         button.addGestureRecognizer(gesture)
