@@ -2709,6 +2709,7 @@ class _View3DState extends State<View3D>
                       right: 10,
                       top: 10,
                       child: NativeGlassButtons(
+                        native: false,
                         vertical: true,
                         dark: true,
                         width: 40,
@@ -3090,6 +3091,7 @@ class _View3DState extends State<View3D>
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: NativeGlassButtons(
+        native: false,
         height: size + 4,
         width: all.length * size + (all.length - 1) * gap,
         spacing: gap,

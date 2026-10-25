@@ -79,24 +79,11 @@ class GlassSurface extends StatelessWidget {
     final solid = MediaQuery.highContrastOf(context);
     final filtered =
         this.blur ?? (!opaque && tint == null && brightness == null);
-    // On iPhone and iPad the floating glass is Apple's own: a UIGlassEffect
-    // view behind the Flutter content, which bends and lights what is under
-    // it as the system bars do.
-    if (!solid && filtered && nativeGlass) {
-      return _NativeGlass(
-        radius: radius,
-        // Sheets and dialogs carry long text: a denser tint of the page
-        // colour keeps it readable over whatever is behind.
-        tint: opaque
-            ? (tint ?? Theme.of(context).colorScheme.surface)
-                .withValues(alpha: .6)
-            : tint,
-        dark: dark,
-        shadow: shadow,
-        child: child,
-      );
-    }
-    if (!solid && !filtered) {
+    // On iPhone only the tab bar and the main buttons are UIKit's glass.
+    // A UIKit view behind every Flutter surface, or a backdrop blur next to
+    // them, made pages with many controls heat the phone and stutter:
+    // there the glass is painted.
+    if (!solid && (!filtered || nativeGlass)) {
       final painted = ClipRSuperellipse(
         borderRadius: radius,
         child: CustomPaint(
@@ -145,70 +132,6 @@ class GlassSurface extends StatelessWidget {
             ),
     );
     if (!shadow || solid) return glass;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        shape: RoundedSuperellipseBorder(borderRadius: radius),
-        shadows: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? .30 : .10),
-            blurRadius: 22,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: glass,
-    );
-  }
-}
-
-class _NativeGlass extends StatelessWidget {
-  final BorderRadius radius;
-  final Color? tint;
-  final bool dark, shadow;
-  final Widget child;
-  const _NativeGlass({
-    required this.radius,
-    required this.tint,
-    required this.dark,
-    required this.shadow,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final params = <String, Object?>{
-      'dark': dark,
-      'corners': [
-        radius.topLeft.x,
-        radius.topRight.x,
-        radius.bottomRight.x,
-        radius.bottomLeft.x,
-      ],
-      // UIKit tints the glass itself; a light touch, as in Apple's apps.
-      if (tint != null) 'tint': tint!.toARGB32(),
-    };
-    // Passthrough: the content takes the surface's full size, as on the
-    // painted glass; loose, an icon sat in the top-left corner of its
-    // circle.
-    final glass = Stack(
-      fit: StackFit.passthrough,
-      children: [
-        Positioned.fill(
-          // Taps go to the Flutter content; the glass only shows.
-          child: IgnorePointer(
-            child: UiKitView(
-              // New look, new view: UIKit glass is configured once.
-              key: ValueKey(jsonEncode(params)),
-              viewType: 'romflow/glass-surface',
-              creationParams: params,
-              creationParamsCodec: const StandardMessageCodec(),
-            ),
-          ),
-        ),
-        ClipRSuperellipse(borderRadius: radius, child: child),
-      ],
-    );
-    if (!shadow) return glass;
     return DecoratedBox(
       decoration: ShapeDecoration(
         shape: RoundedSuperellipseBorder(borderRadius: radius),
@@ -379,37 +302,14 @@ class GlassControl extends StatelessWidget {
         c is InputChip ||
         c is SegmentedButton;
     final radius = BorderRadius.circular(capsule ? 100 : 12);
-    // Capsule controls and the search field are Apple's own glass on
-    // iPhone: the selected chip or segment carries a tint of the accent.
-    if (nativeGlass && (capsule || c is TextField)) {
-      return GlassSurface(
-        radius: radius,
-        tint: selected ? accent.withValues(alpha: .35) : null,
-        shadow: false,
-        blur: true,
-        brightness: brightness,
-        child: child,
-      );
-    }
-    // A field's floating label sits on its top edge: the glass goes behind
-    // the field and never clips the label.
-    if (c is TextField || c is FormField) {
-      return Stack(
-        children: [
-          Positioned.fill(
-            child: IgnorePointer(
-              child: GlassSurface(
-                radius: radius,
-                tint: soft,
-                shadow: false,
-                brightness: brightness,
-                child: const SizedBox.expand(),
-              ),
-            ),
-          ),
-          child,
-        ],
-      );
+    // Fields, switches and list rows stay as they are: glass on every row
+    // filled whole pages with it.
+    if (c is TextField ||
+        c is FormField ||
+        c is ListTile ||
+        c is SwitchListTile ||
+        c is CheckboxListTile) {
+      return child;
     }
     return GlassSurface(
       radius: radius,
@@ -447,21 +347,9 @@ ButtonStyle glassButtonStyle(
           : prominent || states.contains(WidgetState.selected)
               ? accent
               : Color.alphaBlend(accent.withValues(alpha: .12), scheme.surface);
-      // On iPhone a button is a capsule of Apple's glass: tinted with its
-      // colour when prominent (as UIKit's prominent glass), clear with a
-      // coloured label otherwise.
-      if (nativeGlass && !disabled) {
-        final strong = prominent || states.contains(WidgetState.selected);
-        return GlassSurface(
-          radius: BorderRadius.circular(100),
-          tint: strong ? accent : null,
-          shadow: false,
-          blur: true,
-          child: child ?? const SizedBox.shrink(),
-        );
-      }
       return GlassSurface(
-        radius: BorderRadius.circular(12),
+        // A capsule on iPhone, as Apple's buttons.
+        radius: BorderRadius.circular(nativeGlass ? 100 : 12),
         tint: colour,
         shadow: false,
         child: child ?? const SizedBox.shrink(),
@@ -855,6 +743,10 @@ class NativeGlassButtons extends StatefulWidget {
   final double? width;
   final bool vertical, dark, equal;
   final double spacing;
+
+  /// False keeps the Flutter buttons: over a picture that redraws every
+  /// frame (the 3D model) a UIKit view would be recomposited every frame.
+  final bool native;
   const NativeGlassButtons({
     super.key,
     required this.items,
@@ -866,6 +758,7 @@ class NativeGlassButtons extends StatefulWidget {
     this.dark = false,
     this.equal = false,
     this.spacing = 8,
+    this.native = true,
   });
   @override
   State<NativeGlassButtons> createState() => _NativeGlassButtonsState();
@@ -931,7 +824,9 @@ class _NativeGlassButtonsState extends State<NativeGlassButtons> {
 
   @override
   Widget build(BuildContext context) {
-    if (!nativeGlass || !available) return widget.fallback;
+    if (!nativeGlass || !available || !widget.native) {
+      return widget.fallback;
+    }
     return SizedBox(
       height: widget.height < 48 ? 48 : widget.height,
       width: widget.width == null

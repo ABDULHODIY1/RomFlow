@@ -3801,9 +3801,12 @@ class _DrawingEditorState extends State<DrawingEditor> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: CustomPaint(
-              painter: PaperPainter(
-                Theme.of(context).brightness == Brightness.dark,
+            // Its own layer: dragging an impost does not repaint the paper.
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: PaperPainter(
+                  Theme.of(context).brightness == Brightness.dark,
+                ),
               ),
             ),
           ),

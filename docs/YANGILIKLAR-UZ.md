@@ -14,6 +14,7 @@
 - Pastki menyu yangilandi: balandroq shisha kapsula, tanlangan bo‘lim ajralib turadi, yozuvlar kesilmaydi.
 - Paneldagi ikonka tugmalar (orqaga, bekor qilish, sozlash) qutisiz, Apple uslubida.
 - Yuqori panel Apple uslubida: yaxlit plita yo‘q, sahifa sarlavha ostida yumshoq xiralashadi; orqaga tugmasi shisha doirada, panel asboblari bitta shisha kapsulada.
+- Tezlik: tizim (UIKit) shishasi faqat pastki menyu va asosiy tugmalarda; boshqa tugma, chip, panel va oynalar yengil chizilgan shishada, maydon va ro‘yxat qatorlari shishasiz. Telefon qizimaydi va qotmaydi; 3D sahifada tugmalar model ustida qayta yig‘ilmaydi.
 - Shisha tugmalar endi to‘g‘ri kapsula (linza shaklida cho‘zilmaydi); chizma stoli mavzuga mos: qorong‘ida qora fon va oq yozuv/o‘lchamlar, och mavzuda oq fon va qora yozuv.
 - Chizish qulayroq: ikki barmoq bilan chizmani 5× gacha kattalashtirish va surish (bir barmoq chizishda davom etadi), “Asl o‘lcham” tugmasi; bo‘lim ustiga ikki marta bosish uning sozlamalarini ochadi.
 - Chizma stoli butun ekranda: qog‘oz chetdan-chetgacha, asboblar ixcham shisha kapsulalarda ustida suzadi; “To‘liq ekran” tugmasi asboblar va pastki panelni yashiradi. Asbob tugmalari faqat ikonka (nomi uzoq bosganda), 3D va Sarf ham ikonka.
