@@ -100,6 +100,18 @@ class _DrawingEditorState extends State<DrawingEditor> {
   DMap? edgeStart;
   bool draggingSize = false, editingGesture = false, dragCheckpoint = false;
   Offset? dragDown;
+
+  /// Two fingers zoom and move the desk (1×–5×); one finger draws.
+  double zoom = 1;
+  Offset pan = Offset.zero;
+  final pointers = <int, Offset>{};
+  bool pinching = false;
+  double pinchZoom = 1, pinchDistance = 1;
+  Offset pinchPan = Offset.zero, pinchFocal = Offset.zero;
+
+  /// The last tap, for a double tap that opens a section's settings.
+  DateTime? lastTapAt;
+  String? lastTapCell;
   CanvasTransform? dragTransform;
   double dragWidth = 0, dragHeight = 0;
   bool saving = false;
@@ -712,6 +724,60 @@ class _DrawingEditorState extends State<DrawingEditor> {
     }
     return hit;
   }
+
+  /// A second finger came down: the edit the first one began is undone,
+  /// and the fingers zoom instead.
+  void cancelEdit() {
+    if (dragCheckpoint && undo.isNotEmpty) {
+      drawing = cloneMap(undo.removeLast());
+    }
+    dragCheckpoint = false;
+    dragged = null;
+    draggedVertex = null;
+    draggingSize = false;
+    edge = null;
+    edgeStart = null;
+    dragTransform = null;
+    snappedTo = null;
+    guide = const [];
+    overTrash = false;
+    editingGesture = false;
+  }
+
+  void startPinch() {
+    final p = pointers.values.toList();
+    cancelEdit();
+    setState(() {
+      pinching = true;
+      pinchZoom = zoom;
+      pinchPan = pan;
+      pinchFocal = (p[0] + p[1]) / 2;
+      pinchDistance = math.max(1, (p[0] - p[1]).distance);
+    });
+  }
+
+  void updatePinch(Size size) {
+    final p = pointers.values.take(2).toList();
+    if (p.length < 2) return;
+    final focal = (p[0] + p[1]) / 2;
+    final next =
+        (pinchZoom * (p[0] - p[1]).distance / pinchDistance).clamp(1.0, 5.0);
+    // The point of the drawing under the fingers stays under them.
+    final content = (pinchFocal - pinchPan) / pinchZoom;
+    final moved = focal - content * next;
+    setState(() {
+      zoom = next;
+      pan = Offset(
+        moved.dx.clamp(size.width * (1 - next), 0.0),
+        moved.dy.clamp(size.height * (1 - next), 0.0),
+      );
+    });
+  }
+
+  void resetZoom() => setState(() {
+        zoom = 1;
+        pan = Offset.zero;
+      });
 
   void endDrag() {
     final removing = dragged != null && overTrash && dragCheckpoint;
@@ -1780,8 +1846,9 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     width: 190,
                     height: 42,
                   );
-                  return Listener(
+                  final interactive = Listener(
                     onPointerDown: (details) {
+                      if (pinching) return;
                       beginDrag(details.localPosition, transform, layout);
                       dragCheckpoint = false;
                       if (dragged != null ||
@@ -1792,7 +1859,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       }
                     },
                     onPointerMove: (details) {
-                      if (!editingGesture) return;
+                      if (pinching || !editingGesture) return;
                       if (!dragCheckpoint) {
                         if ((details.localPosition - dragDown!).distance < 3) {
                           return;
@@ -1866,6 +1933,39 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       ),
                     ),
                   );
+                  if (!bare) return interactive;
+                  // The desk: two fingers zoom and move it.
+                  return Listener(
+                    onPointerDown: (e) {
+                      pointers[e.pointer] = e.localPosition;
+                      if (pointers.length == 2) startPinch();
+                    },
+                    onPointerMove: (e) {
+                      if (!pointers.containsKey(e.pointer)) return;
+                      pointers[e.pointer] = e.localPosition;
+                      if (pinching) updatePinch(size);
+                    },
+                    onPointerUp: (e) {
+                      pointers.remove(e.pointer);
+                      if (pointers.isEmpty && pinching) {
+                        setState(() => pinching = false);
+                      }
+                    },
+                    onPointerCancel: (e) {
+                      pointers.remove(e.pointer);
+                      if (pointers.isEmpty && pinching) {
+                        setState(() => pinching = false);
+                      }
+                    },
+                    child: ClipRect(
+                      child: Transform(
+                        transform: Matrix4.identity()
+                          ..translateByDouble(pan.dx, pan.dy, 0, 1)
+                          ..scaleByDouble(zoom, zoom, 1, 1),
+                        child: interactive,
+                      ),
+                    ),
+                  );
                 },
               ),
       );
@@ -1915,6 +2015,18 @@ class _DrawingEditorState extends State<DrawingEditor> {
         });
         HapticFeedback.selectionClick();
       } else if (tool == 'select') {
+        // A second tap on the same section opens its settings.
+        final now = DateTime.now(), id = c.node['id'] as String;
+        final twice = lastTapCell == id &&
+            lastTapAt != null &&
+            now.difference(lastTapAt!) < const Duration(milliseconds: 350);
+        lastTapAt = twice ? null : now;
+        lastTapCell = twice ? null : id;
+        if (twice) {
+          HapticFeedback.selectionClick();
+          sectionMenu(id);
+          return;
+        }
         setState(() {
           selected = c.node['id'];
           selectedFill = null;
@@ -2671,7 +2783,8 @@ class _DrawingEditorState extends State<DrawingEditor> {
 
   Offset? localDrop(Offset global) {
     final box = dropCanvasKey.currentContext?.findRenderObject();
-    return box is RenderBox ? box.globalToLocal(global) : null;
+    // Back through the desk's zoom to the drawing's own coordinates.
+    return box is RenderBox ? (box.globalToLocal(global) - pan) / zoom : null;
   }
 
   DraftPlacement? plannedDrop(DraftPayload payload, Offset local, Size size) {
@@ -2830,15 +2943,21 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          CustomPaint(
-                            key: const ValueKey('draft-drop-preview'),
-                            painter: DraftDropPainter(
-                              polygon: placement?.polygon ?? [],
-                              line: placement?.line ?? [],
-                              labels: placement?.labels ?? const [],
-                              snapped: placement?.snapped == true,
-                              valid: valid,
-                              color: color,
+                          Transform(
+                            // The preview follows the desk's zoom.
+                            transform: Matrix4.identity()
+                              ..translateByDouble(pan.dx, pan.dy, 0, 1)
+                              ..scaleByDouble(zoom, zoom, 1, 1),
+                            child: CustomPaint(
+                              key: const ValueKey('draft-drop-preview'),
+                              painter: DraftDropPainter(
+                                polygon: placement?.polygon ?? [],
+                                line: placement?.line ?? [],
+                                labels: placement?.labels ?? const [],
+                                snapped: placement?.snapped == true,
+                                valid: valid,
+                                color: color,
+                              ),
                             ),
                           ),
                           Positioned(
@@ -3941,7 +4060,24 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: show3d && layout != null
                         ? Live3D(drawing: drawing, recipe: recipe)
-                        : dropWorkspace(layout),
+                        : Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              dropWorkspace(layout),
+                              // Back to the whole window after zooming in.
+                              if (zoom > 1.01)
+                                Positioned(
+                                  right: 4,
+                                  bottom: 8,
+                                  child: GlassIconButton(
+                                    key: const ValueKey('fit-desk'),
+                                    icon: Icons.fit_screen_outlined,
+                                    tooltip: tr('Asl o‘lcham'),
+                                    onPressed: resetZoom,
+                                  ),
+                                ),
+                            ],
+                          ),
                   ),
                 ),
                 if (!fullDesk)

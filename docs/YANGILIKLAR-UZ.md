@@ -14,6 +14,7 @@
 - Pastki menyu yangilandi: balandroq shisha kapsula, tanlangan bo‘lim ajralib turadi, yozuvlar kesilmaydi.
 - Paneldagi ikonka tugmalar (orqaga, bekor qilish, sozlash) qutisiz, Apple uslubida.
 - Yuqori panel Apple uslubida: yaxlit plita yo‘q, sahifa sarlavha ostida yumshoq xiralashadi; orqaga tugmasi shisha doirada, panel asboblari bitta shisha kapsulada.
+- Chizish qulayroq: ikki barmoq bilan chizmani 5× gacha kattalashtirish va surish (bir barmoq chizishda davom etadi), “Asl o‘lcham” tugmasi; bo‘lim ustiga ikki marta bosish uning sozlamalarini ochadi.
 - Chizma stoli butun ekranda: qog‘oz chetdan-chetgacha, asboblar ixcham shisha kapsulalarda ustida suzadi; “To‘liq ekran” tugmasi asboblar va pastki panelni yashiradi. Asbob tugmalari faqat ikonka (nomi uzoq bosganda), 3D va Sarf ham ikonka.
 - Rus va ingliz tillari: birinchi ochilishda va har yangilanishdan keyin til so‘raladi; Sozlamalar → Til’dan istalgan payt o‘zgartiriladi. Butun interfeys, xatolar, sana va iOS tugmalari tanlangan tilda.
 - Yangi versiya chiqsa, ilova ochilganda shisha oynada “Yangilash” taklif qilinadi (iPhone’da App Store, so‘ng GitHub; Android’da APK).

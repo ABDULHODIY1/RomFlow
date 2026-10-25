@@ -263,8 +263,8 @@ void main() {
     final target = rect.topLeft +
         CanvasTransform(rect.size, painter().drawing, sectionDimensions: true)
             .to(const V(1050, 700));
-    final gesture =
-        await tester.startGesture(tester.getCenter(find.byTooltip('3 bo‘limli')));
+    final gesture = await tester
+        .startGesture(tester.getCenter(find.byTooltip('3 bo‘limli')));
     await gesture.moveBy(const Offset(0, 28));
     await tester.pump();
     await gesture.moveTo(target);

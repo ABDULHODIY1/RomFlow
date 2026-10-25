@@ -35,8 +35,8 @@ void main() {
     }
 
     final before = jsonEncode(painter().drawing);
-    final gesture =
-        await tester.startGesture(tester.getCenter(find.byTooltip('Tik bo‘lish')));
+    final gesture = await tester
+        .startGesture(tester.getCenter(find.byTooltip('Tik bo‘lish')));
     await gesture.moveBy(const Offset(0, 28));
     await tester.pump();
     await gesture.moveTo(at(const V(650, 750)));
@@ -56,8 +56,8 @@ void main() {
     expect(layoutDrawing(painter().drawing, painter().recipe).cells.length, 2);
     final divided = jsonEncode(painter().drawing);
     // Releasing over canvas whitespace must not create a phantom frame part.
-    final cancel =
-        await tester.startGesture(tester.getCenter(find.byTooltip('Tik bo‘lish')));
+    final cancel = await tester
+        .startGesture(tester.getCenter(find.byTooltip('Tik bo‘lish')));
     await cancel.moveBy(const Offset(0, 28));
     await tester.pump();
     await cancel.moveTo(tester.getTopLeft(canvas) + const Offset(5, 5));
@@ -112,8 +112,8 @@ void main() {
     }
 
     Future<void> drag(String label, V position) async {
-      final gesture =
-          await tester.startGesture(tester.getCenter(find.byTooltip(label).first));
+      final gesture = await tester
+          .startGesture(tester.getCenter(find.byTooltip(label).first));
       await gesture.moveBy(const Offset(0, 28));
       await tester.pump();
       await gesture.moveTo(at(position));
