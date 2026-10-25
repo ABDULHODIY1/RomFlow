@@ -2508,23 +2508,23 @@ class _DrawingEditorState extends State<DrawingEditor> {
             // UIKit's buttons bring their own glass.
             ? Center(child: child)
             : usesIOSGlass
-            // A floating toolbar over the paper: one capsule of Apple's
-            // glass, as wide as its tools, the drawing showing through.
-            ? Center(
-                child: GlassSurface(
-                  radius: BorderRadius.circular(25),
-                  blur: true,
-                  child: child,
-                ),
-              )
-            : DecoratedBox(
-                decoration: BoxDecoration(
-                  color: scheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: scheme.outlineVariant),
-                ),
-                child: child,
-              ),
+                // A floating toolbar over the paper: one capsule of Apple's
+                // glass, as wide as its tools, the drawing showing through.
+                ? Center(
+                    child: GlassSurface(
+                      radius: BorderRadius.circular(25),
+                      blur: true,
+                      child: child,
+                    ),
+                  )
+                : DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: scheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: scheme.outlineVariant),
+                    ),
+                    child: child,
+                  ),
       );
 
   /// The bottom panel: a glass card when Liquid Glass is on.
@@ -3693,7 +3693,10 @@ class _DrawingEditorState extends State<DrawingEditor> {
       // On iPhone a row of tools is UIKit's own glass buttons, one view for
       // the row; the chosen tool is prominent glass. Dragging a part onto
       // the drawing stays with the Flutter row elsewhere.
-      final row = [for (final c in children) if (c is DraftTool) c];
+      final row = [
+        for (final c in children)
+          if (c is DraftTool) c
+      ];
       if (nativeGlass &&
           row.length == children.length &&
           row.isNotEmpty &&
@@ -3727,6 +3730,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
         child: Row(children: children),
       );
     }
+
     void selectTool(String value) => setState(() {
           show3d = false;
           tool = value;
