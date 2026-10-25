@@ -205,7 +205,7 @@ final class GlassButtonsFactory: NSObject, FlutterPlatformViewFactory {
 /// A row (or column) of system glass buttons. Each item: id, symbol (SF
 /// Symbol), title, subtitle, style ("glass", "prominent", "white"),
 /// selected, enabled, expand (takes the free width), size (a round button).
-final class GlassButtons: NSObject, FlutterPlatformView {
+final class GlassButtons: NSObject, FlutterPlatformView, UIGestureRecognizerDelegate {
   private let root = UIView()
   private let stack = UIStackView()
   private let channel: FlutterMethodChannel
@@ -274,20 +274,33 @@ final class GlassButtons: NSObject, FlutterPlatformView {
     build(args["items"] as? [[String: Any]] ?? [])
   }
   private var dragIds: [ObjectIdentifier: String] = [:]
-  @objc private func dragged(_ hold: UILongPressGestureRecognizer) {
-    guard let id = dragIds[ObjectIdentifier(hold)] else { return }
+  /// The recognizer that is dragging now: a pull and a hold never both drag.
+  private var activeDrag: ObjectIdentifier?
+  @objc private func dragged(_ gesture: UIGestureRecognizer) {
+    let key = ObjectIdentifier(gesture)
+    guard let id = dragIds[key] else { return }
+    if gesture.state == .began {
+      guard activeDrag == nil else { return }
+      activeDrag = key
+    }
+    guard activeDrag == key else { return }
     let phase: String
-    switch hold.state {
+    switch gesture.state {
     case .began: phase = "start"
     case .changed: phase = "move"
     case .ended: phase = "end"
     default: phase = "cancel"
     }
-    let at = hold.location(in: nil)
+    if phase == "end" || phase == "cancel" { activeDrag = nil }
+    let at = gesture.location(in: nil)
     channel.invokeMethod("drag", arguments: ["id": id, "phase": phase, "x": Double(at.x), "y": Double(at.y)])
   }
+  // The glass button keeps its own press effect while the finger drags.
+  func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                         shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
   private func build(_ items: [[String: Any]]) {
     dragIds.removeAll()
+    activeDrag = nil
     for view in stack.arrangedSubviews { stack.removeArrangedSubview(view); view.removeFromSuperview() }
     for item in items { stack.addArrangedSubview(make(item)) }
   }
@@ -366,12 +379,18 @@ final class GlassButtons: NSObject, FlutterPlatformView {
     button.accessibilityHint = item["subtitle"] as? String
     button.addAction(UIAction { [weak self] _ in self?.channel.invokeMethod("onTap", arguments: id) }, for: .touchUpInside)
     if item["draggable"] as? Bool == true {
-      // Held, the button drags its part onto the drawing: the finger's
-      // position goes to Flutter in screen points.
+      // Pulled at once (as the Flutter tools) or held still and moved, the
+      // button drags its part onto the drawing: the finger's position goes
+      // to Flutter in screen points.
+      let pull = UIPanGestureRecognizer(target: self, action: #selector(dragged(_:)))
+      pull.maximumNumberOfTouches = 1
       let hold = UILongPressGestureRecognizer(target: self, action: #selector(dragged(_:)))
       hold.minimumPressDuration = 0.25
-      button.addGestureRecognizer(hold)
-      dragIds[ObjectIdentifier(hold)] = id
+      for gesture in [pull, hold] as [UIGestureRecognizer] {
+        gesture.delegate = self
+        button.addGestureRecognizer(gesture)
+        dragIds[ObjectIdentifier(gesture)] = id
+      }
     }
     button.translatesAutoresizingMaskIntoConstraints = false
     if let size = item["size"] as? Double {

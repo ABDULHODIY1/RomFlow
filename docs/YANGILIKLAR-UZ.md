@@ -5,7 +5,7 @@
 - Chizmadagi ochilish belgisi: chiziqlar tutqichda tutashadi, ochiq tomoni petlyalarga qaraydi — 3D bilan bir xil.
 - Filtr chiplari va segment tugmalari: shisha endi tugmaning o‘ziga teng kapsula — ikki qatlam va pastdan kesilish yo‘q.
 - Tarjima: katalog bo‘limlari va filtrlar soni bilan ("Derazalar 27" → "Окна 27"), Android pastki menyusi, rang, to‘ldirma, material nomlari ham tarjima qilinadi; tugma matni kesilmaydi.
-- iPhone (Liquid Glass): asbob tugmasini bosib turib chizmaga sudrash endi ishlaydi — Flutter bosishni UIKit’ga darhol beradi.
+- iPhone (Liquid Glass): asbob tugmasini chizmaga sudrash endi ishlaydi — darhol tortib ham, bosib turib ham (oddiy rejimdagidek).
 - Oddiy rejimda ham chizish asboblari alohida dumaloq, faqat ikonli tugmalar; sudralayotgan qism ham faqat ikon.
 - Chizish stolining yuqori tugmalari (iPhone) endi Apple strelkalari emas, chizmadagi belgining o‘zini ko‘rsatadi: chiziqlar tutqichda tutashadi.
 - Status bar (soat, batareya) och sahifalarda yana ko‘rinadi.
