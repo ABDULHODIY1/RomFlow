@@ -3,6 +3,7 @@
 ## 1.0.0 — Liquid Glass to‘liq tuzatildi, tezroq va silliqroq
 
 - Chizmadagi ochilish belgisi: chiziqlar tutqichda tutashadi, ochiq tomoni petlyalarga qaraydi — 3D bilan bir xil.
+- 3D: fortochka (pastdan petlyali) va yuqoridan petlyali qanotlar ham endi xonaga ochiladi — tortib ochiladi, itarib emas.
 - Filtr chiplari va segment tugmalari: shisha endi tugmaning o‘ziga teng kapsula — ikki qatlam va pastdan kesilish yo‘q.
 - Tarjima: katalog bo‘limlari va filtrlar soni bilan ("Derazalar 27" → "Окна 27"), Android pastki menyusi, rang, to‘ldirma, material nomlari ham tarjima qilinadi; tugma matni kesilmaydi.
 - iPhone (Liquid Glass): asbob tugmasini chizmaga sudrash endi ishlaydi — darhol tortib ham, bosib turib ham (oddiy rejimdagidek).

@@ -68,7 +68,9 @@ class ModelGroup {
     }
     if (type == 'fixed' || progress == 0) return p;
     if (type == 'top' || type == 'bottom') {
-      final a = progress * math.pi * .32 * sign * (type == 'bottom' ? 1 : -1),
+      // Into the room (+z), as the side-hung sashes: the handle's side is
+      // pulled, never pushed out.
+      final a = progress * math.pi * .32 * sign * (type == 'bottom' ? -1 : 1),
           dy = p.y - hingeY,
           dz = p.z - hingeZ;
       return P3(
