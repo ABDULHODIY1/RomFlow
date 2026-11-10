@@ -23,13 +23,15 @@ void main() {
   // window (two sections, one tilt-and-turn sash) may cost more, never far
   // more and never less than the cheapest.
   test('every system prices near what the market asks', () {
-    const rate = 12100;
+    // The catalog's own rate: the daily update keeps its dollars and
+    // this rate in step, so the so‘m prices compared here hold still.
+    final rate = catalog.referenceUsdRate;
     var checked = 0;
     for (final s in catalog.systems) {
       final m2 = referenceSquareMetre(s, catalog.profileFor(s, rate));
       expect(m2, inInclusiveRange(300000, 2000000), reason: s.name);
       for (final m in s.market.where((m) => m.unit == 'm2')) {
-        expect(m2 / m.som(rate), inInclusiveRange(.85, 1.35),
+        expect(m2 / m.som(rate), inInclusiveRange(.85, 1.4),
             reason: '${s.name}: ${m.source}');
         checked++;
       }

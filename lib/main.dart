@@ -30,6 +30,8 @@ import 'platform_files.dart';
 import 'billing.dart';
 import 'exchange_rate.dart';
 import 'price_sources.dart';
+import 'brands.dart';
+import 'glass_page.dart';
 import 'manufacturers_page.dart';
 import 'measurements.dart';
 import 'installments.dart';
@@ -984,6 +986,17 @@ class _HomeState extends State<Home> {
           icon: const Icon(Icons.factory_outlined),
           label: const Tx(
             'Zavodlar narxi',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(height: 8),
+        FilledButton.tonalIcon(
+          key: const ValueKey('open-glass'),
+          onPressed: () => open(GlassPage(store: s)),
+          icon: const Icon(Icons.crop_square),
+          label: const Tx(
+            'Oyna (shisha) narxlari',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -2802,21 +2815,16 @@ class _BuilderPageState extends State<BuilderPage> {
             ),
           ),
           const SizedBox(height: 14),
-          choice(
-            'Profil tizimi',
-            profile,
-            s.profiles
-                .map(
-                  (p) => DropdownMenuItem<String>(
-                    value: p['id'],
-                    child: Tx(p['name'], overflow: TextOverflow.ellipsis),
-                  ),
-                )
-                .toList(),
-            (v) => setState(() {
-              profile = v!;
-              result = null;
-            }),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: ProfilePickTile(
+              store: s,
+              profile: profile,
+              onChanged: (v) => setState(() {
+                profile = v;
+                result = null;
+              }),
+            ),
           ),
           choice(
             'Konstruksiya turi',

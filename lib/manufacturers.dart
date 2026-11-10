@@ -62,6 +62,52 @@ class MarketPrice {
   num som(num usdRate) => currency == 'USD' ? price * usdRate : price;
 }
 
+/// A kind of glass with its price for one square metre. [source] is where
+/// the price was read (empty for an estimate from the nearest listed one).
+class GlassType {
+  final String id, name, kind, source, url, seen;
+  final num thicknessMm, usd;
+  const GlassType({
+    required this.id,
+    required this.name,
+    required this.kind,
+    required this.thicknessMm,
+    required this.usd,
+    this.source = '',
+    this.url = '',
+    this.seen = '',
+  });
+
+  bool get estimate => source.isEmpty;
+
+  /// Read from a catalog; a bad entry throws so the whole file is refused.
+  factory GlassType.fromJson(Map m) {
+    final id = '${m['id'] ?? ''}', name = '${m['name'] ?? ''}';
+    final mm = m['thicknessMm'], usd = m['usd'];
+    if (id.isEmpty ||
+        name.trim().isEmpty ||
+        mm is! num ||
+        mm <= 0 ||
+        mm > 60 ||
+        usd is! num ||
+        !usd.isFinite ||
+        usd <= 0 ||
+        usd > 1000) {
+      throw FormatException('Katalogdagi shisha xato: $id');
+    }
+    return GlassType(
+      id: id,
+      name: name,
+      kind: '${m['kind'] ?? 'clear'}',
+      thicknessMm: mm,
+      usd: usd,
+      source: '${m['source'] ?? ''}',
+      url: '${m['url'] ?? ''}',
+      seen: '${m['seen'] ?? ''}',
+    );
+  }
+}
+
 class Manufacturer {
   final String id, name, group, city, role, website, about;
   final List<String> materials;
@@ -122,6 +168,9 @@ class ManufacturerCatalog {
   final List<MarketPrice> materialsMarket;
   final List<Manufacturer> manufacturers;
   final List<ProfileSystem> systems;
+
+  /// Kinds of glass and their prices; empty in a catalog older than v3.
+  final List<GlassType> glass;
   const ManufacturerCatalog(
     this.version,
     this.date,
@@ -130,8 +179,16 @@ class ManufacturerCatalog {
     this.common,
     this.materialsMarket,
     this.manufacturers,
-    this.systems,
-  );
+    this.systems, {
+    this.glass = const [],
+  });
+
+  GlassType? glassType(String? id) {
+    for (final g in glass) {
+      if (g.id == id) return g;
+    }
+    return null;
+  }
 
   Manufacturer maker(String id) => manufacturers.firstWhere((m) => m.id == id);
   ProfileSystem? system(String id) {
@@ -256,7 +313,11 @@ class ManufacturerCatalog {
       [for (final m in list(data['materialsMarket'])) MarketPrice.fromJson(m)],
       makers,
       systems,
+      glass: [for (final g in list(data['glass'])) GlassType.fromJson(g)],
     );
+    if ({for (final g in catalog.glass) g.id}.length != catalog.glass.length) {
+      throw const FormatException('Katalogdagi shisha turlari takrorlangan');
+    }
     for (final s in systems) {
       validateRecipe(recipeFor(catalog.profileFor(s, rate)));
     }

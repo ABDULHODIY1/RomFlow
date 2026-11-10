@@ -51,6 +51,20 @@ varag‘i faqat dilerlarga beriladi: aniq narx uchun uni Profillar →
 Seriya nomi ochiq bo‘lmagan zavodlar (BENKAM, Alumin, NPK SM UZ) ro‘yxatda
 bor, lekin tizimsiz: ular uchun diler narxini kiriting.
 
+## Kunlik avtomatik yangilanish
+`.github/workflows/prices.yml` har kuni 06:17 da (Toshkent) `tool/update_prices.py`
+ni ishga tushiradi. U faqat sahifada haqiqatan ko‘rsatilgan narxni oladi:
+
+- **Ekopen.uz** — Aldoks rama, qanot, impost, eshik qanoti, shtapik (6 m tayoq);
+- **Stroyka.uz** — 3,5 mm list shisha, toblangan 10 mm shisha, shishapaket;
+- **Markaziy bank** — dollar kursi.
+
+Sahifa ochilmasa, tuzilishi o‘zgarsa yoki narx kechagidan 40% dan ko‘p farq
+qilsa, eski narx qoladi. Narx o‘zgargandagina katalog versiyasi oshadi.
+AKFA’ning oylik diler prays varag‘i ochiq e’lon qilinmaydi (dilerlarga
+yuboriladi) — uni avtomatik olib bo‘lmaydi: yangi prays kelganda uni ilovaga
+“Narxlarni yangilash (diler / jadval)” orqali yuklang yoki katalogga kiriting.
+
 ## Katalogni yangilash
 1. `assets/manufacturers_uz.json` da narxni o‘zgartiring yoki yangi tizim
    qo‘shing (`systems` ro‘yxati; `manufacturer` — `manufacturers` dagi `id`).

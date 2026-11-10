@@ -2798,6 +2798,38 @@ const i18nPlain = <String, List<String>>{
     'Оконная фурнитура, самое дешёвое предложение',
     'Window hardware, cheapest offer'
   ],
+  'Brendni tanlang': ['Выберите бренд', 'Choose a brand'],
+  'Turini tanlang': ['Выберите серию', 'Choose the series'],
+  'Profilni tanlang': ['Выберите профиль', 'Choose a profile'],
+  'Oyna (shisha) narxlari': ['Цены на стекло', 'Glass prices'],
+  'Taxminiy: 3,5 mm shisha narxidan hisoblangan': [
+    'Примерно: рассчитано от цены стекла 3,5 мм',
+    'Estimate: worked out from the 3.5 mm glass price'
+  ],
+  'Shisha narxlari hali yuklanmagan. Internetga ulanib, yangilash tugmasini bosing.':
+      [
+    'Цены на стекло ещё не загружены. Подключитесь к интернету и нажмите «обновить».',
+    'Glass prices are not loaded yet. Connect to the internet and tap refresh.'
+  ],
+  'Shisha turini chizish stolida tanlang: Rang → Shisha turi. O‘z narxingiz bo‘lsa, profilning “Shisha” narxini o‘zgartiring.':
+      [
+    'Вид стекла выбирайте на чертёжном столе: Цвет → Вид стекла. Если у вас своя цена, измените цену «Стекло» в профиле.',
+    'Choose the kind of glass on the drawing desk: Colour → Kind of glass. If you have your own price, change the profile’s “Glass” price.'
+  ],
+  'Oddiy shisha 3,5 mm': ['Обычное стекло 3,5 мм', 'Clear glass 3.5 mm'],
+  'Oddiy shisha 4 mm': ['Обычное стекло 4 мм', 'Clear glass 4 mm'],
+  'Oddiy shisha 5 mm': ['Обычное стекло 5 мм', 'Clear glass 5 mm'],
+  'Oddiy shisha 6 mm': ['Обычное стекло 6 мм', 'Clear glass 6 mm'],
+  'Tonirovka shisha 4 mm': ['Тонированное стекло 4 мм', 'Tinted glass 4 mm'],
+  'Xira (matoviy) shisha 4 mm': ['Матовое стекло 4 мм', 'Frosted glass 4 mm'],
+  'Energiya tejovchi (Low-E) shisha 4 mm': [
+    'Энергосберегающее (Low-E) стекло 4 мм',
+    'Energy-saving (Low-E) glass 4 mm'
+  ],
+  'Toblangan (kalyonniy) shisha 10 mm': [
+    'Закалённое стекло 10 мм',
+    'Tempered glass 10 mm'
+  ],
 };
 
 /// Text with values in it: {} marks a value in the Uzbek, {0}, {1}... the
@@ -3222,4 +3254,19 @@ const i18nTemplates = <String, List<String>>{
     '{0}, готовое окно, 1 м²',
     '{0}, finished window, 1 m²'
   ],
+  'Narxlar sanasi: {} • 1 m² uchun • har kuni yangilanadi': [
+    'Дата цен: {0} • за 1 м² • обновляется ежедневно',
+    'Prices of {0} • per m² • updated daily'
+  ],
+  'Narxlar eng yangi: {}': [
+    'Цены актуальны: {0}',
+    'Prices are up to date: {0}'
+  ],
+  'Narxlar yangilanmadi: {}': [
+    'Цены не обновились: {0}',
+    'Prices were not updated: {0}'
+  ],
+  'Manba: {}': ['Источник: {0}', 'Source: {0}'],
+  '{}/m²': ['{0}/м²', '{0}/m²'],
+  '{} • {}': ['{0} • {1}', '{0} • {1}'],
 };

@@ -2,6 +2,9 @@
 
 ## 1.0.0 — Liquid Glass to‘liq tuzatildi, tezroq va silliqroq
 
+- **Narxlar har kuni yangilanadi**: GitHub’dagi kunlik vazifa ochiq sahifalardan (Ekopen Aldoks prays varag‘i, Stroyka.uz shisha va shishapaket e’lonlari, Markaziy bank kursi) narxlarni o‘qib, katalogni yangilaydi; ilova uni bir kun ichida oladi.
+- **Oyna (shisha) bo‘limi**: Katalog → “Oyna (shisha) narxlari” — shisha turlari (3,5 / 4 / 5 / 6 mm, tonirovka, xira, Low-E, toblangan 10 mm) va 1 m² narxi, manbasi bilan. Chizish stolida: Rang → “Shisha turi” — qalinlik va narx hisobga o‘tadi.
+- **Brend bo‘yicha tanlash**: profil endi ro‘yxatdan emas, avval brend belgisi (AKFA, ENGELBERG, Alubest …), keyin seriya tanlanadi. Rasmiy logotip faylini `assets/brands/` ga qo‘ysangiz, o‘sha ko‘rsatiladi.
 - AKFA katalogi qayta tuzildi (v2): rasmiy seriya nomlari — ALDOX, TERMO 57 / 65 / 70 / 77, TRIO 5200 / 5800 / 6000, QUATTRO 5200 / 5800 / 6000, ENGELBERG 7000 / 7600 / 8000. Tasdiqlanmagan “PENTA 65” olib tashlandi.
 - ALDOX profil narxi endi ochiq diler prays varag‘idan (6 m tayoq narxi), PVX seriyalari esa okna-akfa.uz va goldplast.uz dagi 1 m² narxlariga moslangan. Ochiq narxi yo‘q seriyalar “taxminiy” deb belgilangan.
 - Katalog yangilanishi endi ochiq repodan olinadi (avval yopiq repoga qaragani uchun yangilanmas edi).

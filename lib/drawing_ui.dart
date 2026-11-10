@@ -11,7 +11,9 @@ import 'dialogs.dart';
 import 'drawing_3d.dart';
 import 'design_catalog.dart';
 import 'in_place_page.dart';
-import 'manufacturers.dart' show comparisonKeys;
+import 'manufacturers.dart' show GlassType, comparisonKeys;
+import 'brands.dart';
+import 'glass_page.dart';
 import 'manufacturers_page.dart';
 import 'adaptive_ui.dart';
 import 'i18n.dart';
@@ -1143,34 +1145,24 @@ class _DrawingEditorState extends State<DrawingEditor> {
               ],
             ),
             const SizedBox(height: 10),
-            GlassControl(
-              child: DropdownButtonFormField<String>(
-                isExpanded: true,
-                initialValue: profile,
-                decoration: InputDecoration(
-                  labelText: tr('Profil tizimi / seriya'),
-                ),
-                items: [
-                  for (final p in widget.store.profiles)
-                    DropdownMenuItem(value: p['id'], child: Tx(p['name'])),
-                ],
-                onChanged: (v) {
-                  if (v == null) return;
-                  final next = recipeFor(
-                    widget.store.profiles.firstWhere((p) => p['id'] == v),
-                  );
-                  try {
-                    layoutDrawing(drawing, next);
-                    setState(() {
-                      profile = v;
-                      recipe = cloneMap(next);
-                      report = null;
-                    });
-                  } catch (e) {
-                    setState(() => error = '$e');
-                  }
-                },
-              ),
+            ProfilePickTile(
+              store: widget.store,
+              profile: profile,
+              onChanged: (v) {
+                final next = recipeFor(
+                  widget.store.profiles.firstWhere((p) => p['id'] == v),
+                );
+                try {
+                  layoutDrawing(drawing, next);
+                  setState(() {
+                    profile = v;
+                    recipe = cloneMap(next);
+                    report = null;
+                  });
+                } catch (e) {
+                  setState(() => error = '$e');
+                }
+              },
             ),
             const SizedBox(height: 12),
             GlassControl(
@@ -2562,62 +2554,157 @@ class _DrawingEditorState extends State<DrawingEditor> {
     );
   }
 
-  /// The profile in use, and every manufacturer's price for this window.
+  /// Kinds of glass in the catalog of prices.
+  List<GlassType> get glassTypes => widget.store.catalog?.glass ?? const [];
+
+  /// One square metre of [g] in so‘m at today's rate.
+  int glassSom(GlassType g) => glassPriceSom(widget.store, g);
+
+  /// The recipe with [g] as its glass: thickness and price follow. Throws
+  /// when the profile cannot take glass that thick.
+  DMap withGlass(GlassType g) {
+    final next = cloneMap(recipe);
+    next['glassKind'] = g.id;
+    next['glassThickness'] = g.thicknessMm;
+    next['prices'] = {
+      ...Map<String, dynamic>.from(next['prices'] as Map? ?? const {}),
+      'glass': glassSom(g),
+    };
+    validateRecipe(next);
+    layoutDrawing(drawing, next);
+    return next;
+  }
+
+  /// The profile in use (a tap picks another by its brand), and every
+  /// manufacturer's price for this window.
   Widget profileBar() {
     final scheme = Theme.of(context).colorScheme;
-    final name = widget.store.profiles
-        .where((p) => p['id'] == profile)
-        .map((p) => '${p['name']}')
-        .firstOrNull;
+    final current =
+        widget.store.profiles.where((p) => p['id'] == profile).firstOrNull;
     final canCompare = widget.store.catalog != null;
     return Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          key: const ValueKey('compare-prices'),
-          borderRadius: BorderRadius.circular(10),
-          onTap: canCompare ? comparePrices : null,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(4, 2, 0, 2),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.factory_outlined,
-                  size: 16,
-                  color: scheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Tx(
-                    name ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                if (canCompare) ...[
-                  Flexible(
-                    flex: 0,
-                    child: Tx(
-                      'Zavodlar narxi',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        color: scheme.primary,
+      type: MaterialType.transparency,
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: InkWell(
+              key: const ValueKey('pick-profile'),
+              borderRadius: BorderRadius.circular(10),
+              onTap: () async {
+                final id = await pickProfile(
+                  context,
+                  widget.store,
+                  current: profile,
+                );
+                if (id != null && id != profile) useProfile(id);
+              },
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(4, 2, 0, 2),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 46,
+                      child: MakerLogo(
+                        current == null
+                            ? ''
+                            : profileBrand(
+                                widget.store,
+                                Map<String, dynamic>.from(current),
+                              ),
+                        height: 22,
                       ),
                     ),
-                  ),
-                  Icon(Icons.chevron_right, size: 18, color: scheme.primary),
-                ],
-              ],
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Tx(
+                        '${current?['name'] ?? ''}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.expand_more,
+                      size: 18,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-        ));
+          if (canCompare)
+            Flexible(
+              flex: 2,
+              child: InkWell(
+                key: const ValueKey('compare-prices'),
+                borderRadius: BorderRadius.circular(10),
+                onTap: comparePrices,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 2, 0, 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Tx(
+                          'Zavodlar narxi',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: scheme.primary,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: scheme.primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Switches the window to profile [id]; colour, glazing and handles
+  /// stay as they are.
+  void useProfile(String id) {
+    try {
+      final next = recipeFor(
+        widget.store.profiles.firstWhere((p) => p['id'] == id),
+      );
+      for (final k in comparisonKeys) {
+        if (recipe[k] != null) next[k] = recipe[k];
+      }
+      // The glass chosen for this window stays with it.
+      if (recipe['glassKind'] != null) {
+        next['glassKind'] = recipe['glassKind'];
+        next['glassThickness'] = recipe['glassThickness'];
+        next['prices'] = {
+          ...Map<String, dynamic>.from(next['prices'] as Map),
+          'glass': (recipe['prices'] as Map)['glass'],
+        };
+      }
+      layoutDrawing(drawing, next);
+      setState(() {
+        profile = id;
+        recipe = cloneMap(next);
+        report = null;
+      });
+    } catch (e) {
+      if (mounted) setState(() => error = '$e');
+    }
   }
 
   Future<void> comparePrices() async {
@@ -2638,19 +2725,7 @@ class _DrawingEditorState extends State<DrawingEditor> {
         }(),
       );
       if (id == null || !mounted) return;
-      final next = recipeFor(
-        widget.store.profiles.firstWhere((p) => p['id'] == id),
-      );
-      // Colour, glazing and handles stay, as priced in the comparison.
-      for (final k in comparisonKeys) {
-        if (recipe[k] != null) next[k] = recipe[k];
-      }
-      layoutDrawing(drawing, next);
-      setState(() {
-        profile = id;
-        recipe = cloneMap(next);
-        report = null;
-      });
+      useProfile(id);
     } catch (e) {
       if (mounted) setState(() => error = '$e');
     }
@@ -3190,45 +3265,32 @@ class _DrawingEditorState extends State<DrawingEditor> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   title('Profil tizimi'),
-                  GlassControl(
-                    child: DropdownButtonFormField<String>(
-                      isExpanded: true,
-                      initialValue: profile,
-                      items: [
-                        for (final p in widget.store.profiles)
-                          DropdownMenuItem(
-                            value: p['id'] as String,
-                            child: Tx(
-                              p['name'],
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                      ],
-                      onChanged: (v) {
-                        if (v == null) return;
-                        final next = recipeFor(
-                          widget.store.profiles.firstWhere((p) => p['id'] == v),
-                        );
-                        for (final k in [
-                          'finish',
-                          'glazingType',
-                          'hardwareFinish',
-                          'windowHandle',
-                          'handleStyle',
-                        ]) {
-                          if (recipe[k] != null) next[k] = recipe[k];
-                        }
-                        try {
-                          layoutDrawing(drawing, next);
-                          update(() {
-                            profile = v;
-                            recipe = cloneMap(next);
-                          });
-                        } catch (e) {
-                          setState(() => error = '$e');
-                        }
-                      },
-                    ),
+                  ProfilePickTile(
+                    store: widget.store,
+                    profile: profile,
+                    onChanged: (v) {
+                      final next = recipeFor(
+                        widget.store.profiles.firstWhere((p) => p['id'] == v),
+                      );
+                      for (final k in [
+                        'finish',
+                        'glazingType',
+                        'hardwareFinish',
+                        'windowHandle',
+                        'handleStyle',
+                      ]) {
+                        if (recipe[k] != null) next[k] = recipe[k];
+                      }
+                      try {
+                        layoutDrawing(drawing, next);
+                        update(() {
+                          profile = v;
+                          recipe = cloneMap(next);
+                        });
+                      } catch (e) {
+                        setState(() => error = '$e');
+                      }
+                    },
                   ),
                   title('Profil rangi'),
                   Wrap(
@@ -3276,6 +3338,33 @@ class _DrawingEditorState extends State<DrawingEditor> {
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
+                  if (glassTypes.isNotEmpty) ...[
+                    title('Shisha turi'),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final g in glassTypes)
+                          GlassControl(
+                            child: ChoiceChip(
+                              key: ValueKey('glass-${g.id}'),
+                              label: Tx(
+                                '${tr(g.name)} • ${money(glassSom(g))}',
+                              ),
+                              selected: recipe['glassKind'] == g.id,
+                              onSelected: (_) {
+                                try {
+                                  final next = withGlass(g);
+                                  update(() => recipe = next);
+                                } catch (e) {
+                                  setState(() => error = '$e');
+                                }
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
                   title('Deraza tutqichi'),
                   GlassControl(
                     child: SegmentedButton<String>(

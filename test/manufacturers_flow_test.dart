@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,6 +10,20 @@ import 'package:romflow/manufacturers_page.dart';
 import 'package:romflow/store.dart';
 
 String catalogText() => File('assets/manufacturers_uz.json').readAsStringSync();
+
+/// The shipped catalog, [versions] newer, with one price of a system
+/// changed: the daily price update moves the file's own numbers, so tests
+/// never look for them as text.
+String newerCatalog(int versions, String system, String key, num usd) {
+  final data = jsonDecode(catalogText()) as Map<String, dynamic>;
+  data['version'] = (data['version'] as int) + versions;
+  for (final s in data['systems'] as List) {
+    if (s['id'] == system) (s['usd'] as Map)[key] = usd;
+  }
+  return jsonEncode(data);
+}
+
+int shippedVersion() => (jsonDecode(catalogText()) as Map)['version'] as int;
 
 late Directory lastDir;
 
@@ -68,20 +83,15 @@ void main() {
     await s.saveProfile({...aldox, 'framePrice': 40000});
     expect(price(s, 'mf-akfa-aldox', 'frame'), 40000);
 
-    final newer = catalogText()
-        .replaceFirst('"version": 2', '"version": 3')
-        .replaceAll('"frame": 2.63,', '"frame": 3.0,')
-        .replaceAll('"frame": 5.0,', '"frame": 6.0,');
+    final newer = newerCatalog(1, 'akfa-thermo65', 'frame', 6.0);
     final note = await s.refreshCatalog(force: true, fetch: () async => newer);
     expect(note, contains('katalogi'));
-    expect(s.catalog!.version, 3);
+    expect(s.catalog!.version, shippedVersion() + 1);
     // THERMO 65 followed the catalog; ALDOX kept the typed frame price but
     // its other prices followed.
     expect(price(s, 'mf-akfa-thermo65', 'frame'), 6.0 * 12000);
     // Sash bars and corner profiles follow the mullion's new price too.
-    final newer2 = catalogText()
-        .replaceFirst('"version": 2', '"version": 4')
-        .replaceAll('"mullion": 5.3,', '"mullion": 7.0,');
+    final newer2 = newerCatalog(2, 'akfa-thermo65', 'mullion', 7.0);
     await s.refreshCatalog(force: true, fetch: () async => newer2);
     expect(price(s, 'mf-akfa-thermo65', 'sashMullion'), 7.0 * 12000);
     expect(price(s, 'mf-akfa-thermo65', 'cornerProfile'), 7.0 * 12000);
@@ -93,12 +103,12 @@ void main() {
     await expectLater(
         s.refreshCatalog(force: true, fetch: () async => '<html>'),
         throwsFormatException);
-    expect(s.catalog!.version, 4);
+    expect(s.catalog!.version, shippedVersion() + 2);
 
     // The downloaded catalog is kept for the next start.
     final again = Store(directory: lastDir);
     await again.init();
-    expect(again.catalog!.version, 4);
+    expect(again.catalog!.version, shippedVersion() + 2);
     expect(price(again, 'mf-akfa-aldox', 'frame'), 40000);
   });
 
