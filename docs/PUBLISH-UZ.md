@@ -6,7 +6,7 @@ Ilova server, login yoki pullik obunaga bog‘liq emas. Backend domeni kerak ema
 2. Doimiy applicationId, mahsulot nomi, ikonka, skrinshotlar, support sahifasi va maxfiylik siyosatini tayyorlang. Hozir `uz.romflow.workshop` ishlatilgan.
 3. O‘z upload keystore’ingizni himoyalangan joyda yarating va `android/key.properties` (repoga qo‘yilmaydi) yoki CI secret’lari orqali bering — README → “Android imzosi”.
 4. `flutter analyze` va `flutter test` bajaring. Haqiqiy qurilmalarda ilovani birinchi ochish, qayta ochish, samolyot rejimi, PDF/JSON fayl saqlash/tanlash va zaxiradan tiklashni tekshiring.
-5. `flutter build appbundle --release` bajaring va `build/app/outputs/bundle/release/app-release.aab` faylini yuklang. Ushbu loyiha API36 target qiladi.
+5. GitHub’dagi yig‘ilish imzo secret’lari bor bo‘lsa `RomFlow-<versiya>.aab` faylini release’ga qo‘yadi — Play Console’ga shuni yuklang (qo‘lda: `flutter build appbundle --release`). Ushbu loyiha API36 target qiladi.
 6. Data safety, content rating, reklama va app-access deklaratsiyalarini to‘g‘ri to‘ldiring. Ilovada login va reklama yo‘q. Mijoz yozuvlari qurilmada, eksport esa foydalanuvchining tanlovi bilan amalga oshadi.
 7. Yangi personal hisobga tatbiq etilsa, kamida 12 opted-in tester bilan uzluksiz 14 kun closed testing o‘tkazib, production access so‘rang.
 8. Store listing va siyosat tekshiruvlarini tugatib review’ga yuboring.

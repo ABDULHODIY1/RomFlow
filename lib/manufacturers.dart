@@ -5,7 +5,7 @@ import 'design_engine.dart';
 /// repository, so a newer one can be fetched without an app update.
 const manufacturersAsset = 'assets/manufacturers_uz.json';
 final manufacturersUrl = Uri.parse(
-  'https://raw.githubusercontent.com/z3wax/RomFlow/main/assets/manufacturers_uz.json',
+  'https://raw.githubusercontent.com/ABDULHODIY1/RomFlow/main/assets/manufacturers_uz.json',
 );
 
 /// Systems a new workshop sees in its profile list from the start; the rest

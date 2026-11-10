@@ -33,7 +33,7 @@ Bitta telefon va pul to‘lamasdan — **2** yoki **3-yo‘l**.
    **Admin** → *Generate* → **Download** (`AuthKey_XXXX.p8`, faqat bir marta
    yuklanadi). Sahifadagi **Key ID** va **Issuer ID** ni yozib oling.
 5. **Team ID**: developer.apple.com/account → *Membership details* → Team ID.
-6. **GitHub secret’lari**: github.com/z3wax/RomFlow → *Settings* → *Secrets
+6. **GitHub secret’lari**: github.com/ABDULHODIY1/RomFlow → *Settings* → *Secrets
    and variables* → *Actions* → *New repository secret*:
    - `APPLE_TEAM_ID` — Team ID;
    - `ASC_KEY_ID` — Key ID;
@@ -85,10 +85,10 @@ ID’ingiz bilan imzolanadi.
 
 ### RomFlow’ni o‘rnatish
 - **Bir bosishda** (SideInstaller o‘rnatilgan bo‘lsa), iPhone’da oching:
-  https://sideinstaller.net/open.html?url=https%3A%2F%2Fgithub.com%2Fz3wax%2FRomFlow%2Freleases%2Flatest%2Fdownload%2FRomFlow.ipa
+  https://sideinstaller.net/open.html?url=https%3A%2F%2Fgithub.com%2FABDULHODIY1%2FRomFlow%2Freleases%2Flatest%2Fdownload%2FRomFlow.ipa
 - Yoki SideStore → **Sources** → **+** → manzil:
   ```
-  https://github.com/z3wax/RomFlow/releases/latest/download/altstore-source.json
+  https://github.com/ABDULHODIY1/RomFlow/releases/latest/download/altstore-source.json
   ```
   → *Add* → *Browse* → **RomFlow** → **GET**. Keyingi versiyalar: **UPDATE**.
 - Yoki IPA faylni (Releases → `RomFlow-…-ios-unsigned.ipa`) Fayllar’ga

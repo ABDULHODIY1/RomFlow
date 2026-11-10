@@ -2,6 +2,11 @@
 
 ## 1.0.0 — Liquid Glass to‘liq tuzatildi, tezroq va silliqroq
 
+- AKFA katalogi qayta tuzildi (v2): rasmiy seriya nomlari — ALDOX, TERMO 57 / 65 / 70 / 77, TRIO 5200 / 5800 / 6000, QUATTRO 5200 / 5800 / 6000, ENGELBERG 7000 / 7600 / 8000. Tasdiqlanmagan “PENTA 65” olib tashlandi.
+- ALDOX profil narxi endi ochiq diler prays varag‘idan (6 m tayoq narxi), PVX seriyalari esa okna-akfa.uz va goldplast.uz dagi 1 m² narxlariga moslangan. Ochiq narxi yo‘q seriyalar “taxminiy” deb belgilangan.
+- Katalog yangilanishi endi ochiq repodan olinadi (avval yopiq repoga qaragani uchun yangilanmas edi).
+- Zavodlar sahifasidagi tavsif va bozor narxlari rus va ingliz tillarida ham chiqadi.
+- Google Play uchun imzolangan app bundle (.aab) ham yig‘iladi.
 - Chizmadagi ochilish belgisi: chiziqlar tutqichda tutashadi, ochiq tomoni petlyalarga qaraydi — 3D bilan bir xil.
 - 3D: fortochka (pastdan petlyali) va yuqoridan petlyali qanotlar ham endi xonaga ochiladi — tortib ochiladi, itarib emas.
 - Filtr chiplari va segment tugmalari: shisha endi tugmaning o‘ziga teng kapsula — ikki qatlam va pastdan kesilish yo‘q.

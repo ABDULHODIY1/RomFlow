@@ -343,7 +343,9 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    for (final market in system.market)
+                    // Bar and piece prices are in the system's sheet.
+                    for (final market
+                        in system.market.where((m) => m.unit == 'm2'))
                       Tx(
                         'Bozor: ${_marketText(market)} — ${market.source}',
                         maxLines: 1,
@@ -428,7 +430,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.storefront_outlined),
-                  title: Tx('${market.what}: ${_marketText(market)}'),
+                  title: Tx('${tr(market.what)}: ${_marketText(market)}'),
                   subtitle: Tx('${market.source} • ${_date(market.seen)}'),
                   trailing: market.url.isEmpty
                       ? null
@@ -471,7 +473,7 @@ class _ManufacturersPageState extends State<ManufacturersPage> {
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Tx(
-                  '${m.what}: ${_marketText(m)} — ${m.source}',
+                  '${tr(m.what)}: ${_marketText(m)} — ${m.source}',
                   style: text.bodySmall,
                 ),
               ),

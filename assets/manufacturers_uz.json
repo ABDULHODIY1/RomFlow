@@ -1,7 +1,7 @@
 {
   "format": "romflow-manufacturers",
-  "version": 1,
-  "date": "2026-10-24",
+  "version": 2,
+  "date": "2026-11-10",
   "country": "UZ",
   "referenceUsdRate": 12100,
   "note": "Narxlar ochiq manbalardan (zavod saytlari, Prom.uz, Stroyka.uz, Flagma.uz va dilerlar sahifalari) olingan bozor narxlariga moslab hisoblangan taxminiy tannarx. Profil narxi 1 metr uchun, dollarda; so‘mga Markaziy bank kursida o‘tkaziladi. Diler narxingizni kiritsangiz yoki jadvaldan yuklasangiz, sizniki ishlatiladi.",
@@ -71,9 +71,11 @@
       "group": "AKFA Group",
       "city": "Toshkent",
       "role": "factory",
-      "materials": ["aluminium"],
+      "materials": [
+        "aluminium"
+      ],
       "website": "https://akfagroup.com",
-      "about": "O‘zbekiston va Markaziy Osiyodagi eng yirik alyuminiy va PVX profil ishlab chiqaruvchisi (AKFA Group)."
+      "about": "O‘zbekiston va Markaziy Osiyodagi eng yirik alyuminiy va PVX profil ishlab chiqaruvchisi (AKFA Group). Seriyalar: ALDOX (sovuq), TERMO 57, 65, 70, 77 (issiq)."
     },
     {
       "id": "akfa-plast",
@@ -81,9 +83,11 @@
       "group": "AKFA Group",
       "city": "Navoiy EIZ",
       "role": "factory",
-      "materials": ["pvc"],
+      "materials": [
+        "pvc"
+      ],
       "website": "https://akfaaluminium.com/eng/premium_plastic_windows",
-      "about": "PVX rom va eshik profillari zavodi: 52 ta ekstruziya liniyasi, ISO 9001:2015."
+      "about": "PVX rom va eshik profillari zavodi. Seriyalar: TRIO 5200, 5800, 6000 (3 kamera); QUATTRO 5200, 5800, 6000 (4 kamera)."
     },
     {
       "id": "engelberg",
@@ -91,9 +95,11 @@
       "group": "AKFA Group",
       "city": "Navoiy EIZ",
       "role": "factory",
-      "materials": ["pvc"],
+      "materials": [
+        "pvc"
+      ],
       "website": "https://akfaaluminium.com/eng/premium_plastic_windows",
-      "about": "AKFA Plast’ning premium PVX profil brendi."
+      "about": "AKFA’ning premium PVX profil brendi: 7000 (5 kamera, 70 mm), 7600, 8000 (6 kamera, 80 mm)."
     },
     {
       "id": "imzo",
@@ -101,9 +107,12 @@
       "group": "AKFA Group",
       "city": "Toshkent",
       "role": "windowFactory",
-      "materials": ["pvc", "aluminium"],
+      "materials": [
+        "pvc",
+        "aluminium"
+      ],
       "website": "https://imzo.uz",
-      "about": "Tayyor rom va eshik zavodi (160 000 m²). REHAU, ENGELBERG, AKFA Trio va Quattro tizimlarida rom yasaydi."
+      "about": "Tayyor rom va eshik zavodi (160 000 m²). REHAU, ENGELBERG, AKFA TRIO va QUATTRO tizimlarida rom yasaydi."
     },
     {
       "id": "benkam",
@@ -111,7 +120,9 @@
       "group": "AKFA Group",
       "city": "Navoiy EIZ",
       "role": "factory",
-      "materials": ["aluminium"],
+      "materials": [
+        "aluminium"
+      ],
       "website": "https://akfagroup.com",
       "about": "Alyuminiy profil zavodi, yiliga 36 000 tonna. Tizim narxlari ochiq e’lon qilinmagan — diler narxini kiriting."
     },
@@ -121,7 +132,9 @@
       "group": "",
       "city": "Toshkent",
       "role": "factory",
-      "materials": ["aluminium"],
+      "materials": [
+        "aluminium"
+      ],
       "website": "https://alubest.uz",
       "about": "Alyuminiy profil ekstruziyasi, bo‘yash va anodlash. Seriyalar: Aldoks (sovuq), AluThermo-70 (termo), ALFS50 (fasad)."
     },
@@ -131,7 +144,9 @@
       "group": "",
       "city": "Toshkent",
       "role": "factory",
-      "materials": ["aluminium"],
+      "materials": [
+        "aluminium"
+      ],
       "website": "https://www.gazeta.uz/ru/2017/07/31/alutex/",
       "about": "Rom, eshik, fasad va panjara uchun alyuminiy profil zavodi. Seriya nomlari ochiq manbada yo‘q."
     },
@@ -141,7 +156,9 @@
       "group": "",
       "city": "Toshkent",
       "role": "supplier",
-      "materials": ["aluminium"],
+      "materials": [
+        "aluminium"
+      ],
       "website": "https://stroyka.uz/offer/alyuminievyy-profil-aldoks-578129",
       "about": "Aldoks alyuminiy profili yetkazib beruvchi."
     },
@@ -151,7 +168,9 @@
       "group": "",
       "city": "O‘zbekiston",
       "role": "factory",
-      "materials": ["aluminium"],
+      "materials": [
+        "aluminium"
+      ],
       "website": "https://alumin.top/uz",
       "about": "GOST bo‘yicha alyuminiy profil tizimlari. Tizim narxlari ochiq e’lon qilinmagan — diler narxini kiriting."
     },
@@ -161,7 +180,9 @@
       "group": "",
       "city": "Toshkent",
       "role": "factory",
-      "materials": ["aluminium"],
+      "materials": [
+        "aluminium"
+      ],
       "website": "https://specmet.uz/menu/Aljuminievyj_profil/",
       "about": "Oyna, mebel va radiator alyuminiy profillari. Tizim narxlari ochiq e’lon qilinmagan — diler narxini kiriting."
     }
@@ -172,7 +193,10 @@
       "manufacturer": "akfa-aluminium",
       "name": "AKFA ALDOX",
       "material": "aluminium",
-      "uses": ["window", "door"],
+      "uses": [
+        "window",
+        "door"
+      ],
       "thermal": false,
       "depthMm": 45.5,
       "chambers": 1,
@@ -191,7 +215,13 @@
         "glassRebateMm": 12,
         "finish": "mokri"
       },
-      "usd": {"frame": 2.6, "sash": 3.0, "mullion": 2.8, "bead": 0.6, "tiltKit": 6},
+      "usd": {
+        "frame": 2.63,
+        "sash": 3.04,
+        "mullion": 3.04,
+        "bead": 0.97,
+        "tiltKit": 6
+      },
       "market": [
         {
           "what": "AKFA alyuminiy rom, ulgurji",
@@ -201,23 +231,116 @@
           "source": "Flagma.uz",
           "url": "https://flagma.uz/ru/products/tashkent/q=akfa/",
           "seen": "2026-10"
+        },
+        {
+          "what": "Aldoks rama L, 6 m tayoq",
+          "price": 191100,
+          "currency": "UZS",
+          "unit": "6m",
+          "source": "Ekopen.uz — Aldoks prays varag‘i",
+          "url": "https://ekopen.uz/alyuminiy-profil/",
+          "seen": "2026-11"
+        },
+        {
+          "what": "Aldoks qanot Z, 6 m tayoq",
+          "price": 220500,
+          "currency": "UZS",
+          "unit": "6m",
+          "source": "Ekopen.uz — Aldoks prays varag‘i",
+          "url": "https://ekopen.uz/alyuminiy-profil/",
+          "seen": "2026-11"
+        },
+        {
+          "what": "Aldoks impost T, 6 m tayoq",
+          "price": 220500,
+          "currency": "UZS",
+          "unit": "6m",
+          "source": "Ekopen.uz — Aldoks prays varag‘i",
+          "url": "https://ekopen.uz/alyuminiy-profil/",
+          "seen": "2026-11"
+        },
+        {
+          "what": "Aldoks eshik qanoti Z/T, 6 m tayoq",
+          "price": 431700,
+          "currency": "UZS",
+          "unit": "6m",
+          "source": "Ekopen.uz — Aldoks prays varag‘i",
+          "url": "https://ekopen.uz/alyuminiy-profil/",
+          "seen": "2026-11"
+        },
+        {
+          "what": "Aldoks shtapik, 6 m tayoq",
+          "price": 70200,
+          "currency": "UZS",
+          "unit": "6m",
+          "source": "Ekopen.uz — Aldoks prays varag‘i",
+          "url": "https://ekopen.uz/alyuminiy-profil/",
+          "seen": "2026-11"
+        }
+      ]
+    },
+    {
+      "id": "akfa-termo57",
+      "manufacturer": "akfa-aluminium",
+      "name": "AKFA TERMO 57",
+      "material": "aluminium",
+      "uses": [
+        "window",
+        "door"
+      ],
+      "thermal": true,
+      "depthMm": 57,
+      "chambers": 3,
+      "catalogUrl": "https://prookna.uz/thermo-engelberg/",
+      "recipe": {
+        "sectionStyle": "chambered",
+        "profileChambers": 3,
+        "profileWallMm": 1.4,
+        "frameFace": 60,
+        "sashFace": 70,
+        "mullionFace": 80,
+        "frameDepth": 49,
+        "sashDepth": 57,
+        "glazingType": "double",
+        "glassThickness": 4,
+        "glassGapMm": 16,
+        "finish": "white"
+      },
+      "usd": {
+        "frame": 4.3,
+        "sash": 4.9,
+        "mullion": 4.6,
+        "bead": 0.75
+      },
+      "market": [
+        {
+          "what": "AKFA BKT-57, tayyor rom 1 m² dan",
+          "price": 60,
+          "currency": "USD",
+          "unit": "m2",
+          "source": "Gold Business Plast (goldplast.uz)",
+          "url": "https://goldplast.uz/uz/products/alyuminievye-okna-i-dveri/",
+          "seen": "2026-11"
         }
       ]
     },
     {
       "id": "akfa-thermo65",
       "manufacturer": "akfa-aluminium",
-      "name": "AKFA THERMO 65",
+      "name": "AKFA TERMO 65",
       "material": "aluminium",
-      "uses": ["window", "door"],
+      "uses": [
+        "window",
+        "door"
+      ],
       "thermal": true,
       "depthMm": 65,
       "chambers": 3,
-      "catalogUrl": "https://akfagroup.com/eng/thermo-65",
+      "catalogUrl": "https://prookna.uz/thermo-engelberg/",
       "recipe": {
         "sectionStyle": "chambered",
         "profileChambers": 3,
-        "profileWallMm": 1.6,
+        "profileWallMm": 1.4,
         "frameFace": 60,
         "sashFace": 70,
         "mullionFace": 80,
@@ -228,7 +351,12 @@
         "glassGapMm": 16,
         "finish": "white"
       },
-      "usd": {"frame": 5.0, "sash": 5.6, "mullion": 5.3, "bead": 0.85},
+      "usd": {
+        "frame": 5.0,
+        "sash": 5.6,
+        "mullion": 5.3,
+        "bead": 0.85
+      },
       "market": [
         {
           "what": "Tayyor rom, oq rang, 1 m² dan",
@@ -242,18 +370,317 @@
       ]
     },
     {
-      "id": "akfa-trio60",
-      "manufacturer": "akfa-plast",
-      "name": "AKFA TRIO 60",
-      "material": "pvc",
-      "uses": ["window", "door"],
+      "id": "akfa-termo70",
+      "manufacturer": "akfa-aluminium",
+      "name": "AKFA TERMO 70",
+      "material": "aluminium",
+      "uses": [
+        "window",
+        "door"
+      ],
       "thermal": true,
-      "depthMm": 60,
+      "depthMm": 70,
       "chambers": 3,
-      "catalogUrl": "https://akfaaluminium.com/eng/premium_plastic_windows",
+      "catalogUrl": "https://prookna.uz/thermo-engelberg/",
       "recipe": {
         "sectionStyle": "chambered",
         "profileChambers": 3,
+        "profileWallMm": 1.6,
+        "frameFace": 60,
+        "sashFace": 70,
+        "mullionFace": 80,
+        "frameDepth": 70,
+        "sashDepth": 78,
+        "glazingType": "double",
+        "glassThickness": 4,
+        "glassGapMm": 16,
+        "finish": "white"
+      },
+      "usd": {
+        "frame": 5.2,
+        "sash": 5.8,
+        "mullion": 5.5,
+        "bead": 0.85
+      },
+      "market": [],
+      "estimateNote": "Profil narxi ochiq e’lon qilinmagan: TERMO 65 ga nisbatan baholangan. Diler narxini kiriting."
+    },
+    {
+      "id": "akfa-termo77",
+      "manufacturer": "akfa-aluminium",
+      "name": "AKFA TERMO 77",
+      "material": "aluminium",
+      "uses": [
+        "window",
+        "door"
+      ],
+      "thermal": true,
+      "depthMm": 77,
+      "chambers": 3,
+      "recipe": {
+        "sectionStyle": "chambered",
+        "profileChambers": 3,
+        "profileWallMm": 1.8,
+        "frameFace": 60,
+        "sashFace": 70,
+        "mullionFace": 80,
+        "frameDepth": 77,
+        "sashDepth": 85,
+        "glazingType": "double",
+        "glassThickness": 4,
+        "glassGapMm": 20,
+        "finish": "white"
+      },
+      "usd": {
+        "frame": 5.4,
+        "sash": 6.0,
+        "mullion": 5.7,
+        "bead": 0.9
+      },
+      "market": [],
+      "estimateNote": "Profil narxi ochiq e’lon qilinmagan: TERMO 65 ga nisbatan baholangan. Diler narxini kiriting."
+    },
+    {
+      "id": "akfa-trio52",
+      "manufacturer": "akfa-plast",
+      "name": "AKFA TRIO 5200",
+      "material": "pvc",
+      "uses": [
+        "window",
+        "door"
+      ],
+      "thermal": true,
+      "depthMm": 52,
+      "chambers": 3,
+      "catalogUrl": "https://www.okna-akfa.uz/",
+      "recipe": {
+        "sectionStyle": "chambered",
+        "profileChambers": 3,
+        "profileWallMm": 2.5,
+        "frameFace": 62,
+        "sashFace": 77,
+        "mullionFace": 82,
+        "frameDepth": 52,
+        "sashDepth": 60,
+        "glazingType": "double",
+        "glassThickness": 4,
+        "glassGapMm": 12,
+        "finish": "white"
+      },
+      "usd": {
+        "frame": 1.9,
+        "sash": 2.2,
+        "mullion": 2.1,
+        "bead": 0.4
+      },
+      "market": [
+        {
+          "what": "TRIO 5200, tayyor rom 1 m² dan",
+          "price": 720000,
+          "currency": "UZS",
+          "unit": "m2",
+          "source": "okna-akfa.uz",
+          "url": "https://www.okna-akfa.uz/",
+          "seen": "2026-11"
+        }
+      ]
+    },
+    {
+      "id": "akfa-trio58",
+      "manufacturer": "akfa-plast",
+      "name": "AKFA TRIO 5800",
+      "material": "pvc",
+      "uses": [
+        "window",
+        "door"
+      ],
+      "thermal": true,
+      "depthMm": 58,
+      "chambers": 3,
+      "catalogUrl": "https://goldplast.uz/uz/products/plastikovie-okna-i-dveri/akfa-trio-5800/",
+      "recipe": {
+        "sectionStyle": "chambered",
+        "profileChambers": 3,
+        "profileWallMm": 2.5,
+        "frameFace": 62,
+        "sashFace": 77,
+        "mullionFace": 82,
+        "frameDepth": 58,
+        "sashDepth": 66,
+        "glazingType": "double",
+        "glassThickness": 4,
+        "glassGapMm": 12,
+        "finish": "white"
+      },
+      "usd": {
+        "frame": 1.9,
+        "sash": 2.2,
+        "mullion": 2.1,
+        "bead": 0.4
+      },
+      "market": [
+        {
+          "what": "AKFA Trio 5800, tayyor rom 1 m² dan",
+          "price": 50,
+          "currency": "USD",
+          "unit": "m2",
+          "source": "Gold Business Plast (goldplast.uz)",
+          "url": "https://goldplast.uz/uz/products/plastikovie-okna-i-dveri/",
+          "seen": "2026-11"
+        }
+      ]
+    },
+    {
+      "id": "akfa-trio60",
+      "manufacturer": "akfa-plast",
+      "name": "AKFA TRIO 6000",
+      "material": "pvc",
+      "uses": [
+        "window",
+        "door"
+      ],
+      "thermal": true,
+      "depthMm": 60,
+      "chambers": 3,
+      "catalogUrl": "https://www.okna-akfa.uz/",
+      "recipe": {
+        "sectionStyle": "chambered",
+        "profileChambers": 3,
+        "profileWallMm": 3,
+        "frameFace": 62,
+        "sashFace": 77,
+        "mullionFace": 82,
+        "frameDepth": 60,
+        "sashDepth": 68,
+        "glazingType": "double",
+        "glassThickness": 4,
+        "glassGapMm": 12,
+        "finish": "white"
+      },
+      "usd": {
+        "frame": 2.3,
+        "sash": 2.7,
+        "mullion": 2.5,
+        "bead": 0.45
+      },
+      "market": [
+        {
+          "what": "TRIO 6000, tayyor rom 1 m² dan",
+          "price": 800000,
+          "currency": "UZS",
+          "unit": "m2",
+          "source": "okna-akfa.uz",
+          "url": "https://www.okna-akfa.uz/",
+          "seen": "2026-11"
+        }
+      ]
+    },
+    {
+      "id": "akfa-quattro52",
+      "manufacturer": "akfa-plast",
+      "name": "AKFA QUATTRO 5200",
+      "material": "pvc",
+      "uses": [
+        "window",
+        "door"
+      ],
+      "thermal": true,
+      "depthMm": 52,
+      "chambers": 4,
+      "catalogUrl": "https://www.okna-akfa.uz/",
+      "recipe": {
+        "sectionStyle": "chambered",
+        "profileChambers": 4,
+        "profileWallMm": 2.5,
+        "frameFace": 62,
+        "sashFace": 77,
+        "mullionFace": 82,
+        "frameDepth": 52,
+        "sashDepth": 60,
+        "glazingType": "double",
+        "glassThickness": 4,
+        "glassGapMm": 12,
+        "finish": "white"
+      },
+      "usd": {
+        "frame": 1.7,
+        "sash": 2.0,
+        "mullion": 1.9,
+        "bead": 0.38
+      },
+      "market": [
+        {
+          "what": "Quattro 5200, tayyor rom 1 m² dan",
+          "price": 650000,
+          "currency": "UZS",
+          "unit": "m2",
+          "source": "okna-akfa.uz",
+          "url": "https://www.okna-akfa.uz/",
+          "seen": "2026-11"
+        }
+      ]
+    },
+    {
+      "id": "akfa-quattro58",
+      "manufacturer": "akfa-plast",
+      "name": "AKFA QUATTRO 5800",
+      "material": "pvc",
+      "uses": [
+        "window",
+        "door"
+      ],
+      "thermal": true,
+      "depthMm": 58,
+      "chambers": 4,
+      "catalogUrl": "https://www.okna-akfa.uz/",
+      "recipe": {
+        "sectionStyle": "chambered",
+        "profileChambers": 4,
+        "profileWallMm": 2.7,
+        "frameFace": 62,
+        "sashFace": 77,
+        "mullionFace": 82,
+        "frameDepth": 58,
+        "sashDepth": 66,
+        "glazingType": "double",
+        "glassThickness": 4,
+        "glassGapMm": 16,
+        "finish": "white"
+      },
+      "usd": {
+        "frame": 2.1,
+        "sash": 2.5,
+        "mullion": 2.3,
+        "bead": 0.42
+      },
+      "market": [
+        {
+          "what": "Quattro 5800, tayyor rom 1 m² dan",
+          "price": 750000,
+          "currency": "UZS",
+          "unit": "m2",
+          "source": "okna-akfa.uz",
+          "url": "https://www.okna-akfa.uz/",
+          "seen": "2026-11"
+        }
+      ]
+    },
+    {
+      "id": "akfa-quattro60",
+      "manufacturer": "akfa-plast",
+      "name": "AKFA QUATTRO 6000",
+      "material": "pvc",
+      "uses": [
+        "window",
+        "door"
+      ],
+      "thermal": true,
+      "depthMm": 60,
+      "chambers": 4,
+      "catalogUrl": "https://goldplast.uz/uz/products/plastikovie-okna-i-dveri/akfa-quattro-6000/",
+      "recipe": {
+        "sectionStyle": "chambered",
+        "profileChambers": 4,
         "profileWallMm": 2.5,
         "frameFace": 62,
         "sashFace": 77,
@@ -262,37 +689,25 @@
         "sashDepth": 68,
         "glazingType": "double",
         "glassThickness": 4,
-        "glassGapMm": 16,
+        "glassGapMm": 12,
         "finish": "white"
       },
-      "usd": {"frame": 1.9, "sash": 2.2, "mullion": 2.1, "bead": 0.4}
-    },
-    {
-      "id": "akfa-quattro60",
-      "manufacturer": "akfa-plast",
-      "name": "AKFA QUATTRO 60",
-      "material": "pvc",
-      "uses": ["window", "door"],
-      "thermal": true,
-      "depthMm": 60,
-      "chambers": 4,
-      "catalogUrl": "https://akfaaluminium.com/eng/premium_plastic_windows",
-      "recipe": {
-        "sectionStyle": "chambered",
-        "profileChambers": 4,
-        "profileWallMm": 2.6,
-        "frameFace": 62,
-        "sashFace": 77,
-        "mullionFace": 82,
-        "frameDepth": 60,
-        "sashDepth": 68,
-        "glazingType": "double",
-        "glassThickness": 4,
-        "glassGapMm": 16,
-        "finish": "white"
+      "usd": {
+        "frame": 2.0,
+        "sash": 2.3,
+        "mullion": 2.2,
+        "bead": 0.42
       },
-      "usd": {"frame": 2.2, "sash": 2.6, "mullion": 2.5, "bead": 0.45},
       "market": [
+        {
+          "what": "Quattro 6000, tayyor rom 1 m² dan",
+          "price": 700000,
+          "currency": "UZS",
+          "unit": "m2",
+          "source": "okna-akfa.uz",
+          "url": "https://www.okna-akfa.uz/",
+          "seen": "2026-11"
+        },
         {
           "what": "AKFA Quattro 6000, tayyor rom 1 m² dan",
           "price": 50,
@@ -300,46 +715,21 @@
           "unit": "m2",
           "source": "Gold Business Plast (goldplast.uz)",
           "url": "https://goldplast.uz/uz/products/plastikovie-okna-i-dveri/",
-          "seen": "2026-10"
+          "seen": "2026-11"
         }
       ]
     },
     {
-      "id": "akfa-penta65",
-      "manufacturer": "akfa-plast",
-      "name": "AKFA PENTA 65",
-      "material": "pvc",
-      "uses": ["window", "door"],
-      "thermal": true,
-      "depthMm": 65,
-      "chambers": 5,
-      "catalogUrl": "https://akfaaluminium.com/eng/premium_plastic_windows",
-      "recipe": {
-        "sectionStyle": "chambered",
-        "profileChambers": 4,
-        "profileWallMm": 2.7,
-        "frameFace": 64,
-        "sashFace": 78,
-        "mullionFace": 84,
-        "frameDepth": 65,
-        "sashDepth": 73,
-        "glazingType": "double",
-        "glassThickness": 4,
-        "glassGapMm": 16,
-        "finish": "white"
-      },
-      "usd": {"frame": 2.6, "sash": 3.0, "mullion": 2.8, "bead": 0.5}
-    },
-    {
       "id": "akfa-inslider",
       "manufacturer": "akfa-plast",
-      "name": "AKFA INSLIDER (surilma)",
+      "name": "AKFA PVX surilma tizimi",
       "material": "pvc",
-      "uses": ["sliding"],
+      "uses": [
+        "sliding"
+      ],
       "thermal": true,
       "depthMm": 70,
       "chambers": null,
-      "catalogUrl": "https://akfaaluminium.com/eng/premium_plastic_windows",
       "recipe": {
         "sectionStyle": "chambered",
         "profileChambers": 3,
@@ -354,22 +744,31 @@
         "glassGapMm": 12,
         "finish": "white"
       },
-      "usd": {"frame": 2.9, "sash": 3.4, "mullion": 3.1, "bead": 0.45}
+      "usd": {
+        "frame": 2.9,
+        "sash": 3.4,
+        "mullion": 3.1,
+        "bead": 0.45
+      },
+      "estimateNote": "Seriya nomi va narxi ochiq manbada tasdiqlanmagan: taxminiy namuna."
     },
     {
       "id": "engelberg-7000",
       "manufacturer": "engelberg",
       "name": "ENGELBERG 7000",
       "material": "pvc",
-      "uses": ["window", "door"],
+      "uses": [
+        "window",
+        "door"
+      ],
       "thermal": true,
       "depthMm": 70,
-      "chambers": null,
-      "catalogUrl": "https://akfaaluminium.com/eng/premium_plastic_windows",
+      "chambers": 5,
+      "catalogUrl": "https://prookna.uz/akfa-rom/",
       "recipe": {
         "sectionStyle": "chambered",
         "profileChambers": 4,
-        "profileWallMm": 2.8,
+        "profileWallMm": 3,
         "frameFace": 64,
         "sashFace": 80,
         "mullionFace": 84,
@@ -380,7 +779,12 @@
         "glassGapMm": 16,
         "finish": "white"
       },
-      "usd": {"frame": 3.0, "sash": 3.4, "mullion": 3.2, "bead": 0.55},
+      "usd": {
+        "frame": 3.0,
+        "sash": 3.4,
+        "mullion": 3.2,
+        "bead": 0.55
+      },
       "market": [
         {
           "what": "ENGELBERG 7000, tayyor rom 1 m²",
@@ -407,11 +811,13 @@
       "manufacturer": "engelberg",
       "name": "ENGELBERG 7600",
       "material": "pvc",
-      "uses": ["window", "door"],
+      "uses": [
+        "window",
+        "door"
+      ],
       "thermal": true,
       "depthMm": 76,
       "chambers": null,
-      "catalogUrl": "https://akfaaluminium.com/eng/premium_plastic_windows",
       "recipe": {
         "sectionStyle": "chambered",
         "profileChambers": 4,
@@ -426,18 +832,26 @@
         "glassGapMm": 20,
         "finish": "white"
       },
-      "usd": {"frame": 3.6, "sash": 4.1, "mullion": 3.8, "bead": 0.6}
+      "usd": {
+        "frame": 3.6,
+        "sash": 4.1,
+        "mullion": 3.8,
+        "bead": 0.6
+      },
+      "estimateNote": "Kamera soni va narxi ochiq manbada yo‘q: 7000 va 8000 oralig‘ida baholangan."
     },
     {
       "id": "engelberg-8000",
       "manufacturer": "engelberg",
-      "name": "ENGELBERG 8000 INFINITY",
+      "name": "ENGELBERG 8000",
       "material": "pvc",
-      "uses": ["window", "door"],
+      "uses": [
+        "window",
+        "door"
+      ],
       "thermal": true,
       "depthMm": 80,
-      "chambers": null,
-      "catalogUrl": "https://akfaaluminium.com/eng/premium_plastic_windows",
+      "chambers": 6,
       "recipe": {
         "sectionStyle": "chambered",
         "profileChambers": 4,
@@ -452,14 +866,22 @@
         "glassGapMm": 24,
         "finish": "white"
       },
-      "usd": {"frame": 4.3, "sash": 4.9, "mullion": 4.6, "bead": 0.65}
+      "usd": {
+        "frame": 4.3,
+        "sash": 4.9,
+        "mullion": 4.6,
+        "bead": 0.65
+      }
     },
     {
       "id": "imzo-rehau-euro70",
       "manufacturer": "imzo",
       "name": "REHAU EURO-DESIGN 70 (IMZO)",
       "material": "pvc",
-      "uses": ["window", "door"],
+      "uses": [
+        "window",
+        "door"
+      ],
       "thermal": true,
       "depthMm": 70,
       "chambers": 5,
@@ -478,14 +900,23 @@
         "glassGapMm": 16,
         "finish": "white"
       },
-      "usd": {"frame": 4.6, "sash": 5.3, "mullion": 5.0, "bead": 0.75, "tiltKit": 20}
+      "usd": {
+        "frame": 4.6,
+        "sash": 5.3,
+        "mullion": 5.0,
+        "bead": 0.75,
+        "tiltKit": 20
+      }
     },
     {
       "id": "alubest-aldoks",
       "manufacturer": "alubest",
       "name": "Alubest ALDOKS",
       "material": "aluminium",
-      "uses": ["window", "door"],
+      "uses": [
+        "window",
+        "door"
+      ],
       "thermal": false,
       "depthMm": 45,
       "chambers": 1,
@@ -504,14 +935,23 @@
         "glassRebateMm": 12,
         "finish": "mokri"
       },
-      "usd": {"frame": 2.5, "sash": 2.9, "mullion": 2.7, "bead": 0.58, "tiltKit": 6}
+      "usd": {
+        "frame": 2.5,
+        "sash": 2.9,
+        "mullion": 2.7,
+        "bead": 0.58,
+        "tiltKit": 6
+      }
     },
     {
       "id": "alubest-thermo70",
       "manufacturer": "alubest",
       "name": "Alubest AluThermo-70",
       "material": "aluminium",
-      "uses": ["window", "door"],
+      "uses": [
+        "window",
+        "door"
+      ],
       "thermal": true,
       "depthMm": 70,
       "chambers": 3,
@@ -530,14 +970,22 @@
         "glassGapMm": 20,
         "finish": "white"
       },
-      "usd": {"frame": 5.3, "sash": 5.9, "mullion": 5.6, "bead": 0.9}
+      "usd": {
+        "frame": 5.3,
+        "sash": 5.9,
+        "mullion": 5.6,
+        "bead": 0.9
+      }
     },
     {
       "id": "alutex-cold",
       "manufacturer": "alutex",
       "name": "ALUTEX sovuq rom profili",
       "material": "aluminium",
-      "uses": ["window", "door"],
+      "uses": [
+        "window",
+        "door"
+      ],
       "thermal": false,
       "depthMm": 45,
       "chambers": 1,
@@ -556,14 +1004,23 @@
         "glassRebateMm": 12,
         "finish": "mokri"
       },
-      "usd": {"frame": 2.5, "sash": 2.9, "mullion": 2.7, "bead": 0.58, "tiltKit": 6}
+      "usd": {
+        "frame": 2.5,
+        "sash": 2.9,
+        "mullion": 2.7,
+        "bead": 0.58,
+        "tiltKit": 6
+      }
     },
     {
       "id": "alsys-aldoks",
       "manufacturer": "alsys",
       "name": "Alsys ALDOKS",
       "material": "aluminium",
-      "uses": ["window", "door"],
+      "uses": [
+        "window",
+        "door"
+      ],
       "thermal": false,
       "depthMm": 45,
       "chambers": 1,
@@ -582,7 +1039,13 @@
         "glassRebateMm": 12,
         "finish": "mokri"
       },
-      "usd": {"frame": 2.45, "sash": 2.85, "mullion": 2.65, "bead": 0.58, "tiltKit": 6}
+      "usd": {
+        "frame": 2.45,
+        "sash": 2.85,
+        "mullion": 2.65,
+        "bead": 0.58,
+        "tiltKit": 6
+      }
     }
   ]
 }

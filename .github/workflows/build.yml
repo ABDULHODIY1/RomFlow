@@ -108,9 +108,25 @@ jobs:
             echo "$apk: $code"
             test "$code" = "$want"
           done
+      # Google Play takes an app bundle signed with the release key; a
+      # debug-signed one would be refused, so it is built only with the key.
+      - name: Build the app bundle for Google Play
+        if: env.SIGNED == 'release'
+        run: |
+          flutter build appbundle --release
+          version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr '+' '-')
+          mkdir -p play
+          cp build/app/outputs/bundle/release/app-release.aab "play/RomFlow-$version.aab"
+          ls -la play
       - name: Remove the signing key
         if: always()
         run: rm -f android/app/upload.keystore android/key.properties
+      - uses: actions/upload-artifact@v4
+        if: env.SIGNED == 'release'
+        with:
+          name: RomFlow-AAB
+          path: play/*.aab
+          if-no-files-found: error
       - name: Publish the APKs right away
         if: env.PUBLISH == 'true'
         env:
@@ -129,6 +145,9 @@ jobs:
               --notes-file notes.md
           fi
           gh release upload "$tag" dist/*.apk --clobber
+          if ls play/*.aab > /dev/null 2>&1; then
+            gh release upload "$tag" play/*.aab --clobber
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: RomFlow-APK

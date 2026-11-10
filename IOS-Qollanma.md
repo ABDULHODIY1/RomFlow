@@ -11,7 +11,7 @@ o‘zida yangilanib turadi.
   iPhone’ga chiqadi. SMS orqali kod ba’zan ishlamaydi — shuning uchun shu
   iPhone’da kirilgan Apple ID qulayroq.
 - **RomFlow IPA**: `RomFlow-1.0.0-27-ios-unsigned.ipa`
-  (GitHub → z3wax/RomFlow → **Releases** → eng yangi versiya → *Assets*).
+  (GitHub → ABDULHODIY1/RomFlow → **Releases** → eng yangi versiya → *Assets*).
 
 > Dasturlarni faqat rasmiy joydan oling: **iloader.app** (yoki
 > github.com/nab138/iloader), **Flathub** (Impactor). Boshqa saytlar sizning

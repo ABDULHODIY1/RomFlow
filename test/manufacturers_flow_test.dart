@@ -69,18 +69,18 @@ void main() {
     expect(price(s, 'mf-akfa-aldox', 'frame'), 40000);
 
     final newer = catalogText()
-        .replaceFirst('"version": 1', '"version": 2')
-        .replaceAll('"frame": 2.6,', '"frame": 3.0,')
+        .replaceFirst('"version": 2', '"version": 3')
+        .replaceAll('"frame": 2.63,', '"frame": 3.0,')
         .replaceAll('"frame": 5.0,', '"frame": 6.0,');
     final note = await s.refreshCatalog(force: true, fetch: () async => newer);
     expect(note, contains('katalogi'));
-    expect(s.catalog!.version, 2);
+    expect(s.catalog!.version, 3);
     // THERMO 65 followed the catalog; ALDOX kept the typed frame price but
     // its other prices followed.
     expect(price(s, 'mf-akfa-thermo65', 'frame'), 6.0 * 12000);
     // Sash bars and corner profiles follow the mullion's new price too.
     final newer2 = catalogText()
-        .replaceFirst('"version": 1', '"version": 3')
+        .replaceFirst('"version": 2', '"version": 4')
         .replaceAll('"mullion": 5.3,', '"mullion": 7.0,');
     await s.refreshCatalog(force: true, fetch: () async => newer2);
     expect(price(s, 'mf-akfa-thermo65', 'sashMullion'), 7.0 * 12000);
@@ -93,12 +93,12 @@ void main() {
     await expectLater(
         s.refreshCatalog(force: true, fetch: () async => '<html>'),
         throwsFormatException);
-    expect(s.catalog!.version, 3);
+    expect(s.catalog!.version, 4);
 
     // The downloaded catalog is kept for the next start.
     final again = Store(directory: lastDir);
     await again.init();
-    expect(again.catalog!.version, 3);
+    expect(again.catalog!.version, 4);
     expect(price(again, 'mf-akfa-aldox', 'frame'), 40000);
   });
 
@@ -151,7 +151,7 @@ void main() {
       expect(find.byKey(ValueKey('maker-${m.id}')), findsOneWidget);
     }
     // PVC only, then add ENGELBERG 8000 to the profiles.
-    await tester.drag(list, const Offset(0, 4000));
+    await tester.drag(list, const Offset(0, 40000));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('mf-filter-pvc')));
     await tester.pumpAndSettle();

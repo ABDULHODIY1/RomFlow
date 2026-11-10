@@ -2679,6 +2679,125 @@ const i18nPlain = <String, List<String>>{
   '2 tabaqali eshik': ['Двустворчатая дверь', 'Double door'],
   'NAMUNA QIYMATLAR': ['ОБРАЗЦОВЫЕ ЗНАЧЕНИЯ', 'SAMPLE VALUES'],
   'PVX': ['ПВХ', 'PVC'],
+  'Narxlar ochiq manbalardan (zavod saytlari, Prom.uz, Stroyka.uz, Flagma.uz va dilerlar sahifalari) olingan bozor narxlariga moslab hisoblangan taxminiy tannarx. Profil narxi 1 metr uchun, dollarda; so‘mga Markaziy bank kursida o‘tkaziladi. Diler narxingizni kiritsangiz yoki jadvaldan yuklasangiz, sizniki ishlatiladi.':
+      [
+    'Примерная себестоимость, рассчитанная по рыночным ценам из открытых источников (сайты заводов, Prom.uz, Stroyka.uz, Flagma.uz и страницы дилеров). Цена профиля — за 1 метр, в долларах; в сумы переводится по курсу Центробанка. Если введёте цену своего дилера или загрузите из таблицы, используется ваша.',
+    'An approximate cost worked out from market prices in open sources (factory sites, Prom.uz, Stroyka.uz, Flagma.uz and dealer pages). Profile prices are per metre, in dollars, converted to so‘m at the Central Bank rate. If you enter your dealer’s price or load it from a table, yours is used.'
+  ],
+  'O‘zbekiston va Markaziy Osiyodagi eng yirik alyuminiy va PVX profil ishlab chiqaruvchisi (AKFA Group). Seriyalar: ALDOX (sovuq), TERMO 57, 65, 70, 77 (issiq).':
+      [
+    'Крупнейший производитель алюминиевого и ПВХ-профиля в Узбекистане и Центральной Азии (AKFA Group). Серии: ALDOX (холодная), TERMO 57, 65, 70, 77 (тёплые).',
+    'The largest aluminium and PVC profile maker in Uzbekistan and Central Asia (AKFA Group). Series: ALDOX (cold), TERMO 57, 65, 70, 77 (thermal).'
+  ],
+  'PVX rom va eshik profillari zavodi. Seriyalar: TRIO 5200, 5800, 6000 (3 kamera); QUATTRO 5200, 5800, 6000 (4 kamera).':
+      [
+    'Завод ПВХ-профилей для окон и дверей. Серии: TRIO 5200, 5800, 6000 (3 камеры); QUATTRO 5200, 5800, 6000 (4 камеры).',
+    'PVC window and door profile factory. Series: TRIO 5200, 5800, 6000 (3 chambers); QUATTRO 5200, 5800, 6000 (4 chambers).'
+  ],
+  'AKFA’ning premium PVX profil brendi: 7000 (5 kamera, 70 mm), 7600, 8000 (6 kamera, 80 mm).':
+      [
+    'Премиальный бренд ПВХ-профиля AKFA: 7000 (5 камер, 70 мм), 7600, 8000 (6 камер, 80 мм).',
+    'AKFA’s premium PVC profile brand: 7000 (5 chambers, 70 mm), 7600, 8000 (6 chambers, 80 mm).'
+  ],
+  'Tayyor rom va eshik zavodi (160 000 m²). REHAU, ENGELBERG, AKFA TRIO va QUATTRO tizimlarida rom yasaydi.':
+      [
+    'Завод готовых окон и дверей (160 000 м²). Делает окна из систем REHAU, ENGELBERG, AKFA TRIO и QUATTRO.',
+    'Finished window and door factory (160,000 m²). Builds windows in REHAU, ENGELBERG, AKFA TRIO and QUATTRO systems.'
+  ],
+  'Alyuminiy profil zavodi, yiliga 36 000 tonna. Tizim narxlari ochiq e’lon qilinmagan — diler narxini kiriting.':
+      [
+    'Завод алюминиевого профиля, 36 000 тонн в год. Цены систем открыто не публикуются — введите цену дилера.',
+    'Aluminium profile factory, 36,000 tonnes a year. System prices are not published — enter your dealer’s price.'
+  ],
+  'Alyuminiy profil ekstruziyasi, bo‘yash va anodlash. Seriyalar: Aldoks (sovuq), AluThermo-70 (termo), ALFS50 (fasad).':
+      [
+    'Экструзия алюминиевого профиля, покраска и анодирование. Серии: Aldoks (холодная), AluThermo-70 (термо), ALFS50 (фасад).',
+    'Aluminium profile extrusion, painting and anodising. Series: Aldoks (cold), AluThermo-70 (thermal), ALFS50 (facade).'
+  ],
+  'Rom, eshik, fasad va panjara uchun alyuminiy profil zavodi. Seriya nomlari ochiq manbada yo‘q.':
+      [
+    'Завод алюминиевого профиля для окон, дверей, фасадов и решёток. Названий серий в открытых источниках нет.',
+    'Aluminium profile factory for windows, doors, facades and grilles. Series names are not in open sources.'
+  ],
+  'Aldoks alyuminiy profili yetkazib beruvchi.': [
+    'Поставщик алюминиевого профиля Aldoks.',
+    'Supplier of Aldoks aluminium profile.'
+  ],
+  'GOST bo‘yicha alyuminiy profil tizimlari. Tizim narxlari ochiq e’lon qilinmagan — diler narxini kiriting.':
+      [
+    'Алюминиевые профильные системы по ГОСТ. Цены систем открыто не публикуются — введите цену дилера.',
+    'Aluminium profile systems to GOST. System prices are not published — enter your dealer’s price.'
+  ],
+  'Oyna, mebel va radiator alyuminiy profillari. Tizim narxlari ochiq e’lon qilinmagan — diler narxini kiriting.':
+      [
+    'Алюминиевые профили для окон, мебели и радиаторов. Цены систем открыто не публикуются — введите цену дилера.',
+    'Aluminium profiles for windows, furniture and radiators. System prices are not published — enter your dealer’s price.'
+  ],
+  'Toshkent': ['Ташкент', 'Tashkent'],
+  'Navoiy EIZ': ['СЭЗ Навои', 'Navoi FEZ'],
+  'O‘zbekiston': ['Узбекистан', 'Uzbekistan'],
+  'AKFA alyuminiy rom, ulgurji': [
+    'Алюминиевое окно AKFA, оптом',
+    'AKFA aluminium window, wholesale'
+  ],
+  'Aldoks rama L, 6 m tayoq': [
+    'Aldoks рама L, хлыст 6 м',
+    'Aldoks frame L, 6 m bar'
+  ],
+  'Aldoks qanot Z, 6 m tayoq': [
+    'Aldoks створка Z, хлыст 6 м',
+    'Aldoks sash Z, 6 m bar'
+  ],
+  'Aldoks impost T, 6 m tayoq': [
+    'Aldoks импост T, хлыст 6 м',
+    'Aldoks mullion T, 6 m bar'
+  ],
+  'Aldoks eshik qanoti Z/T, 6 m tayoq': [
+    'Aldoks дверная створка Z/T, хлыст 6 м',
+    'Aldoks door sash Z/T, 6 m bar'
+  ],
+  'Aldoks shtapik, 6 m tayoq': [
+    'Aldoks штапик, хлыст 6 м',
+    'Aldoks glazing bead, 6 m bar'
+  ],
+  'Tayyor rom, oq rang, 1 m² dan': [
+    'Готовое окно, белое, от 1 м²',
+    'Finished window, white, from 1 m²'
+  ],
+  'Profil narxi ochiq e’lon qilinmagan: TERMO 65 ga nisbatan baholangan. Diler narxini kiriting.':
+      [
+    'Цена профиля открыто не публикуется: оценена относительно TERMO 65. Введите цену дилера.',
+    'The profile price is not published: estimated relative to TERMO 65. Enter your dealer’s price.'
+  ],
+  'Seriya nomi va narxi ochiq manbada tasdiqlanmagan: taxminiy namuna.': [
+    'Название и цена серии не подтверждены открытыми источниками: примерный образец.',
+    'The series name and price are not confirmed in open sources: an approximate sample.'
+  ],
+  'AKFA PVX surilma tizimi': [
+    'Раздвижная ПВХ-система AKFA',
+    'AKFA PVC sliding system'
+  ],
+  'Kamera soni va narxi ochiq manbada yo‘q: 7000 va 8000 oralig‘ida baholangan.':
+      [
+    'Числа камер и цены в открытых источниках нет: оценена между 7000 и 8000.',
+    'Chamber count and price are not in open sources: estimated between 7000 and 8000.'
+  ],
+  'Seriya o‘lchamlari ochiq emas: Aldoks turidagi namuna.': [
+    'Размеры серии не опубликованы: образец типа Aldoks.',
+    'Series dimensions are not published: an Aldoks-type sample.'
+  ],
+  'ALUTEX sovuq rom profili': [
+    'Холодный оконный профиль ALUTEX',
+    'ALUTEX cold window profile'
+  ],
+  'Shishapaket (tayyor), 1 m²': [
+    'Стеклопакет (готовый), 1 м²',
+    'Insulated glass unit (ready), 1 m²'
+  ],
+  'Oyna furniturasi, eng arzon taklif': [
+    'Оконная фурнитура, самое дешёвое предложение',
+    'Window hardware, cheapest offer'
+  ],
 };
 
 /// Text with values in it: {} marks a value in the Uzbek, {0}, {1}... the
@@ -3095,4 +3214,12 @@ const i18nTemplates = <String, List<String>>{
     'Initial: {0}\nPaid: {1}\n{2}\n{3}{4}'
   ],
   '{} / {}': ['{0} / {1}', '{0} / {1}'],
+  '{}, tayyor rom 1 m² dan': [
+    '{0}, готовое окно от 1 м²',
+    '{0}, finished window from 1 m²'
+  ],
+  '{}, tayyor rom 1 m²': [
+    '{0}, готовое окно, 1 м²',
+    '{0}, finished window, 1 m²'
+  ],
 };

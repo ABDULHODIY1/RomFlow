@@ -171,7 +171,7 @@ List<Json> sampleProfiles() => [
         {
           'id': 'series-akfa-thermo65',
           'brand': 'AKFA',
-          'name': 'AKFA THERMO 65',
+          'name': 'AKFA TERMO 65',
           'catalogUrl': 'https://akfagroup.com/eng/thermo-65',
         },
         {
