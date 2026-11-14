@@ -1,12 +1,12 @@
 {
   "format": "romflow-manufacturers",
-  "version": 7,
-  "date": "2026-11-13",
+  "version": 8,
+  "date": "2026-11-14",
   "country": "UZ",
-  "referenceUsdRate": 11973,
+  "referenceUsdRate": 12014,
   "note": "Narxlar ochiq manbalardan (zavod saytlari, Prom.uz, Stroyka.uz, Flagma.uz va dilerlar sahifalari) olingan bozor narxlariga moslab hisoblangan taxminiy tannarx. Profil narxi 1 metr uchun, dollarda; so‘mga Markaziy bank kursida o‘tkaziladi. Diler narxingizni kiritsangiz yoki jadvaldan yuklasangiz, sizniki ishlatiladi.",
   "common": {
-    "glass": 4.58,
+    "glass": 4.57,
     "spacer": 0.35,
     "spacerCorner": 0.06,
     "butyl": 0.05,
@@ -216,10 +216,10 @@
         "finish": "mokri"
       },
       "usd": {
-        "frame": 2.66,
-        "sash": 3.07,
-        "mullion": 3.07,
-        "bead": 0.98,
+        "frame": 2.65,
+        "sash": 3.06,
+        "mullion": 3.06,
+        "bead": 0.97,
         "tiltKit": 6
       },
       "market": [
@@ -1054,7 +1054,7 @@
       "name": "Oddiy shisha 3,5 mm",
       "kind": "clear",
       "thicknessMm": 3.5,
-      "usd": 4.01,
+      "usd": 4.0,
       "source": "Stroyka.uz — Maple Group",
       "url": "https://stroyka.uz/offers/steklo",
       "seen": "2026-11",
@@ -1065,42 +1065,42 @@
       "name": "Oddiy shisha 4 mm",
       "kind": "clear",
       "thicknessMm": 4,
-      "usd": 4.58
+      "usd": 4.57
     },
     {
       "id": "clear5",
       "name": "Oddiy shisha 5 mm",
       "kind": "clear",
       "thicknessMm": 5,
-      "usd": 5.73
+      "usd": 5.71
     },
     {
       "id": "clear6",
       "name": "Oddiy shisha 6 mm",
       "kind": "clear",
       "thicknessMm": 6,
-      "usd": 6.87
+      "usd": 6.85
     },
     {
       "id": "toned4",
       "name": "Tonirovka shisha 4 mm",
       "kind": "toned",
       "thicknessMm": 4,
-      "usd": 6.87
+      "usd": 6.85
     },
     {
       "id": "matte4",
       "name": "Xira (matoviy) shisha 4 mm",
       "kind": "matte",
       "thicknessMm": 4,
-      "usd": 7.33
+      "usd": 7.31
     },
     {
       "id": "lowe4",
       "name": "Energiya tejovchi (Low-E) shisha 4 mm",
       "kind": "lowe",
       "thicknessMm": 4,
-      "usd": 7.79
+      "usd": 7.76
     },
     {
       "id": "tempered10",
