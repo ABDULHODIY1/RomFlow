@@ -1,9 +1,9 @@
 {
   "format": "romflow-manufacturers",
-  "version": 11,
-  "date": "2026-11-19",
+  "version": 12,
+  "date": "2026-11-20",
   "country": "UZ",
-  "referenceUsdRate": 11980,
+  "referenceUsdRate": 11972,
   "note": "Narxlar ochiq manbalardan (zavod saytlari, Prom.uz, Stroyka.uz, Flagma.uz va dilerlar sahifalari) olingan bozor narxlariga moslab hisoblangan taxminiy tannarx. Profil narxi 1 metr uchun, dollarda; so‘mga Markaziy bank kursida o‘tkaziladi. Diler narxingizni kiritsangiz yoki jadvaldan yuklasangiz, sizniki ishlatiladi.",
   "common": {
     "glass": 4.58,
@@ -1072,7 +1072,7 @@
       "name": "Oddiy shisha 5 mm",
       "kind": "clear",
       "thicknessMm": 5,
-      "usd": 5.72
+      "usd": 5.73
     },
     {
       "id": "clear6",
@@ -1100,7 +1100,7 @@
       "name": "Energiya tejovchi (Low-E) shisha 4 mm",
       "kind": "lowe",
       "thicknessMm": 4,
-      "usd": 7.78
+      "usd": 7.79
     },
     {
       "id": "tempered10",
